@@ -1,0 +1,14 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        General chat about Company Supplier. Quick routing so you get the best response:
+        **need help → Q&A**, **feature idea → Ideas**, **bug or crash → open a Bug report
+        issue**, **showing off a build → Show and tell**.
+
+  - type: textarea
+    id: body
+    attributes:
+      label: What's on your mind?
+    validations:
+      required: true

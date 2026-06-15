@@ -1,0 +1,32 @@
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        💡 Got a "would be cool if…" idea? Float it here for discussion and votes. Once an
+        idea is concrete and agreed on, it can graduate into a formal **Feature request**
+        issue. Scope: singleplayer, stable branch — no multiplayer / anti-cheat.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: What would it let you do, and why would it help?
+      placeholder: |
+        A hotkey to toggle all Sandbox cheats at once without opening the menu.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area? (optional)
+      options:
+        - Resources
+        - Sandbox / creative
+        - Environment / pollution
+        - World Map
+        - Terrain
+        - Vehicles / Fleet
+        - General / menu
+        - Something new

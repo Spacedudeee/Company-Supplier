@@ -1,0 +1,21 @@
+title: "[Show & Tell] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🏭 Show off what you built or did with Company Supplier — cursed mega-bases,
+        instant terraforming, infinite everything. Screenshots and clips welcome!
+
+  - type: textarea
+    id: showcase
+    attributes:
+      label: What did you make?
+      description: A short description — drag screenshots or clips straight into the box.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version used (optional)
+      placeholder: e.g. 2.0.0-beta.1
