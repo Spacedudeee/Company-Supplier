@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    font-family: "Segoe UI", system-ui, Arial, sans-serif;
+    color: #f4f1ea;
+    background:
+      radial-gradient(900px 520px at 80% 28%, rgba(242,130,13,0.22), transparent 62%),
+      radial-gradient(700px 500px at 10% 95%, rgba(87,217,119,0.08), transparent 60%),
+      linear-gradient(135deg, #1b202a 0%, #0d0f14 100%);
+    position: relative;
+  }
+  /* feiner Industrie-Grid */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(900px 600px at 50% 40%, #000 55%, transparent 100%);
+  }
+  /* Hazard-Streifen unten als Industrie-Akzent */
+  .hazard {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 10px;
+    background: repeating-linear-gradient(-45deg, #f2820d 0 22px, #14171d 22px 44px);
+    opacity: 0.9;
+  }
+  .wrap { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 78px; }
+  .left { flex: 1; }
+  .kicker {
+    font-size: 21px; font-weight: 700; letter-spacing: 5px; text-transform: uppercase;
+    color: #f2a04d;
+  }
+  .title {
+    font-size: 104px; font-weight: 900; line-height: 0.98; letter-spacing: -2px;
+    margin: 14px 0 0; color: #ffffff;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .title .ic { font-size: 86px; filter: drop-shadow(0 6px 18px rgba(242,130,13,0.45)); }
+  .tagline { font-size: 33px; font-weight: 600; color: #c9cfd9; margin-top: 20px; }
+  .tagline b { color: #f2820d; }
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; max-width: 720px; }
+  .chip {
+    font-size: 20px; font-weight: 600; color: #e7ebf1;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 999px; padding: 9px 18px 9px 16px; display: flex; align-items: center; gap: 9px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .foot {
+    position: absolute; left: 78px; bottom: 34px;
+    font-size: 20px; font-weight: 600; color: #8b94a3; letter-spacing: 0.3px;
+  }
+  .foot b { color: #aeb6c2; }
+  /* F8 Keycap Hero */
+  .key {
+    width: 232px; height: 232px; border-radius: 30px; position: relative; flex: none;
+    margin-right: 18px; transform: rotate(-6deg);
+    background: linear-gradient(160deg, #2a2f3a 0%, #171b22 100%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow:
+      0 26px 60px rgba(0,0,0,0.55),
+      0 0 0 10px rgba(242,130,13,0.10),
+      inset 0 3px 0 rgba(255,255,255,0.10);
+  }
+  .key .face {
+    position: absolute; inset: 14px; border-radius: 20px;
+    background: linear-gradient(160deg, #1f242e 0%, #11151b 100%);
+    box-shadow: inset 0 -8px 18px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .key .f8 {
+    font-size: 104px; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(180deg, #ffc06a 0%, #f2820d 70%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 2px 14px rgba(242,130,13,0.3);
+  }
+  .key .hint {
+    position: absolute; left: 0; right: 0; bottom: -42px; text-align: center;
+    font-size: 19px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #9aa3b1;
+    transform: rotate(6deg);
+  }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="wrap">
+    <div class="left">
+      <div class="kicker">Captain of Industry · Singleplayer Mod</div>
+      <div class="title"><span class="ic">🏭</span>Company Supplier</div>
+      <div class="tagline">Cheat- &amp; Trainer-Menü — <b>alles aus einem Fenster</b>.</div>
+      <div class="chips">
+        <div class="chip"><span class="dot" style="background:#f2820d"></span>Ressourcen</div>
+        <div class="chip"><span class="dot" style="background:#57d977"></span>Kreativmodus</div>
+        <div class="chip"><span class="dot" style="background:#5bb6ff"></span>Weltkarte</div>
+        <div class="chip"><span class="dot" style="background:#b98cff"></span>Umwelt</div>
+        <div class="chip"><span class="dot" style="background:#ffd24d"></span>Profile &amp; Presets</div>
+      </div>
+    </div>
+    <div class="key">
+      <div class="face"><span class="f8">F8</span></div>
+      <div class="hint">Menü öffnen</div>
+    </div>
+  </div>
+  <div class="foot">github.com/Spacedudeee/<b>Company-Supplier</b></div>
+  <div class="hazard"></div>
+</body>
+</html>
