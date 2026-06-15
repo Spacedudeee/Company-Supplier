@@ -1,0 +1,21 @@
+# Forces everyone to pick "Bug report" or "Feature request" instead of opening a
+# blank issue. Set to true again if you want to allow free-form issues.
+blank_issues_enabled: false
+
+contact_links:
+  - name: 📖 Installation & usage
+    url: https://github.com/Spacedudeee/Company-Supplier#readme
+    about: Read the README first — install steps, the F8 menu, and the stable-branch note.
+
+  - name: 💬 Questions & discussion
+    url: https://github.com/Spacedudeee/Company-Supplier/discussions
+    about: For general questions, ideas, and help. (Enable "Discussions" in the repo Settings for this link to work.)
+
+  # Uncomment and fill in once you have these set up:
+  # - name: 🎮 Discord
+  #   url: https://discord.gg/your-invite
+  #   about: Chat with other players and get quick help.
+  #
+  # - name: 📦 Nexus Mods page
+  #   url: https://www.nexusmods.com/captainofindustry/mods/0000
+  #   about: Downloads, changelog, and mod-specific comments.
