@@ -22,6 +22,9 @@ namespace CompanySupplier.Cheats
         private IEntitiesManager _entities;       // Enumeration aller Lager-Entitaeten im Spiel
         private InstaBuildManager _instaBuild;    // Sofortbau an/aus (public IsInstaBuildEnabled-Setter)
 
+        /// <summary>Zuletzt von uns gesetzter Sofortbau-Zustand (fuer UI-Spiegelung / Zustands-Erfassung).</summary>
+        public bool InstaBuildEnabled { get; private set; }
+
         public BuildingCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -96,6 +99,7 @@ namespace CompanySupplier.Cheats
                     return;
                 }
                 setInstaBuild.Invoke(_instaBuild, new object[] { enabled });
+                InstaBuildEnabled = enabled;
                 Log.Info($"[{CompanySupplier.ModName}] Sofortbau = {enabled}.");
             }
             catch (Exception ex)

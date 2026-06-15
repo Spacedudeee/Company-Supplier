@@ -28,6 +28,9 @@ namespace CompanySupplier.UI
         private readonly CheatMenuWindowView _view;
         private readonly IUnityInputMgr _inputMgr;
         private bool _shortcutRegistered;
+        // Auto-Restore wird einmalig beim ersten Menue-Oeffnen nach einem Spielstand-Laden angewendet.
+        // Der Controller wird pro Laden neu gebaut (DI laeuft je EarlyInit) -> Flag resettet sich natuerlich.
+        private bool _autoRestoreApplied;
 
         public CheatMenuController(ControllerContext context, CheatMenuWindowView view)
             : base(context, ControllerConfig.Window)
@@ -38,8 +41,35 @@ namespace CompanySupplier.UI
             Log.Info($"[{CompanySupplier.ModName}] CheatMenuController bereit (Hotkey F8).");
         }
 
-        /// <summary>Wird von der Basis beim Aktivieren aufgerufen — baut das Fenster ueber den View.</summary>
-        protected override Window CreateWindow() => _view.BuildWindow();
+        /// <summary>Wird von der Basis beim Aktivieren aufgerufen — baut das Fenster ueber den View.
+        /// Beim ERSTEN Oeffnen nach einem Laden wird (falls aktiviert) der gespeicherte Cheat-Zustand
+        /// automatisch wiederhergestellt.</summary>
+        protected override Window CreateWindow()
+        {
+            TryAutoRestoreOnce();
+            return _view.BuildWindow();
+        }
+
+        /// <summary>Wendet den gespeicherten Cheat-Zustand einmalig an, wenn Auto-Restore aktiv ist und
+        /// etwas gespeichert wurde. Best-effort — bei jedem Fehler nur Log, nie Absturz.</summary>
+        private void TryAutoRestoreOnce()
+        {
+            if (_autoRestoreApplied) return;
+            _autoRestoreApplied = true;
+            try
+            {
+                var svc = CheatService.Instance;
+                if (svc?.Config?.AutoRestore == true && svc.Config.Toggles != null && svc.Config.Toggles.Count > 0)
+                {
+                    svc.ApplyState(svc.Config.Toggles);
+                    CheatMenuStatus.Show("Gespeicherter Cheat-Zustand wiederhergestellt");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Auto-Restore fehlgeschlagen: {ex.Message}");
+            }
+        }
 
         private void RegisterHotkey()
         {

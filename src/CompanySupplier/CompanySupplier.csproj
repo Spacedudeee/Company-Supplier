@@ -20,6 +20,19 @@
     <FileVersion>1.0.0.0</FileVersion>
     <Product>Company Supplier</Product>
 
+    <!-- Variante: Standard = stable. Beta wird mit -p:ModVariant=beta gebaut und erhaelt einen eigenen
+         AssemblyName (-> eigener Mods-Ordner CompanySupplierBeta), eigene Version und ein eigenes Manifest
+         (manifest.beta.json mit id "CompanySupplierBeta"). So ist die Beta ein separater Mod NEBEN dem
+         Stable und kann dessen Ordner/Saves/config.json nicht ueberschreiben. Die Conditions stehen NACH
+         den statischen Werten oben -> sie ueberschreiben sie bei ModVariant=beta. -->
+    <ModVariant Condition="'$(ModVariant)' == ''">stable</ModVariant>
+    <AssemblyName Condition="'$(ModVariant)' == 'beta'">CompanySupplierBeta</AssemblyName>
+    <Version Condition="'$(ModVariant)' == 'beta'">2.0.0-beta.1</Version>
+    <AssemblyVersion Condition="'$(ModVariant)' == 'beta'">2.0.0.0</AssemblyVersion>
+    <FileVersion Condition="'$(ModVariant)' == 'beta'">2.0.0.0</FileVersion>
+    <ManifestFile Condition="'$(ModVariant)' == 'beta'">manifest.beta.json</ManifestFile>
+    <ManifestFile Condition="'$(ManifestFile)' == ''">manifest.json</ManifestFile>
+
     <!-- COI-Pfade: ENV-Var COI_ROOT/COI_MODS bevorzugt, sonst auf dieser Maschine verifizierter Fallback. -->
     <COI_ROOT Condition="'$(COI_ROOT)' == ''">D:\Steam\steamapps\common\Captain of Industry</COI_ROOT>
     <COI_MODS Condition="'$(COI_MODS)' == ''">$(APPDATA)\Captain of Industry\Mods</COI_MODS>
@@ -73,7 +86,9 @@
   <!-- Auto-Deploy in den Mods-Ordner nach erfolgreichem Build. -->
   <Target Name="DeployToModsFolder" AfterTargets="Build" Condition="'$(DeployToModsFolder)' == 'true'">
     <MakeDir Directories="$(COI_MODS)\$(AssemblyName)" />
-    <Copy SourceFiles="$(ProjectDir)manifest.json" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" />
+    <!-- Variant-aware: kopiert das passende Manifest (manifest.json bzw. manifest.beta.json) und benennt es
+         im Zielordner immer auf manifest.json um (CoI erwartet exakt diesen Dateinamen). -->
+    <Copy SourceFiles="$(ProjectDir)$(ManifestFile)" DestinationFiles="$(COI_MODS)\$(AssemblyName)\manifest.json" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" />
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
     <Message Importance="high" Text="Deployed CompanySupplier -> $(COI_MODS)\$(AssemblyName)" />

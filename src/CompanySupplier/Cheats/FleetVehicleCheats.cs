@@ -32,6 +32,9 @@ namespace CompanySupplier.Cheats
         private IVehiclesManager _vehiclesManager;        // Fahrzeug-Limit (public IncreaseVehicleLimit)
         private IPropertiesDb _propertiesDb;              // globale Spiel-Properties (Treibstoff/LKW-Kapazitaet)
 
+        /// <summary>Zuletzt von uns gesetzter Treibstoff-aus-Zustand (fuer UI-Spiegelung / Zustands-Erfassung).</summary>
+        public bool FuelConsumptionDisabled { get; private set; }
+
         public FleetVehicleCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -179,6 +182,7 @@ namespace CompanySupplier.Cheats
                 else
                     prop.TryRemoveModifier(ModifierOwner);
 
+                FuelConsumptionDisabled = disabled;
                 Log.Info($"[{CompanySupplier.ModName}] Treibstoff-Verbrauch deaktiviert = {disabled}.");
             }
             catch (Exception ex)
