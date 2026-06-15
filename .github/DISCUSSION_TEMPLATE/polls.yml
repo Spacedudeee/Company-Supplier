@@ -1,0 +1,13 @@
+title: "[Poll] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🗳️ Ask the community to vote. Put your question in the title and add the answer
+        options in the poll fields below. Use this box for any context.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context (optional)
+      description: Why you're asking and what the result will influence.

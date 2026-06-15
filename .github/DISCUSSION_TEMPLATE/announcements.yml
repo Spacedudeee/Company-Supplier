@@ -1,0 +1,41 @@
+title: "Company Supplier — "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        📣 Maintainer announcements — new releases and important notices.
+        Most members can read but not post here. For help use **Q&A**, for suggestions
+        use **Ideas**, and for bugs open a **Bug report** issue.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - New stable release
+        - New beta / pre-release
+        - Heads-up / notice
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version (for a release)
+      placeholder: e.g. 2.0.0-beta.2
+
+  - type: textarea
+    id: highlights
+    attributes:
+      label: What's new / what to know
+      placeholder: |
+        - New Sandbox tab
+        - Fixed the storage god-mode crash
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Download / details link (for a release)
+      placeholder: https://github.com/Spacedudeee/Company-Supplier/releases
