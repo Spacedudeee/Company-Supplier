@@ -1,0 +1,47 @@
+title: "[Q&A] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help with Company Supplier? Ask away — only the first field is required.
+
+        💡 Quick wins first: the [FAQ](https://github.com/Spacedudeee/Company-Supplier#faq)
+        already covers the most common ones (menu won't open, multiplayer, where the logs
+        are). If something is actually broken or crashes, please open a **Bug report** issue
+        instead.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you need help with?
+      description: What are you trying to do, and what happens instead?
+      placeholder: |
+        I want to give myself every product at once. I found the Resources tab but I'm not
+        sure which button adds all products.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: What's it about? (optional)
+      options:
+        - Installation / getting the menu to open (F8)
+        - Resources / storages
+        - Sandbox / creative mode
+        - Terrain / world map
+        - Vehicles / fleet
+        - Something else / not sure
+
+  - type: input
+    id: version
+    attributes:
+      label: Which version are you on? (optional)
+      placeholder: e.g. 2.0.0-beta.1 or 1.0.0
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you already tried? (optional)
+      description: Saves us suggesting things you've ruled out.
