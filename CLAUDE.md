@@ -9,14 +9,17 @@ colony-builder by MaFi Games). Built and tested against the **stable** release
 - **Stable branch only.** The mod is updated for stable releases, never for the
   experimental branch. Experimental-only bug reports are out of scope.
 - **Singleplayer only.** No multiplayer / anti-cheat work.
-- **German for users, English for code.** All in-game/UI display strings and issue
-  replies are German; code, identifiers, filenames, and commit messages are English.
+- **Localised UI, English code, reporter-language replies.** In-game/UI display
+  strings are German (the mod's menu language); code, identifiers, filenames, and
+  commit messages are English; issue/PR replies are written in the **same language
+  the reporter used** (default to English if unclear).
 - This is a deliberate cheat tool — it bypasses the game economy by design. That is
   expected behaviour, not a bug.
 
 ## How to handle issues & PRs
 
-- Reply in **German**, short and friendly.
+- Reply in the **same language the issue/comment was written in** (default to
+  English if unclear), short and friendly.
 - Bug reports come from the "Bug report" issue form, feature requests from the
   "Feature request" form. The forms auto-apply `bug` / `enhancement`.
 - For crashes, the most important attachment is the log file from
@@ -56,7 +59,7 @@ colony-builder by MaFi Games). Built and tested against the **stable** release
 
 ## FAQ — canned answers for common issues
 
-When an issue matches one of these, answer from here (in German, keep it short):
+When an issue matches one of these, answer in the reporter's language (keep it short):
 
 - **Menu won't open / nothing happens on F8.** Check in order: (1) mods are enabled in
   the game options; (2) the mod was added to the current save (it can be added to
