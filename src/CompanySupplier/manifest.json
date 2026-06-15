@@ -1,0 +1,10 @@
+{
+  "id": "CompanySupplier",
+  "version": "1.0.0",
+  "display_name": "Company Supplier",
+  "authors": [ "Moritz" ],
+  "primary_dlls": [ "CompanySupplier.dll" ],
+  "non_locking_dll_load": true,
+  "can_add_to_saved_game": true,
+  "can_remove_from_saved_game": true
+}

@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>CS0436;NU1701</NoWarn>
+    <!-- Wir referenzieren die spiel-eigene BCL explizit (exakte Laufzeit-Übereinstimmung) und
+         brauchen daher KEIN net48-Targeting-Pack -> implizite Framework-Referenzen aus. -->
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>portable</DebugType>
+
+    <!-- Statische Version (offizieller CodeTaskFactory-Generator laeuft nur unter Full-MSBuild). -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>Company Supplier</Product>
+
+    <!-- COI-Pfade: ENV-Var COI_ROOT/COI_MODS bevorzugt, sonst auf dieser Maschine verifizierter Fallback. -->
+    <COI_ROOT Condition="'$(COI_ROOT)' == ''">D:\Steam\steamapps\common\Captain of Industry</COI_ROOT>
+    <COI_MODS Condition="'$(COI_MODS)' == ''">$(APPDATA)\Captain of Industry\Mods</COI_MODS>
+    <ManagedDir>$(COI_ROOT)\Captain of Industry_Data\Managed</ManagedDir>
+
+    <DeployToModsFolder>true</DeployToModsFolder>
+    <RequiresSupporterDlc>false</RequiresSupporterDlc>
+    <RequiresTrainsDlc>false</RequiresTrainsDlc>
+  </PropertyGroup>
+
+  <!-- BCL aus dem Spiel (DisableImplicitFrameworkReferences=true -> alles explizit). -->
+  <ItemGroup>
+    <Reference Include="mscorlib"><HintPath>$(ManagedDir)\mscorlib.dll</HintPath></Reference>
+    <Reference Include="netstandard"><HintPath>$(ManagedDir)\netstandard.dll</HintPath></Reference>
+    <Reference Include="System"><HintPath>$(ManagedDir)\System.dll</HintPath></Reference>
+    <Reference Include="System.Core"><HintPath>$(ManagedDir)\System.Core.dll</HintPath></Reference>
+    <Reference Include="System.Runtime"><HintPath>$(ManagedDir)\System.Runtime.dll</HintPath></Reference>
+    <Reference Include="System.Runtime.Serialization"><HintPath>$(ManagedDir)\System.Runtime.Serialization.dll</HintPath></Reference>
+    <Reference Include="System.Xml"><HintPath>$(ManagedDir)\System.Xml.dll</HintPath></Reference>
+    <Reference Include="System.Xml.Linq"><HintPath>$(ManagedDir)\System.Xml.Linq.dll</HintPath></Reference>
+    <Reference Include="System.Numerics"><HintPath>$(ManagedDir)\System.Numerics.dll</HintPath></Reference>
+    <Reference Include="System.Data"><HintPath>$(ManagedDir)\System.Data.dll</HintPath></Reference>
+  </ItemGroup>
+
+  <!-- Mafi (Spiel-Code). -->
+  <ItemGroup>
+    <Reference Include="Mafi"><HintPath>$(ManagedDir)\Mafi.dll</HintPath></Reference>
+    <Reference Include="Mafi.Core"><HintPath>$(ManagedDir)\Mafi.Core.dll</HintPath></Reference>
+    <Reference Include="Mafi.Base"><HintPath>$(ManagedDir)\Mafi.Base.dll</HintPath></Reference>
+    <Reference Include="Mafi.Unity"><HintPath>$(ManagedDir)\Mafi.Unity.dll</HintPath></Reference>
+    <Reference Include="Mafi.UnityCore"><HintPath>$(ManagedDir)\Mafi.UnityCore.dll</HintPath></Reference>
+    <Reference Include="Mafi.Supporter" Condition="'$(RequiresSupporterDlc)' == 'true'"><HintPath>$(ManagedDir)\Mafi.Supporter.dll</HintPath></Reference>
+    <Reference Include="Mafi.TrainsDlc" Condition="'$(RequiresTrainsDlc)' == 'true'"><HintPath>$(ManagedDir)\Mafi.TrainsDlc.dll</HintPath></Reference>
+  </ItemGroup>
+
+  <!-- Unity (fuer UI/Input in spaeteren Phasen). -->
+  <ItemGroup>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(ManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath></Reference>
+  </ItemGroup>
+
+  <Target Name="CheckCoiRoot" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(ManagedDir)\Mafi.Core.dll')"
+           Text="COI_ROOT zeigt nicht auf eine gueltige CoI-Installation: $(COI_ROOT)" />
+  </Target>
+
+  <!-- Auto-Deploy in den Mods-Ordner nach erfolgreichem Build. -->
+  <Target Name="DeployToModsFolder" AfterTargets="Build" Condition="'$(DeployToModsFolder)' == 'true'">
+    <MakeDir Directories="$(COI_MODS)\$(AssemblyName)" />
+    <Copy SourceFiles="$(ProjectDir)manifest.json" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" />
+    <Copy SourceFiles="$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+    <Message Importance="high" Text="Deployed CompanySupplier -> $(COI_MODS)\$(AssemblyName)" />
+  </Target>
+
+</Project>
