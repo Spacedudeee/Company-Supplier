@@ -12,6 +12,7 @@ obj/
 # ===== Local helper / working files (not part of the mod) =====
 /_tools/
 /_reference/
+/_release/
 /design/
 /docs/
 /assets/
