@@ -56,6 +56,12 @@ colony-builder by MaFi Games). Built and tested against the **stable** release
 - Keep files small and focused; prefer reusing `CheatWidgets` helpers.
 - Product/material names shown to the user come from the game's localisation
   (`ProtoDisplayName`), so they appear in the player's language automatically.
+- **Do not hand-edit the version dropdown** in `.github/ISSUE_TEMPLATE/bug_report.yml`.
+  The lines between the `# >>> auto-versions >>>` / `# <<< auto-versions <<<` markers are
+  generated from GitHub Releases by `.github/workflows/update-issue-versions.yml` (latest
+  3 stable + 3 beta). To change the offered versions, publish/edit a release — not the
+  file. Everything else in that form (including the static "Built from source" / "Not sure"
+  options) is fine to edit by hand.
 
 ## FAQ — canned answers for common issues
 
