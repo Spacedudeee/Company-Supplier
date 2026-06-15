@@ -20,16 +20,18 @@ namespace CompanySupplier.UI
     [GlobalDependency(RegistrationMode.AsSelf)]
     public sealed class CheatMenuWindowView
     {
-        // Breiter + höher als der erste Wurf: 7 Tabs brauchen Platz (sonst staucht die Tab-Schrift),
+        // Breiter + höher als der erste Wurf: elf Tabs brauchen Platz (sonst staucht die Tab-Schrift),
         // und die Controls (Slider, Dropdown) sollen sich entfalten können.
         private const int WindowWidthPx = 1100;
         private const int WindowHeightPx = 640;
 
-        /// <summary>Feste, vom Design vorgegebene Reiter-Reihenfolge (haeufig -> selten genutzt).
-        /// Tabs, deren Name hier nicht vorkommt, werden hinten alphabetisch angehaengt.</summary>
+        /// <summary>Feste, vom Design vorgegebene Reiter-Reihenfolge (Headliner zuerst, Werkzeuge danach).
+        /// Tabs, deren Name hier nicht vorkommt, werden hinten alphabetisch angehaengt. Muss mit der
+        /// Reihenfolge in der README-Funktionstabelle uebereinstimmen.</summary>
         private static readonly string[] TabOrder =
         {
-            "Ressourcen", "Allgemein", "Erzeugung", "Werft & Flotte", "Fahrzeuge", "Gelände", "Wetter"
+            "Ressourcen", "Sandbox", "Umwelt", "Weltkarte",
+            "Allgemein", "Erzeugung", "Werft & Flotte", "Fahrzeuge", "Gelände", "Wetter", "Profil"
         };
 
         private readonly IReadOnlyList<ICheatTab> _tabs;
