@@ -1,0 +1,43 @@
+name: Update issue version dropdown
+
+# Whenever a release is published / edited / deleted (stable = normal release,
+# beta = pre-release), refresh the version picker in the bug-report form to the
+# latest 3 stable + 3 beta versions. Can also be run manually.
+on:
+  release:
+    types: [published, edited, deleted, released, prereleased]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Don't let overlapping release events race on the same push.
+concurrency:
+  group: update-issue-versions
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the default branch (where the form lives)
+        uses: actions/checkout@v4
+        with:
+          ref: stable
+
+      - name: Refresh version dropdown from releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/update_issue_versions.py
+
+      - name: Commit if the dropdown changed
+        run: |
+          if git diff --quiet -- .github/ISSUE_TEMPLATE/bug_report.yml; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/ISSUE_TEMPLATE/bug_report.yml
+          git commit -m "chore: refresh issue-form version dropdown from releases"
+          git push origin stable

@@ -76,8 +76,10 @@ body:
       label: Which version are you running?
       description: The beta installs as a separate mod, shown in-game as "Company Supplier (BETA)".
       options:
+        # >>> auto-versions (managed by update-issue-versions workflow) >>>
         - 2.0.0-beta.1 (BETA)
         - 1.0.0 (stable)
+        # <<< auto-versions <<<
         - Built from source
         - Not sure
     validations:
