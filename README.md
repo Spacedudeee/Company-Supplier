@@ -46,6 +46,31 @@ $env:COI_ROOT = "C:\Program Files (x86)\Steam\steamapps\common\Captain of Indust
 The build compiles `src/CompanySupplier` and automatically deploys the DLL + manifest into your
 `%APPDATA%\Captain of Industry\Mods\` folder.
 
+## FAQ
+
+**The menu won't open when I press F8.**
+Check these in order: mods are enabled in the game options, the mod has been added to your
+current save, you're on the **stable** game version (0.8.5.0, not experimental), and
+`manifest.json` + `CompanySupplier.dll` are in
+`%APPDATA%\Captain of Industry\Mods\CompanySupplier\`.
+
+**Does it work on the experimental branch?**
+No — the mod targets stable releases only.
+
+**Does it work in multiplayer?**
+No — Captain of Industry is singleplayer, and so is this mod.
+
+**Where are my log files?** (needed for bug reports)
+`%USERPROFILE%\Documents\Captain of Industry\Logs` — press **Win + R**, paste that path,
+hit Enter, and grab the newest file.
+
+**Product names show in another language.**
+That's intentional — names come from the game's own localisation, so they match your game
+language.
+
+**A cheat changed my economy in a weird way.**
+That's expected — this tool deliberately bypasses the game's economy. Back up your saves.
+
 ## Disclaimer
 
 This is a singleplayer cheat tool — it deliberately bypasses the game's normal economy.

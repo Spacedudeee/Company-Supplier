@@ -53,3 +53,26 @@ colony-builder by MaFi Games). Built and tested against the **stable** release
 - Keep files small and focused; prefer reusing `CheatWidgets` helpers.
 - Product/material names shown to the user come from the game's localisation
   (`ProtoDisplayName`), so they appear in the player's language automatically.
+
+## FAQ — canned answers for common issues
+
+When an issue matches one of these, answer from here (in German, keep it short):
+
+- **Menu won't open / nothing happens on F8.** Check in order: (1) mods are enabled in
+  the game options; (2) the mod was added to the current save (it can be added to
+  existing saves); (3) the game is on the **stable** version (0.8.5.0), not experimental;
+  (4) `manifest.json` and `CompanySupplier.dll` sit in
+  `%APPDATA%\Captain of Industry\Mods\CompanySupplier\`.
+- **How do I install it?** Copy `manifest.json` + `CompanySupplier.dll` into
+  `%APPDATA%\Captain of Industry\Mods\CompanySupplier\`, enable mods in the options, add
+  the mod to the save, then press **F8**.
+- **Which key opens the menu?** F8.
+- **Does it work on the experimental branch?** No — stable releases only.
+- **Multiplayer?** No — singleplayer only.
+- **Which game version is supported?** Stable 0.8.5.0.
+- **Where are the log files?** `%USERPROFILE%\Documents\Captain of Industry\Logs`.
+- **Product/material names appear in another language.** Expected — names come from the
+  game's own localisation and follow the player's game language.
+- **A cheat "broke" my economy / numbers look off.** Expected — the tool bypasses the
+  economy by design. Only treat it as a bug if the game crashes or a control does nothing
+  at all.
