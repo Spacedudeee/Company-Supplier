@@ -70,11 +70,18 @@ body:
         ```
       render: text
 
-  - type: input
+  - type: dropdown
     id: mod-version
     attributes:
-      label: Company Supplier version (optional)
-      value: "1.0.0"
+      label: Which version are you running?
+      description: The beta installs as a separate mod, shown in-game as "Company Supplier (BETA)".
+      options:
+        - 2.0.0-beta.1 (BETA)
+        - 1.0.0 (stable)
+        - Built from source
+        - Not sure
+    validations:
+      required: true
 
   - type: input
     id: other-mods
