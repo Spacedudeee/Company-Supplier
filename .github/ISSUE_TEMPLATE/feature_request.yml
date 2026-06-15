@@ -1,0 +1,46 @@
+name: Feature request
+description: Got an idea for a new cheat or an improvement? Drop it here.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Two quick fields and you're done. Company Supplier is a **singleplayer** cheat menu
+        for the **stable** release of Captain of Industry — multiplayer / anti-cheat stuff is
+        out of scope.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What's your idea?
+      description: What should it let you do — and why would it help? Don't overthink it.
+      placeholder: |
+        A button to instantly flatten a whole area — placing dump markers by hand for a big
+        base is really tedious.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tab
+    attributes:
+      label: Which tab does it fit best? (one click)
+      options:
+        - Resources
+        - General
+        - Generation
+        - Shipyard & Fleet
+        - Vehicles
+        - Terrain
+        - Weather
+        - A new tab / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else? (optional)
+      description: >
+        How you'd imagine it working (button, toggle, slider, world-click tool…),
+        screenshots or mock-ups, or a similar mod/trainer that already does it.

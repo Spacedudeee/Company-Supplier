@@ -1,0 +1,92 @@
+name: Bug report
+description: Something in Company Supplier isn't working? This takes under a minute.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Only the first two boxes and **Describe the bug** + **Steps**
+        are required — everything else is optional but speeds up a fix.
+
+        ⚠️ **Stable branch only** — bugs that only happen on the experimental branch will be closed.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Quick check
+      options:
+        - label: I'm on the **stable** branch of Captain of Industry (not experimental).
+          required: true
+        - label: I had a quick look and didn't find an existing issue for this.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: What went wrong — and what did you expect instead?
+      placeholder: |
+        I clicked "Produkt hinzufügen" on the Resources tab, but nothing showed up in my
+        storage. I expected 250x Iron to be added.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: area
+    attributes:
+      label: Where does it happen? (just tick — optional)
+      options:
+        - label: Resources
+        - label: General
+        - label: Generation
+        - label: Shipyard & Fleet
+        - label: Vehicles
+        - label: Terrain
+        - label: Weather
+        - label: The menu itself (won't open / crashes)
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Press F8
+        2. Go to the '...' tab
+        3. Click '...'
+        4. See ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log file — please attach it if the game crashed (optional)
+      description: |
+        Quickest way: press **Win + R**, paste the path below, press Enter, then drag the
+        newest file into this box.
+        ```
+        %USERPROFILE%\Documents\Captain of Industry\Logs
+        ```
+      render: text
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Company Supplier version (optional)
+      value: "1.0.0"
+
+  - type: input
+    id: other-mods
+    attributes:
+      label: Other mods running (optional)
+      description: Helps us rule out conflicts. Leave as "none" if it's just this one.
+      value: none
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else? (optional)
+      description: >
+        Screenshots (just drag them in), the affected save zipped, "happens every time vs.
+        only sometimes", or whether it started after a game/mod update.
