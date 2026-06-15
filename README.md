@@ -1,81 +1,114 @@
-# Company Supplier
+<h1 align="center">🏭 Company Supplier</h1>
 
-An in-game cheat / trainer menu for **Captain of Industry**, the singleplayer factory &
-colony-builder by MaFi Games. Give yourself resources, tweak vehicles and terrain, control
-the weather, and more — all from one movable window.
+<p align="center">
+  <strong>Das In-Game-Cheat- &amp; Trainer-Menü für <em>Captain of Industry</em></strong><br>
+  Gib dir Ressourcen, schraube an Fahrzeugen und Gelände, beherrsche das Wetter und mehr – alles aus
+  einem Fenster. Ein Druck auf <kbd>F8</kbd>, und du bestimmst die Regeln.
+</p>
 
-> Built and tested against Captain of Industry **0.8.5.0**. Singleplayer only.
+<p align="center">
+  <img src="https://img.shields.io/badge/Captain%20of%20Industry-0.8.5.0-E8730C?style=flat-square" alt="Captain of Industry 0.8.5.0">
+  <img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?style=flat-square&label=Release&color=blue" alt="Release-Version">
+  <img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&color=success&label=Downloads" alt="Downloads">
+  <img src="https://img.shields.io/badge/Modus-Singleplayer-blue?style=flat-square" alt="Singleplayer">
+  <img src="https://img.shields.io/badge/Lizenz-MIT-green?style=flat-square" alt="Lizenz MIT">
+</p>
 
-## Features
+---
 
-Press **F8** in-game to open the menu. It is organised into tabs:
+## ✨ Was ist das?
 
-| Tab | What it does |
-|-----|--------------|
-| **Resources** | Add any single product or *all* products to your global storage. World-click tools to fill or empty a single storage on the map (e.g. clear out nuclear waste), plus a one-click "fill all storages". |
-| **General** | Construction & maintenance toggles, population & supply satisfaction, research unlocks, add Unity points. |
-| **Generation** | Set power, computing and Unity levels directly. |
-| **Shipyard & Fleet** | World-ship (fleet) controls. |
-| **Vehicles** | Disable fuel consumption, raise the vehicle limit, multiply truck cargo capacity. |
-| **Terrain** | Instant mine / dump / convert terrain, refill groundwater & oil reserves, plant or remove trees. |
-| **Weather** | Lock the weather to a chosen state. |
+**Company Supplier** ist ein Cheat-/Trainer-Menü für den Singleplayer-Fabrikaufbau *Captain of Industry*
+(MaFi Games). Kein Konsolen-Gefummel: Du öffnest mit <kbd>F8</kbd> ein verschiebbares Fenster mit
+übersichtlichen Reitern und schaltest per Klick frei, was du brauchst – von „gib mir 10.000 Stahl“ bis
+„fülle alle Lager auf einen Schlag“.
 
-Product and material names are shown in your game's language.
+> [!NOTE]
+> **Lust auf mehr?** Die **v2.0-Beta** bringt einen echten Kreativmodus, Verschmutzungs-Cheats, eine
+> Weltkarten-Ebene, ein God-Werkzeug und Profile/Presets – als **separater Test-Mod neben** diesem Stable,
+> ohne ihn anzutasten. Hol sie dir als **Pre-Release** auf der
+> [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases).
 
-## Installation
+## 🚀 Schnellstart
 
-1. Grab the latest release, or build it yourself (see below).
-2. Copy `manifest.json` and `CompanySupplier.dll` into:
-   `%APPDATA%\Captain of Industry\Mods\CompanySupplier\`
-3. Launch the game, enable mods in the options, and add the mod to your save
-   (the manifest allows adding to / removing from existing saves).
-4. Press **F8** in-game to open the menu.
+1. Lade `CompanySupplier-v1.0.0.zip` aus dem **Latest**-Release auf der
+   [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases) – oder baue ihn selbst (siehe unten).
+2. Schließe Captain of Industry komplett.
+3. Entpacke die ZIP nach `%APPDATA%\Captain of Industry\Mods\`. Es entsteht der Ordner
+   `Mods\CompanySupplier\` (mit `manifest.json` + `CompanySupplier.dll`).
+4. Starte das Spiel, aktiviere Mods in den Optionen und füge **Company Supplier** deinem Spielstand hinzu
+   (das Manifest erlaubt das Hinzufügen zu / Entfernen aus bestehenden Spielständen).
+5. <kbd>F8</kbd> drücken – fertig. 🎉
 
-## Building from source
+## 🎛️ Funktionen
 
-You need the **.NET SDK** and a local Captain of Industry installation (the mod compiles
-against the game's own assemblies — no separate targeting pack required).
+Alles erreichbar über die Reiter im <kbd>F8</kbd>-Fenster:
+
+| Reiter | Was du damit anstellst |
+|--------|------------------------|
+| 📦 **Ressourcen** | Schütte dir jedes Produkt – oder *alle* auf einmal – ins Lager. Per Welt-Klick ein einzelnes Lager füllen oder leeren (z. B. Atommüll loswerden), oder mit einem Klick **alle** Lager randvoll. |
+| 🏗️ **Allgemein** | Bau & Wartung, Bevölkerung & Zufriedenheit, Forschung freischalten, Unity gutschreiben. |
+| ⚡ **Erzeugung** | Strom-, Computing- und Unity-Erzeugung direkt setzen. |
+| 🚢 **Werft & Flotte** | Steuerung des Welt-Schiffs (Flotte). |
+| 🚚 **Fahrzeuge** | Treibstoffverbrauch aus, Fahrzeuglimit anheben, LKW-Ladekapazität vervielfachen. |
+| ⛰️ **Gelände** | Sofort abbauen / verfüllen / umwandeln, Grundwasser & Erdöl auffüllen, Bäume pflanzen oder entfernen. |
+| ☀️ **Wetter** | Das Wetter dauerhaft auf einen Zustand fixieren. |
+
+> Produkt- und Materialnamen erscheinen in deiner Spielsprache – sie kommen direkt aus der Lokalisierung des Spiels.
+
+<details>
+<summary><strong>🛠️ Aus dem Quellcode bauen</strong></summary>
+
+<br>
+
+Du brauchst das **.NET SDK** und eine lokale Captain-of-Industry-Installation (der Mod kompiliert gegen die
+spieleigenen Assemblies – kein separates Targeting-Pack nötig).
 
 ```powershell
-# Point COI_ROOT at your install if it differs from the default in build.ps1:
+# COI_ROOT auf deine Installation zeigen lassen, falls sie vom Standard in build.ps1 abweicht:
 $env:COI_ROOT = "C:\Program Files (x86)\Steam\steamapps\common\Captain of Industry"
 
 .\build.ps1 -Config Release
 ```
 
-The build compiles `src/CompanySupplier` and automatically deploys the DLL + manifest into your
-`%APPDATA%\Captain of Industry\Mods\` folder.
+Der Build kompiliert `src/CompanySupplier` und deployt DLL + Manifest automatisch in deinen
+`%APPDATA%\Captain of Industry\Mods\`-Ordner.
 
-## FAQ
+</details>
 
-**The menu won't open when I press F8.**
-Check these in order: mods are enabled in the game options, the mod has been added to your
-current save, you're on the **stable** game version (0.8.5.0, not experimental), and
-`manifest.json` + `CompanySupplier.dll` are in
-`%APPDATA%\Captain of Industry\Mods\CompanySupplier\`.
+<details>
+<summary><strong>❓ FAQ</strong></summary>
 
-**Does it work on the experimental branch?**
-No — the mod targets stable releases only.
+<br>
 
-**Does it work in multiplayer?**
-No — Captain of Industry is singleplayer, and so is this mod.
+**Das Menü öffnet sich nicht bei <kbd>F8</kbd>.**
+Der Reihe nach prüfen: Mods sind in den Spieloptionen aktiviert, der Mod ist deinem aktuellen Spielstand
+hinzugefügt, du bist auf der **stabilen** Spielversion (0.8.5.0, nicht experimental), und
+`manifest.json` + `CompanySupplier.dll` liegen in `%APPDATA%\Captain of Industry\Mods\CompanySupplier\`.
 
-**Where are my log files?** (needed for bug reports)
-`%USERPROFILE%\Documents\Captain of Industry\Logs` — press **Win + R**, paste that path,
-hit Enter, and grab the newest file.
+**Läuft es auf dem Experimental-Branch des Spiels?**
+Nein – der Mod zielt nur auf stabile Releases.
 
-**Product names show in another language.**
-That's intentional — names come from the game's own localisation, so they match your game
-language.
+**Läuft es im Multiplayer?**
+Nein – Captain of Industry ist Singleplayer, und dieser Mod ebenso.
 
-**A cheat changed my economy in a weird way.**
-That's expected — this tool deliberately bypasses the game's economy. Back up your saves.
+**Wo finde ich meine Log-Dateien?** (für Fehlerberichte)
+`%USERPROFILE%\Documents\Captain of Industry\Logs` – <kbd>Win</kbd> + <kbd>R</kbd>, Pfad einfügen, Enter,
+die neueste Datei nehmen.
 
-## Disclaimer
+**Produktnamen erscheinen in einer anderen Sprache.**
+Das ist Absicht – die Namen stammen aus der Lokalisierung des Spiels und passen so zu deiner Spielsprache.
 
-This is a singleplayer cheat tool — it deliberately bypasses the game's normal economy.
-Back up your saves before use. Not affiliated with or endorsed by MaFi Games.
+**Ein Cheat hat meine Wirtschaft seltsam verändert.**
+Das ist zu erwarten – dieses Werkzeug umgeht die Spielwirtschaft bewusst. Mach vorher ein Backup deiner Spielstände.
 
-## License
+</details>
 
-[MIT](LICENSE)
+## ⚠️ Hinweis
+
+Dies ist ein Singleplayer-Cheat-Werkzeug – es umgeht die normale Wirtschaft des Spiels absichtlich.
+**Sichere deine Spielstände vor der Nutzung.** Nicht mit MaFi Games verbunden oder von ihnen unterstützt.
+
+## 📜 Lizenz
+
+[MIT](LICENSE) – mach damit, was du willst. Viel Spaß beim Cheaten! 🚀
