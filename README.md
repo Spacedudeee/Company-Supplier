@@ -129,8 +129,19 @@ Das ist zu erwarten – dieses Werkzeug umgeht die Spielwirtschaft bewusst. Mach
 ## ⚠️ Hinweis
 
 Dies ist ein Singleplayer-Cheat-Werkzeug – es umgeht die normale Wirtschaft des Spiels absichtlich.
-**Sichere deine Spielstände vor der Nutzung.** Nicht mit MaFi Games verbunden oder von ihnen unterstützt.
+**Sichere deine Spielstände vor der Nutzung.**
 
-## 📜 Lizenz
+## 📜 Lizenz & rechtlicher Hinweis
 
-[MIT](LICENSE) – mach damit, was du willst. Viel Spaß beim Cheaten! 🚀
+Der **Original-Quellcode** von Company Supplier steht unter der [MIT-Lizenz](LICENSE). Die MIT-Lizenz
+gilt **ausschließlich** für diesen eigenen Quellcode und **nicht** für *Captain of Industry* oder andere
+MaFi-Games-Materialien (Spielcode, Assets, `Mafi.*`-Assemblies). Diese bleiben Eigentum von Mafisoft
+Limited (MaFi Games) und werden ausschließlich im Rahmen der
+[Captain of Industry Modding Policy](https://coigame.com/modding-policy) genutzt.
+
+> This Mod includes short excerpts or references to Captain of Industry Game Code. Any such Game Code is
+> © MaFi Games and is used only under the Captain of Industry Modding Policy.
+
+Company Supplier ist ein **kostenloser, nicht-kommerzieller** Fan-Mod und **nicht** mit MaFi Games
+verbunden oder von ihnen unterstützt. Der Mod selbst darf gemäß der Modding Policy nicht verkauft, gegen
+Gebühr weiterlizenziert oder hinter einer Bezahlschranke angeboten werden. Viel Spaß beim Cheaten! 🚀
