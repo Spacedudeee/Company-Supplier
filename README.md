@@ -8,10 +8,10 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Captain%20of%20Industry-0.8.5.0-E8730C?style=flat-square" alt="Captain of Industry 0.8.5.0">
-  <img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?include_prereleases&style=flat-square&label=Beta&color=yellow" alt="Beta-Version">
-  <img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&color=success&label=Downloads" alt="Downloads">
+  <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?include_prereleases&amp;style=flat-square&amp;label=Beta&amp;color=yellow" alt="Beta-Version"></a>
+  <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&amp;color=success&amp;label=Downloads" alt="Downloads"></a>
   <img src="https://img.shields.io/badge/Modus-Singleplayer-blue?style=flat-square" alt="Singleplayer">
-  <img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell"></a>
 </p>
 
 > [!WARNING]
