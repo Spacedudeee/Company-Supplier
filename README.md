@@ -150,3 +150,7 @@ Mafisoft Limited (MaFi Games) und werden ausschließlich im Rahmen der
 Company Supplier ist ein **kostenloser, nicht-kommerzieller** Fan-Mod und **nicht** mit MaFi Games
 verbunden oder von ihnen unterstützt. Der Mod selbst darf gemäß der Modding Policy nicht verkauft, gegen
 Gebühr weiterlizenziert oder hinter einer Bezahlschranke angeboten werden. Viel Spaß beim Cheaten! 🚀
+
+## 👤 Autor
+
+Company Supplier wird von **[Spacedudee](https://github.com/Spacedudeee)** entwickelt (GitHub-Handle: [`Spacedudeee`](https://github.com/Spacedudeee)).

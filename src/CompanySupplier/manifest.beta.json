@@ -2,7 +2,7 @@
   "id": "CompanySupplierBeta",
   "version": "2.0.0",
   "display_name": "Company Supplier (BETA)",
-  "authors": [ "Spacedudee" ],
+  "authors": [ "Spacedudee (github.com/Spacedudeee)" ],
   "primary_dlls": [ "CompanySupplierBeta.dll" ],
   "non_locking_dll_load": true,
   "can_add_to_saved_game": true,
