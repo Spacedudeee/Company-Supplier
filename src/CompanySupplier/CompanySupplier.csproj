@@ -76,6 +76,9 @@
     <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(ManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath></Reference>
+    <!-- UIElements (UiToolkit-Unterbau): wird gebraucht, sobald Code einen Member aufruft, dessen Signatur
+         einen UIElements-Typ nennt (z. B. Button.OnClick(EventCallback<>) bei den Sidebar-Buttons). -->
+    <Reference Include="UnityEngine.UIElementsModule"><HintPath>$(ManagedDir)\UnityEngine.UIElementsModule.dll</HintPath></Reference>
   </ItemGroup>
 
   <Target Name="CheckCoiRoot" BeforeTargets="BeforeBuild">

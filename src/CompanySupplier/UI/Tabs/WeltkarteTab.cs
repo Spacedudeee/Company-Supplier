@@ -25,7 +25,8 @@ namespace CompanySupplier.UI.Tabs
 
         public string Name => "Weltkarte";
 
-        public string IconPath => "";
+        // WorldMap-Toolbar-Icon — die buchstaebliche Weltkarte (rendert auch bei Wetter als Fallback).
+        public string IconPath => "Assets/Unity/UserInterface/Toolbar/WorldMap.svg";
 
         public UiComponent Content => _content;
 

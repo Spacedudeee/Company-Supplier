@@ -31,10 +31,9 @@ namespace CompanySupplier.UI.Tabs
 
         public string Name => "Wetter";
 
-        // Wetter hat kein dediziertes Toolbar-Icon -> WorldMap-Asset als Fallback. String-Pfad ist in
-        // 0.8.5.0 die robuste Variante (kein IconStyle mehr); fehlt das Asset, rendert der Tab trotzdem
-        // (nur ohne Icon).
-        public string IconPath => "Assets/Unity/UserInterface/Toolbar/WorldMap.svg";
+        // Temperature-Icon (Thermometer) — das Spiel hat kein Sonne/Wolke-Asset; das ist das naechstliegende
+        // saubere Wetter/Klima-Glyph und passt stilistisch zu den uebrigen Reiter-Icons. (Fog.svg war eine Welle.)
+        public string IconPath => "Assets/Unity/UserInterface/General/Temperature.svg";
 
         public UiComponent Content => _content;
 

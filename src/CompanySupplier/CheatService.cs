@@ -56,6 +56,8 @@ namespace CompanySupplier
         public Cheats.ResearchCheats     Research     { get; private set; }
         public Cheats.GenerationCheats   Generation   { get; private set; }
         public Cheats.FleetVehicleCheats FleetVehicle { get; private set; }
+        public Cheats.VehicleStatsCheats VehicleStats { get; private set; }
+        public Cheats.TrainCheats        Train        { get; private set; }
         public Cheats.TerrainCheats      Terrain      { get; private set; }
         public Cheats.WeatherCheats      Weather      { get; private set; }
         public Cheats.StorageToolCheats  StorageTool  { get; private set; }
@@ -89,6 +91,8 @@ namespace CompanySupplier
             Research     = new Cheats.ResearchCheats(_resolver);
             Generation   = new Cheats.GenerationCheats(_resolver);
             FleetVehicle = new Cheats.FleetVehicleCheats(_resolver);
+            VehicleStats = new Cheats.VehicleStatsCheats(_resolver);
+            Train        = new Cheats.TrainCheats(_resolver);
             Terrain      = new Cheats.TerrainCheats(_resolver);
             Weather      = new Cheats.WeatherCheats(_resolver);
             Sandbox      = new Cheats.SandboxCheats(_resolver);

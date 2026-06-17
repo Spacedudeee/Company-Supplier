@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Mafi;
 using Mafi.Core.Input;
 using Mafi.Core.Simulation;
@@ -35,6 +36,14 @@ namespace CompanySupplier.Cheats
         /// <summary>true = Adaptiv-Modus Uncapped aktiv (von uns gesetzt).</summary>
         public bool Uncapped { get; private set; }
 
+        // "Uncapped" = angehobener Speed-Cap; in der Praxis limitiert die CPU vorher (echtes "so schnell wie moeglich").
+        // Das Spiel-Hardcap ist 12x (SUPER_FAST_FORWARD_MULT) — wir heben den hoechsten Speeds-Eintrag hierauf an.
+        private const int UncappedMultiplier = 100;
+        private const BindingFlags InstAll = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        // Original-Wert des hoechsten Speeds-Eintrags (Spiel-Super-Speed, normal 12x) — fuer Reset.
+        private int? _origSuperSpeed;
+
         public GameSpeedCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -49,6 +58,7 @@ namespace CompanySupplier.Cheats
             if (multiplier < 1) multiplier = 1;
             try
             {
+                RaiseSpeedCapTo(multiplier); // Hardcap (12x) anheben -> echte 20x statt geklemmter 12x
                 _inputScheduler.ScheduleInputCmd(new GameSpeedChangeCmd(multiplier));
                 LastSpeedMultiplier = multiplier;
                 Log.Info($"[{CompanySupplier.ModName}] Spielgeschwindigkeit = {multiplier}x eingeplant.");
@@ -59,36 +69,80 @@ namespace CompanySupplier.Cheats
             }
         }
 
-        /// <summary>Schaltet den Adaptiv-Modus zwischen Uncapped (true) und Predictive (false). Best-effort:
-        /// braucht den Unity-seitigen GameSpeedController, der ggf. nicht aufloesbar ist (dann No-Op).</summary>
+        /// <summary>Schaltet "so schnell wie die CPU kann" an/aus.
+        /// WICHTIG: Das Spiel deckelt die Sim-Geschwindigkeit HART auf den hoechsten Eintrag im
+        /// <c>Speeds</c>-Array (Super-Speed = 12x, <c>SUPER_FAST_FORWARD_MULT</c>) — ein hoeheres Sim-Ziel allein
+        /// wird darauf geklemmt (deshalb lief der "20x"-Button real nur 12x). Daher heben wir diesen Eintrag per
+        /// Reflection auf <see cref="UncappedMultiplier"/> an, setzen den Adaptiv-Modus auf Uncapped (keine
+        /// FPS-Drossel) und das Sim-Ziel auf denselben Wert. Aus -> Original wiederherstellen, Predictive, 1x.
+        /// Best effort: braucht den Unity-GameSpeedController.</summary>
         public void SetUncapped(bool uncapped)
         {
             try
             {
+                if (uncapped) RaiseSpeedCapTo(UncappedMultiplier);
+
+                // Adaptiv-Modus: Uncapped = Sim nicht fuer FPS drosseln, flat out laufen.
                 var controller = ResolveSpeedController();
-                if (controller == null)
+                if (controller != null)
                 {
-                    Log.Warning($"[{CompanySupplier.ModName}] SetUncapped: GameSpeedController nicht aufgeloest — uebersprungen.");
-                    return;
+                    var mode = uncapped ? SimAdaptiveSpeedMode.Uncapped : SimAdaptiveSpeedMode.Predictive;
+                    var mi = controller.GetType().GetMethod("SetAdaptiveSimSpeedMode");
+                    if (mi != null) mi.Invoke(controller, new object[] { mode });
+                }
+                else
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] SetUncapped: GameSpeedController nicht aufgeloest (nur der Speed-Teil greift).");
                 }
 
-                var mode = uncapped ? SimAdaptiveSpeedMode.Uncapped : SimAdaptiveSpeedMode.Predictive;
-                // Direkter Aufruf der public Methode ueber den konkreten Typ (per Reflection, da der
-                // Mafi.Unity-Typ hier nicht hart referenziert werden soll — haelt die Abhaengigkeit schlank).
-                var mi = controller.GetType().GetMethod("SetAdaptiveSimSpeedMode");
-                if (mi == null)
-                {
-                    Log.Warning($"[{CompanySupplier.ModName}] SetUncapped: SetAdaptiveSimSpeedMode nicht gefunden.");
-                    return;
-                }
-                mi.Invoke(controller, new object[] { mode });
+                // Sim-Ziel auf den (angehobenen) Hoechstwert bzw. zurueck auf 1x; beim Ausschalten Cap zuruecksetzen.
+                SetSpeed(uncapped ? UncappedMultiplier : 1);
+                if (!uncapped) RestoreSpeedCap();
+
                 Uncapped = uncapped;
-                Log.Info($"[{CompanySupplier.ModName}] Adaptiv-Sim-Modus = {mode}.");
+                Log.Info($"[{CompanySupplier.ModName}] Uncapped = {uncapped} (Cap/Ziel {(uncapped ? UncappedMultiplier : 1)}x).");
             }
             catch (Exception ex)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] SetUncapped({uncapped}): {ex.Message}");
             }
+        }
+
+        // Hebt den hoechsten Speeds-Eintrag (Spiel-Hardcap, normal 12x = SUPER_FAST_FORWARD_MULT) auf mindestens
+        // <paramref name="target"/> an, damit Multiplikatoren > 12 (echte 20x, Uncapped) nicht auf 12 geklemmt
+        // werden. Snapshottet den Originalwert EINMALIG fuer <see cref="RestoreSpeedCap"/>.
+        private void RaiseSpeedCapTo(int target)
+        {
+            try
+            {
+                var controller = ResolveSpeedController();
+                var speeds = controller?.GetType().GetField("Speeds", InstAll)?.GetValue(controller) as int[];
+                if (speeds == null || speeds.Length == 0) return;
+                int maxIdx = 0;
+                for (int i = 1; i < speeds.Length; i++) if (speeds[i] > speeds[maxIdx]) maxIdx = i;
+                if (_origSuperSpeed == null) _origSuperSpeed = speeds[maxIdx];
+                if (speeds[maxIdx] < target) speeds[maxIdx] = target;
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] RaiseSpeedCapTo({target}): {ex.Message}"); }
+        }
+
+        // Stellt den originalen Spiel-Hardcap (12x) wieder her (z. B. nach Uncapped-Aus).
+        private void RestoreSpeedCap()
+        {
+            if (_origSuperSpeed == null) return;
+            try
+            {
+                var controller = ResolveSpeedController();
+                var speeds = controller?.GetType().GetField("Speeds", InstAll)?.GetValue(controller) as int[];
+                if (speeds != null && speeds.Length > 0)
+                {
+                    int maxIdx = 0;
+                    for (int i = 1; i < speeds.Length; i++) if (speeds[i] > speeds[maxIdx]) maxIdx = i;
+                    speeds[maxIdx] = _origSuperSpeed.Value;
+                }
+                _origSuperSpeed = null;
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] RestoreSpeedCap: {ex.Message}"); }
         }
 
         private object ResolveSpeedController()

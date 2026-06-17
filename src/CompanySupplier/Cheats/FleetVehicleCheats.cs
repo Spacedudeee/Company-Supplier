@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Mafi;
 using Mafi.Collections;
 using Mafi.Core;                       // IdsCore.PropertyIds, ProductQuantity (struct liegt in Mafi.Core)
@@ -42,6 +43,31 @@ namespace CompanySupplier.Cheats
             _resolver.TryResolve<TravelingFleetManager>(out _fleetManager);
             _resolver.TryResolve<IVehiclesManager>(out _vehiclesManager);
             _resolver.TryResolve<IPropertiesDb>(out _propertiesDb);
+
+            LogShipyardDiagnostics(); // TEMP: Werft-Member ins Log (fuer den Shipyard-Kapazitaets-Hebel)
+        }
+
+        // TEMP-Diagnose: die Werft-Klasse laesst sich NICHT per ReflectionOnly (.NET 4.8) inspizieren (DIM-Problem),
+        // zur Laufzeit (Mono) aber schon. Loggt einmalig die kapazitaets-/lager-relevanten Member + Interfaces,
+        // damit der Shipyard-Kapazitaets-Hebel gefunden werden kann. Wird danach wieder entfernt.
+        private static void LogShipyardDiagnostics()
+        {
+            try
+            {
+                var t = typeof(Shipyard);
+                Log.Info($"[{CompanySupplier.ModName}] DIAG Shipyard base={t.BaseType?.Name} ifaces=[{string.Join(", ", Array.ConvertAll(t.GetInterfaces(), i => i.Name))}]");
+                const string rx = "capacit|storage|cargo|product|quant|max|limit|store|hold|buffer|stored";
+                foreach (var p in t.GetProperties())
+                    if (System.Text.RegularExpressions.Regex.IsMatch(p.Name, rx, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                        Log.Info($"[{CompanySupplier.ModName}] DIAG Shipyard.prop {p.PropertyType.Name} {p.Name}");
+                foreach (var m in t.GetMethods())
+                    if (m.DeclaringType == t && System.Text.RegularExpressions.Regex.IsMatch(m.Name, rx, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                        Log.Info($"[{CompanySupplier.ModName}] DIAG Shipyard.meth {m.ReturnType.Name} {m.Name}");
+                foreach (var f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                    if (System.Text.RegularExpressions.Regex.IsMatch(f.Name, rx, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                        Log.Info($"[{CompanySupplier.ModName}] DIAG Shipyard.field {f.FieldType.Name} {f.Name}");
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] DIAG Shipyard: {ex.Message}"); }
         }
 
         // ----------------------------------------------------------------------------------------
@@ -158,6 +184,27 @@ namespace CompanySupplier.Cheats
             catch (Exception ex)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] ChangeVehicleLimit: {ex.Message}");
+            }
+        }
+
+        /// <summary>Aktuelles Gesamt-Fahrzeug-Limit (Maximum), oder -1 wenn der Manager fehlt.</summary>
+        public int GetVehicleLimit() => _vehiclesManager?.MaxVehiclesLimit ?? -1;
+
+        /// <summary>Setzt das Fahrzeug-Limit ABSOLUT auf <paramref name="newLimit"/> (>= 0). Intern ueber das
+        /// Delta zur aktuellen Obergrenze, da der Manager nur <c>IncreaseVehicleLimit(diff)</c> bietet.</summary>
+        public void SetVehicleLimit(int newLimit)
+        {
+            if (_vehiclesManager == null) return;
+            if (newLimit < 0) newLimit = 0;
+            try
+            {
+                int cur = _vehiclesManager.MaxVehiclesLimit;
+                _vehiclesManager.IncreaseVehicleLimit(newLimit - cur);
+                Log.Info($"[{CompanySupplier.ModName}] Fahrzeug-Limit auf {newLimit} gesetzt (war {cur}).");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] SetVehicleLimit({newLimit}): {ex.Message}");
             }
         }
 

@@ -29,7 +29,9 @@ namespace CompanySupplier.UI.Tabs
 
         public string Name => "Umwelt";
 
-        public string IconPath => "";
+        // Waste-Toolbar-Icon (Abfall/Verschmutzung) — passt zum Umwelt-/Verschmutzungs-Tab.
+        // Verifizierter Pfad aus Mafi.Base.IconsPaths.ToolbarWaste.
+        public string IconPath => "Assets/Unity/UserInterface/Toolbar/Waste.svg";
 
         public UiComponent Content => _content;
 

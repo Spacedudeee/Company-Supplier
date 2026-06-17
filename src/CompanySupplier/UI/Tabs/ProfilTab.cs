@@ -25,7 +25,8 @@ namespace CompanySupplier.UI.Tabs
 
         public string Name => "Profil";
 
-        public string IconPath => "";
+        // Save-Icon (General) — passt zum Profil-Tab (Cheat-Setup/Presets speichern & laden).
+        public string IconPath => "Assets/Unity/UserInterface/General/Save.svg";
 
         public UiComponent Content => _content;
 

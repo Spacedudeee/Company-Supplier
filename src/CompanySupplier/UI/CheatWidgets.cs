@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Mafi;
 using Mafi.Localization;
@@ -97,6 +98,95 @@ namespace CompanySupplier.UI
 
         /// <summary>Section-Titel (ersetzt das alte <c>AddSectionTitle</c>).</summary>
         public static Title SectionTitle(string text) => new Title(new LocStrFormatted(text));
+
+        // ------------------------------------------------------------------------------------------
+        // Zahlen-Eingabefelder (direkte Werteingabe)
+        // ------------------------------------------------------------------------------------------
+        // UiToolkit hat KEIN natives Eingabefeld (nur Slider/Stepper/Dropdown/Toggle). Wir nutzen daher das
+        // rohe UnityEngine.UIElements.TextField und wrappen es ueber den oeffentlichen UiComponent(VisualElement)-
+        // ctor in den Mafi-UI-Baum. Kein Placeholder in dieser Unity-Version -> Hinweis via Label/Vorbelegung.
+
+        /// <summary>Gemeinsames Geruest: Beschriftung + TextField (als UiComponent) + "Setzen"-Button. Bei Enter
+        /// oder Button-Klick wird <paramref name="tryApply"/> mit dem getrimmten Rohtext gerufen; liefert es
+        /// <c>false</c>, meldet die zentrale Statuszeile eine ungueltige Eingabe.</summary>
+        private static Row NewInputRow(string label, string hint, string setLabel, Func<string, bool> tryApply)
+        {
+            var caption = new Label(new LocStrFormatted(label));
+
+            var field = new UnityEngine.UIElements.TextField { multiline = false, maxLength = 12, isDelayed = true };
+            StyleInputField(field); // sichtbarer Rahmen/Hintergrund — rohes TextField ist sonst kaum erkennbar
+            if (!string.IsNullOrEmpty(hint)) field.value = hint;
+            var fieldComp = new UiComponent(field);
+
+            void Commit()
+            {
+                string raw = (field.value ?? string.Empty).Trim();
+                if (!tryApply(raw))
+                    CheatMenuStatus.Show($"Ungültige Zahl: \"{raw}\"");
+            }
+
+            field.RegisterCallback<UnityEngine.UIElements.KeyDownEvent>(e =>
+            {
+                if (e.keyCode == UnityEngine.KeyCode.Return || e.keyCode == UnityEngine.KeyCode.KeypadEnter)
+                    Commit();
+            });
+
+            var row = new Row((Px)Gap).AlignItemsCenter();
+            row.SetChildren(caption, fieldComp, PrimaryButton(setLabel, Commit));
+            return row;
+        }
+
+        /// <summary>Beschriftetes Ganzzahl-Eingabefeld + "Setzen"-Button. <paramref name="onSet"/> bekommt den
+        /// geparsten Wert (geklemmt auf <paramref name="min"/>/<paramref name="max"/>, falls gesetzt).</summary>
+        public static Row NewIntInputRow(string label, Action<int> onSet, int? min = null, int? max = null,
+                                         string hint = null, string setLabel = "Setzen")
+            => NewInputRow(label, hint, setLabel, raw =>
+            {
+                if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int n)) return false;
+                if (min.HasValue && n < min.Value) n = min.Value;
+                if (max.HasValue && n > max.Value) n = max.Value;
+                onSet(n);
+                return true;
+            });
+
+        /// <summary>Beschriftetes Dezimal-Eingabefeld + "Setzen"-Button (z. B. fuer Geschwindigkeit).</summary>
+        public static Row NewFloatInputRow(string label, Action<float> onSet, float? min = null, float? max = null,
+                                           string hint = null, string setLabel = "Setzen")
+            => NewInputRow(label, hint, setLabel, raw =>
+            {
+                if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float f)) return false;
+                if (min.HasValue && f < min.Value) f = min.Value;
+                if (max.HasValue && f > max.Value) f = max.Value;
+                onSet(f);
+                return true;
+            });
+
+        // Das rohe Unity-TextField ist ungestylt und auf dem dunklen Panel kaum erkennbar. Wir geben ihm
+        // einen sichtbaren Rahmen + dunklen Hintergrund + hellen Text (angelehnt an den CoI-Eingabefeld-Look).
+        private static void StyleInputField(UnityEngine.UIElements.TextField field)
+        {
+            var bg = new UnityEngine.Color(0.09f, 0.11f, 0.15f, 1f);
+            var border = new UnityEngine.Color(0.48f, 0.53f, 0.60f, 1f);
+
+            var s = field.style;
+            s.width = 130f;
+            s.height = 26f;
+            s.backgroundColor = bg;
+            s.color = UnityEngine.Color.white;
+            s.paddingLeft = 6f; s.paddingRight = 6f;
+            s.borderTopWidth = 1f; s.borderBottomWidth = 1f; s.borderLeftWidth = 1f; s.borderRightWidth = 1f;
+            s.borderTopColor = border; s.borderBottomColor = border; s.borderLeftColor = border; s.borderRightColor = border;
+            s.borderTopLeftRadius = 3f; s.borderTopRightRadius = 3f; s.borderBottomLeftRadius = 3f; s.borderBottomRightRadius = 3f;
+
+            // Inneres Eingabe-Element (haelt den eigentlichen Text) ebenfalls einfaerben, sonst ueberdeckt dessen
+            // Default-Hintergrund unsere Farbe.
+            var input = UnityEngine.UIElements.UQueryExtensions.Q(field, "unity-text-input");
+            if (input != null)
+            {
+                input.style.backgroundColor = bg;
+                input.style.color = UnityEngine.Color.white;
+            }
+        }
 
         /// <summary>
         /// Slider-ValueFormatter: zeigt den (intern als Prozent der Range gefuehrten) Wert als ABSOLUTE Zahl
