@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?style=flat-square&label=Release&color=blue" alt="Release-Version">
   <img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&color=success&label=Downloads" alt="Downloads">
   <img src="https://img.shields.io/badge/Modus-Singleplayer-blue?style=flat-square" alt="Singleplayer">
-  <img src="https://img.shields.io/badge/Lizenz-MIT-green?style=flat-square" alt="Lizenz MIT">
+  <img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell">
 </p>
 
 ---
@@ -111,10 +111,15 @@ Dies ist ein Singleplayer-Cheat-Werkzeug – es umgeht die normale Wirtschaft de
 
 ## 📜 Lizenz & rechtlicher Hinweis
 
-Der **Original-Quellcode** von Company Supplier steht unter der [MIT-Lizenz](LICENSE). Die MIT-Lizenz
-gilt **ausschließlich** für diesen eigenen Quellcode und **nicht** für *Captain of Industry* oder andere
-MaFi-Games-Materialien (Spielcode, Assets, `Mafi.*`-Assemblies). Diese bleiben Eigentum von Mafisoft
-Limited (MaFi Games) und werden ausschließlich im Rahmen der
+Der **Original-Quellcode** von Company Supplier steht unter einer eigenen, **nicht-kommerziellen
+[Personal-Use-Lizenz](LICENSE)**: Du darfst den Code **nutzen** und für dich **selbst verändern**, aber
+**nicht verkaufen, kommerziell nutzen oder weitergeben** – auch keine geänderten Versionen. Verteilt wird
+der Mod ausschließlich über die offiziellen Releases dieses Repos. (Das ist bewusst **keine**
+Open-Source-Lizenz, sondern *source-available*.)
+
+Diese Lizenz gilt **ausschließlich** für diesen eigenen Quellcode und **nicht** für *Captain of Industry*
+oder andere MaFi-Games-Materialien (Spielcode, Assets, `Mafi.*`-Assemblies). Diese bleiben Eigentum von
+Mafisoft Limited (MaFi Games) und werden ausschließlich im Rahmen der
 [Captain of Industry Modding Policy](https://www.captain-of-industry.com/modding-policy) genutzt.
 
 > This Mod includes short excerpts or references to Captain of Industry Game Code. Any such Game Code is

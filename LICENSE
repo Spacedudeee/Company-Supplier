@@ -1,44 +1,89 @@
-MIT License
+Company Supplier License
+Personal, Non-Commercial Use Only
 
 Copyright (c) 2026 Moritz
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This is a source-available license. It is NOT an open-source license: it does
+not grant any right to redistribute the Software. Please read it before using
+the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. DEFINITIONS
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   "Software" means the original source code and the compiled binaries of
+   Company Supplier created by the copyright holder. It does NOT include
+   Captain of Industry or any MaFi Games materials (see Section 6).
 
--------------------------------------------------------------------------------
-ADDITIONAL TERMS — Captain of Industry materials
--------------------------------------------------------------------------------
+   "You" means the individual exercising the rights granted below.
 
-The MIT license above applies ONLY to the original source code of Company
-Supplier authored by its contributors. It does NOT grant any rights in, and
-expressly excludes, Captain of Industry and any MaFi Games materials — the
-game's code, assets, and Mafi.* assemblies — which remain the exclusive
-property of Mafisoft Limited (MaFi Games) and are used only as permitted by the
-Captain of Industry Modding Policy (https://www.captain-of-industry.com/modding-policy).
+2. GRANT OF RIGHTS
 
-This Mod includes short excerpts or references to Captain of Industry Game
-Code. Any such Game Code is © MaFi Games and is used only under the Captain of
-Industry Modding Policy.
+   Subject to Your compliance with this License, the copyright holder grants
+   You a worldwide, royalty-free, non-exclusive, non-transferable, revocable
+   license to:
 
-Company Supplier is a free, non-commercial, fan-made modification and is not
-affiliated with or endorsed by MaFi Games. Notwithstanding the permissions
-granted by the MIT license above, the Mod as distributed depends on and
-references the above MaFi Games materials; its distribution and use are
-therefore additionally subject to the Captain of Industry Modding Policy, which
-requires that the Mod not be sold, sublicensed for a fee, or placed behind a
-paywall.
+   (a) use and run the Software for Your own personal, non-commercial
+       purposes; and
+
+   (b) modify the Software for Your own personal, non-commercial use.
+
+3. RESTRICTIONS
+
+   You may NOT:
+
+   (a) sell, rent, lease, sublicense, or otherwise distribute the Software or
+       any modified version of it, in source or binary form, to any third
+       party;
+
+   (b) publish, share, redistribute, or otherwise make the Software or any
+       modified version available to anyone else;
+
+   (c) use the Software or any modified version for any commercial purpose, or
+       for commercial advantage or monetary compensation; or
+
+   (d) remove or alter any copyright, license, or attribution notice in the
+       Software.
+
+   For clarity: only the copyright holder distributes the Software. You may
+   obtain it from the copyright holder's official release channels and may
+   use it and privately modify it for yourself, but You may not pass it on,
+   in original or modified form.
+
+4. RESERVATION OF RIGHTS
+
+   All rights not expressly granted in this License are reserved by the
+   copyright holder. This License grants no rights under any patent or
+   trademark.
+
+5. TERMINATION
+
+   This License terminates automatically if You breach any of its terms. Upon
+   termination You must stop using the Software and delete all copies in Your
+   possession.
+
+6. CAPTAIN OF INDUSTRY MATERIALS
+
+   This License applies ONLY to the original source code and binaries of
+   Company Supplier authored by the copyright holder. It does NOT grant any
+   rights in, and expressly excludes, Captain of Industry and any MaFi Games
+   materials — the game's code, assets, and Mafi.* assemblies — which remain
+   the exclusive property of Mafisoft Limited (MaFi Games) and are used only
+   as permitted by the Captain of Industry Modding Policy
+   (https://www.captain-of-industry.com/modding-policy).
+
+   This Mod includes short excerpts or references to Captain of Industry Game
+   Code. Any such Game Code is © MaFi Games and is used only under the Captain
+   of Industry Modding Policy.
+
+   Company Supplier is a free, non-commercial, fan-made modification and is
+   not affiliated with or endorsed by MaFi Games. Its distribution and use are
+   additionally subject to the Captain of Industry Modding Policy.
+
+7. DISCLAIMER OF WARRANTY AND LIMITATION OF LIABILITY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+   IN THE SOFTWARE.
