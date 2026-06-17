@@ -137,7 +137,7 @@ Der **Original-Quellcode** von Company Supplier steht unter der [MIT-Lizenz](LIC
 gilt **ausschließlich** für diesen eigenen Quellcode und **nicht** für *Captain of Industry* oder andere
 MaFi-Games-Materialien (Spielcode, Assets, `Mafi.*`-Assemblies). Diese bleiben Eigentum von Mafisoft
 Limited (MaFi Games) und werden ausschließlich im Rahmen der
-[Captain of Industry Modding Policy](https://coigame.com/modding-policy) genutzt.
+[Captain of Industry Modding Policy](https://www.captain-of-industry.com/modding-policy) genutzt.
 
 > This Mod includes short excerpts or references to Captain of Industry Game Code. Any such Game Code is
 > © MaFi Games and is used only under the Captain of Industry Modding Policy.
