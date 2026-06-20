@@ -52,7 +52,11 @@ namespace CompanySupplier.UI
         {
             // MaFi's ImmutableArray<T> ist ein eigener Typ — .AsEnumerable() liefert IEnumerable<T> fuer LINQ.
             _tabs = OrderTabs(cheatTabs.Implementations.AsEnumerable());
-            if (_activeIndex >= _tabs.Count) _activeIndex = 0;
+
+            // Zuletzt geoeffneten Reiter aus der Config wiederherstellen (ueber Spielstarts hinweg). Config kann
+            // bei sehr fruehem Bau noch fehlen -> Fallback 0; danach gegen den gueltigen Bereich klemmen.
+            _activeIndex = CheatService.Instance?.Config?.LastTabIndex ?? 0;
+            if (_activeIndex < 0 || _activeIndex >= _tabs.Count) _activeIndex = 0;
             Log.Info($"[{CompanySupplier.ModName}] CheatMenuWindowView: {_tabs.Count} Tabs gefunden.");
         }
 
@@ -135,6 +139,17 @@ namespace CompanySupplier.UI
             if (index < 0 || index >= _tabs.Count) return;
             _activeIndex = index;
             RefreshSidebarAndVisibility();
+            PersistActiveTab();
+        }
+
+        /// <summary>Merkt sich den aktiven Reiter in der Config (best-effort), damit er ueber Spielstarts
+        /// erhalten bleibt. Schreibt nur bei tatsaechlicher Aenderung -> kein unnoetiger Datei-I/O.</summary>
+        private void PersistActiveTab()
+        {
+            var svc = CheatService.Instance;
+            if (svc?.Config == null || svc.Config.LastTabIndex == _activeIndex) return;
+            svc.Config.LastTabIndex = _activeIndex;
+            svc.SaveConfig();
         }
 
         private static IReadOnlyList<ICheatTab> OrderTabs(IEnumerable<ICheatTab> tabs)

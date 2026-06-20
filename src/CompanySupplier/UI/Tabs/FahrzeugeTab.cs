@@ -16,7 +16,7 @@ namespace CompanySupplier.UI.Tabs
 {
     /// <summary>
     /// Reiter "Fahrzeuge" (ui-spec V1–V3): Treibstoff, Fahrzeug-Limit, LKW-Kapazitaet.
-    /// - V1 Toggle Treibstoff aus      -> FleetVehicle.SetFuelConsumptionDisabled(bool) [kein Status-Prop -> lokal]
+    /// - V1 Toggle Treibstoff aus      -> FleetVehicle.SetFuelConsumptionDisabled(bool) [Initialzustand aus FuelConsumptionDisabled gespiegelt]
     /// - V2 Stepper Fahrzeug-Limit ±5/±25/±50 (DELTA) -> FleetVehicle.ChangeVehicleLimit(int)
     /// - V3 Button-Gruppe LKW-Kapazitaet +100/+200/+500 % -> FleetVehicle.SetTruckCapacityMultiplier(int)
     ///      + "Zuruecksetzen" -> FleetVehicle.ResetTruckCapacity()
@@ -31,9 +31,6 @@ namespace CompanySupplier.UI.Tabs
     public sealed class FahrzeugeTab : ICheatTab
     {
         private readonly UiComponent _content;
-
-        // V1 "Treibstoff aus" hat keine Backend-Status-Property -> lokal gehalten.
-        private bool _fuelDisabled;
 
         // V2 "Fahrzeug-Limit": Label fuer das aktuelle Limit (wird nach Zahlenfeld/Stepper aktualisiert).
         private Label _limitLabel;
@@ -113,17 +110,14 @@ namespace CompanySupplier.UI.Tabs
             return column;
         }
 
-        // V1: Treibstoff-Verbrauch global an/aus. Aktiv = Verbrauch AUS.
+        // V1: Treibstoff-Verbrauch global an/aus. Aktiv = Verbrauch AUS. Anfangszustand aus dem Backend
+        // gespiegelt (FuelConsumptionDisabled), damit der Toggle nach Auto-Restore/Allgemein-Tab stimmt.
         private UiComponent BuildFuelToggle()
         {
             return CheatWidgets.NewToggleRow(
                 "Treibstoff-Verbrauch aus (aktiv = AUS)",
-                _fuelDisabled,
-                v =>
-                {
-                    _fuelDisabled = v;
-                    CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v);
-                },
+                CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false,
+                v => CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v),
                 "Aktiv = Fahrzeuge verbrauchen keinen Treibstoff mehr.");
         }
 

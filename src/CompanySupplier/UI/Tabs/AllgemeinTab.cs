@@ -62,10 +62,10 @@ namespace CompanySupplier.UI.Tabs
             _noFood = BuildIgnoreToggle("Keine Lebensmittel nötig", () => Svc?.Sandbox?.NoFoodNeeded ?? false,
                 v => Svc?.Sandbox?.SetNoFoodNeeded(v),
                 "Keine Hunger-/Versorgungs-Strafe bei fehlenden Lebensmitteln.");
-            _instaBuild = BuildIgnoreToggle("Sofortbau", () => false,
+            _instaBuild = BuildIgnoreToggle("Sofortbau", () => Svc?.Building?.InstaBuildEnabled ?? false,
                 v => Svc?.Building?.SetInstaBuild(v),
                 "Gebäude, Forschung, Upgrades und Reparaturen werden sofort fertig.");
-            _noFuel = BuildIgnoreToggle("Kein Treibstoffverbrauch", () => false,
+            _noFuel = BuildIgnoreToggle("Kein Treibstoffverbrauch", () => Svc?.FleetVehicle?.FuelConsumptionDisabled ?? false,
                 v => Svc?.FleetVehicle?.SetFuelConsumptionDisabled(v),
                 "Fahrzeuge verbrauchen keinen Treibstoff mehr.");
             _noMaintenance = BuildIgnoreToggle("Wartung deaktivieren", () => Svc?.MaintenanceDisabled ?? false,

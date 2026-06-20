@@ -6,8 +6,8 @@ namespace CompanySupplier.Config
     /// <summary>
     /// Persistierter Mod-Zustand (UI-/Komfort-Schicht) — bewusst GETRENNT vom Spielstand: die Cheats
     /// selbst bleiben <c>NonSaveable</c>, diese Datei haelt nur, was ueber Spielsitzungen hinweg bequem
-    /// erhalten bleiben soll (zuletzt aktive Dauer-Toggles fuer Auto-Restore, Fenster-Zustand, Presets,
-    /// Standard-Menge).
+    /// erhalten bleiben soll (zuletzt aktive Dauer-Toggles fuer Auto-Restore, zuletzt geoeffneter Reiter,
+    /// Presets).
     ///
     /// Serialisiert ueber <see cref="System.Runtime.Serialization.Json.DataContractJsonSerializer"/>
     /// (in .NET 4.8 vorhanden; keine externe Abhaengigkeit). Statt eines Dictionary (das der
@@ -25,23 +25,12 @@ namespace CompanySupplier.Config
         [DataMember(Name = "autoRestore", Order = 1)]
         public bool AutoRestore { get; set; } = true;
 
-        /// <summary>Standard-Menge fuer das Ressourcen-Mengenfeld.</summary>
-        [DataMember(Name = "defaultAmount", Order = 2)]
-        public int DefaultAmount { get; set; } = 1000;
-
-        /// <summary>Zuletzt geoeffneter Reiter-Index (Fenster-Komfort).</summary>
-        [DataMember(Name = "lastTabIndex", Order = 3)]
+        /// <summary>Zuletzt geoeffneter Reiter-Index (Fenster-Komfort; bleibt ueber Spielstarts erhalten).</summary>
+        [DataMember(Name = "lastTabIndex", Order = 2)]
         public int LastTabIndex { get; set; }
 
-        /// <summary>Gespeicherte Fenster-Position (−1 = noch nie gesetzt -> Default des Fensters).</summary>
-        [DataMember(Name = "windowX", Order = 4)]
-        public int WindowX { get; set; } = -1;
-
-        [DataMember(Name = "windowY", Order = 5)]
-        public int WindowY { get; set; } = -1;
-
         /// <summary>Benannte Cheat-Presets (Bundles von Dauer-Toggle-Zustaenden).</summary>
-        [DataMember(Name = "presets", Order = 6)]
+        [DataMember(Name = "presets", Order = 3)]
         public List<CheatPreset> Presets { get; set; } = new List<CheatPreset>();
 
         // ----------------------------------------------------------------------------------------
