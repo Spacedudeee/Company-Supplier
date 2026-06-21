@@ -1,5 +1,7 @@
 param(
-    [string]$Config = 'Debug'
+    [string]$Config = 'Debug',
+    # '' / 'stable' = Stable-Build (CompanySupplier). 'beta' = Beta-Variante (CompanySupplierBeta).
+    [string]$ModVariant = ''
 )
 $ErrorActionPreference = 'Stop'
 
@@ -10,6 +12,6 @@ $proj = Join-Path $PSScriptRoot 'src\CompanySupplier\CompanySupplier.csproj'
 # setzen; der Fallback unten ist nur ein Standard-Pfad und sollte ggf. angepasst werden.
 if (-not $env:COI_ROOT) { $env:COI_ROOT = 'D:\Steam\steamapps\common\Captain of Industry' }
 
-Write-Host "==> dotnet build ($Config)  COI_ROOT=$env:COI_ROOT" -ForegroundColor Cyan
-dotnet build $proj -c $Config -v minimal -nologo
+Write-Host "==> dotnet build ($Config)  ModVariant=$ModVariant  COI_ROOT=$env:COI_ROOT" -ForegroundColor Cyan
+dotnet build $proj -c $Config -v minimal -nologo -p:ModVariant=$ModVariant
 exit $LASTEXITCODE

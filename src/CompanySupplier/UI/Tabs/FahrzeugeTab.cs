@@ -4,6 +4,9 @@ using System.Linq;
 using Mafi;
 using Mafi.Core.Prototypes;
 using Mafi.Core.Vehicles.Trucks;
+using Mafi.Core.Entities.Dynamic;
+using Mafi.Core.Entities.Ships;
+using Mafi.Core.Trains;
 using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
@@ -13,7 +16,7 @@ namespace CompanySupplier.UI.Tabs
 {
     /// <summary>
     /// Reiter "Fahrzeuge" (ui-spec V1–V3): Treibstoff, Fahrzeug-Limit, LKW-Kapazitaet.
-    /// - V1 Toggle Treibstoff aus      -> FleetVehicle.SetFuelConsumptionDisabled(bool) [kein Status-Prop -> lokal]
+    /// - V1 Toggle Treibstoff aus      -> FleetVehicle.SetFuelConsumptionDisabled(bool) [Initialzustand aus FuelConsumptionDisabled gespiegelt]
     /// - V2 Stepper Fahrzeug-Limit ±5/±25/±50 (DELTA) -> FleetVehicle.ChangeVehicleLimit(int)
     /// - V3 Button-Gruppe LKW-Kapazitaet +100/+200/+500 % -> FleetVehicle.SetTruckCapacityMultiplier(int)
     ///      + "Zuruecksetzen" -> FleetVehicle.ResetTruckCapacity()
@@ -29,8 +32,8 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
-        // V1 "Treibstoff aus" hat keine Backend-Status-Property -> lokal gehalten.
-        private bool _fuelDisabled;
+        // V2 "Fahrzeug-Limit": Label fuer das aktuelle Limit (wird nach Zahlenfeld/Stepper aktualisiert).
+        private Label _limitLabel;
 
         // V3-Live-Kacheln: pro LKW-Typ das Kapazitaets-Label halten, damit es nach jedem Kapazitaets-Button-
         // Klick per SetValue neu gesetzt werden kann (Icon bleibt; Tabs haben keinen RenderUpdate-Hook).
@@ -42,6 +45,21 @@ namespace CompanySupplier.UI.Tabs
         // IComponentWithText-Interface erreichbar (explizite Impl.) -> Referenz als Label halten, beim
         // Refresh casten.
         private Label _multiplierSummary;
+
+        // "Fahrzeug-Stats (pro Typ)": gewaehlter Fahrzeugtyp + Info-Label (Standard/Aktuell). Liste der
+        // kapazitaetsfaehigen Typen (LKW/Bagger) fuer das Dropdown.
+        private DrivingEntityProto _statsSelected;
+        private Label _statsInfo;
+        private IReadOnlyList<DrivingEntityProto> _statVehicles;
+
+        // Kachel-Übersicht (alle Stats-Fahrzeuge mit aktueller Geschwindigkeit + Kapazität, live aktualisiert).
+        private readonly List<StatTile> _statOverview = new List<StatTile>();
+        private sealed class StatTile { public DrivingEntityProto Proto; public Label Cap; public Label Speed; }
+
+        // "Zug-Waggon-Kapazität": gewaehlter Waggon-Typ + Info-Label + Liste (nur falls Zuege/DLC vorhanden).
+        private CargoWagonProto _trainSelected;
+        private Label _trainInfo;
+        private IReadOnlyList<CargoWagonProto> _trainWagons;
 
         public FahrzeugeTab()
         {
@@ -74,41 +92,75 @@ namespace CompanySupplier.UI.Tabs
                 BuildFuelToggle(),              // V1
 
                 CheatWidgets.SectionTitle("Fahrzeug-Limit"),
-                BuildVehicleLimitStepper(),     // V2
+                BuildVehicleLimitSection(),     // V2: aktuelles Limit + Zahlenfeld + Stepper
 
                 CheatWidgets.SectionTitle("LKW-Kapazität"),
                 BuildTruckCapacityButtons(),    // V3 (Buttons)
                 BuildMultiplierSummary(),       // V3 (aktueller Gesamt-Multiplikator in %)
-                BuildTruckCapacityList()        // V3 (Live-Liste je LKW-Typ)
+                BuildTruckCapacityList(),       // V3 (Live-Liste je LKW-Typ)
+
+                CheatWidgets.SectionTitle("Fahrzeug-Stats (pro Typ)"),
+                BuildVehicleStatsSection()      // exakte Kapazitaet pro Fahrzeugtyp (Reflection-Override)
             };
+
+            // Zug-Waggon-Kapazitaet nur anhaengen, wenn (DLC-)Zuege vorhanden sind.
+            AppendTrainSection(children);
 
             column.SetChildren(children.ToArray());
             return column;
         }
 
-        // V1: Treibstoff-Verbrauch global an/aus. Aktiv = Verbrauch AUS.
+        // V1: Treibstoff-Verbrauch global an/aus. Aktiv = Verbrauch AUS. Anfangszustand aus dem Backend
+        // gespiegelt (FuelConsumptionDisabled), damit der Toggle nach Auto-Restore/Allgemein-Tab stimmt.
         private UiComponent BuildFuelToggle()
         {
             return CheatWidgets.NewToggleRow(
                 "Treibstoff-Verbrauch aus (aktiv = AUS)",
-                _fuelDisabled,
-                v =>
-                {
-                    _fuelDisabled = v;
-                    CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v);
-                },
+                CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false,
+                v => CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v),
                 "Aktiv = Fahrzeuge verbrauchen keinen Treibstoff mehr.");
         }
 
-        // V2: Fahrzeug-Limit-Stepper ±5/±25/±50. ChangeVehicleLimit erwartet ein DELTA
-        // (positiv erhoeht, negativ verringert) -> direkt auf die Inkrement-Gruppe abbildbar.
+        // V2: aktuelles Limit (Label) + absolutes Zahlenfeld + ±Stepper. Alle drei aktualisieren das Label.
+        private UiComponent BuildVehicleLimitSection()
+        {
+            _limitLabel = new Label(new LocStrFormatted(LimitText()));
+
+            var inputRow = CheatWidgets.NewIntInputRow(
+                "Limit setzen",
+                v =>
+                {
+                    CheatService.Instance?.FleetVehicle?.SetVehicleLimit(v);
+                    RefreshLimit();
+                    CheatMenuStatus.Show($"Fahrzeug-Limit = {v}");
+                },
+                min: 0);
+
+            var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
+            col.SetChildren(_limitLabel, inputRow, BuildVehicleLimitStepper());
+            return col;
+        }
+
+        private static string LimitText()
+        {
+            int l = CheatService.Instance?.FleetVehicle?.GetVehicleLimit() ?? -1;
+            return l < 0 ? "Aktuelles Limit: —" : $"Aktuelles Limit: {l}";
+        }
+
+        private void RefreshLimit()
+        {
+            if (_limitLabel is IComponentWithText t)
+                t.SetValue(new LocStrFormatted(LimitText()));
+        }
+
+        // ±5/±25/±50-Stepper. ChangeVehicleLimit erwartet ein DELTA; nach jedem Klick das Limit-Label auffrischen.
         private UiComponent BuildVehicleLimitStepper()
         {
             var steps = new Dictionary<int, Action<int>>
             {
-                { 5,  d => CheatService.Instance?.FleetVehicle?.ChangeVehicleLimit(d) },
-                { 25, d => CheatService.Instance?.FleetVehicle?.ChangeVehicleLimit(d) },
-                { 50, d => CheatService.Instance?.FleetVehicle?.ChangeVehicleLimit(d) },
+                { 5,  d => { CheatService.Instance?.FleetVehicle?.ChangeVehicleLimit(d); RefreshLimit(); } },
+                { 25, d => { CheatService.Instance?.FleetVehicle?.ChangeVehicleLimit(d); RefreshLimit(); } },
+                { 50, d => { CheatService.Instance?.FleetVehicle?.ChangeVehicleLimit(d); RefreshLimit(); } },
             };
             return CheatWidgets.NewIncrementButtonGroup(steps);
         }
@@ -229,6 +281,238 @@ namespace CompanySupplier.UI.Tabs
             Percent mult = CheatService.Instance?.FleetVehicle?.GetTruckCapacityMultiplier() ?? Percent.Hundred;
             int effective = truck.CapacityBase.ScaledBy(mult).Value;
             return baseCap == effective ? $"{baseCap}" : $"{baseCap} → {effective}";
+        }
+
+        // ------------------------------------------------------------------------------------------
+        // Fahrzeug-Stats pro Typ (exakte Werte, Reflection-Override via VehicleStatsCheats)
+        // ------------------------------------------------------------------------------------------
+
+        /// <summary>Dropdown (kapazitaetsfaehige Fahrzeugtypen) + Info-Label + exaktes Kapazitaets-Eingabefeld
+        /// + "Zuruecksetzen". Anders als die globalen %-Buttons oben wirkt das EXAKT und PRO TYP.</summary>
+        private UiComponent BuildVehicleStatsSection()
+        {
+            var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
+
+            var protos = CheatService.Instance?.Protos;
+            var stats = CheatService.Instance?.VehicleStats;
+            if (protos == null || stats == null)
+            {
+                col.SetChildren(new Label(new LocStrFormatted("(Fahrzeug-Stats nicht verfügbar)")));
+                return col;
+            }
+
+            // Kapazitaetsfaehige Typen (LKW/Bagger); H-Varianten ausblenden (Duplikate, wie oben).
+            // Boden-Fahrzeuge mit Icon (LKW/Bagger/Holzvollernter/Baumpflanzer/Raketen). Schiffe (ShipProto:
+            // Welt-Schiff + Frachtschiffe) sind ebenfalls DrivingEntityProto -> raus. H-Varianten (Duplikate) raus.
+            _statVehicles = protos.Filter<DrivingEntityProto>(p => p is IProtoWithIcon
+                                    && !(p is ShipProto)
+                                    && !p.Id.ToString().EndsWith("H", StringComparison.Ordinal))
+                                  .OrderBy(p => CheatWidgets.ProtoDisplayName(p))
+                                  .ToList();
+            _statsSelected = _statVehicles.Count > 0 ? _statVehicles[0] : null;
+
+            Dropdown<DrivingEntityProto>.OptionFactory factory =
+                (DrivingEntityProto proto, int index, bool isInDropdown) =>
+                    new ButtonIconText(Button.None, (IProtoWithIcon)proto, CheatWidgets.ProtoDisplayLabel(proto));
+
+            var dropdown = new Dropdown<DrivingEntityProto>(factory, null, null, false);
+            dropdown.Label(new LocStrFormatted("Fahrzeug"));
+            dropdown.SetOptions(_statVehicles);
+            dropdown.OnValueChanged((DrivingEntityProto proto, int idx) => { _statsSelected = proto; RefreshStatsInfo(); });
+            dropdown.FlexGrow(1f);
+            if (_statVehicles.Count > 0) dropdown.SetValueIndex(0, notifyChangeListeners: false);
+
+            _statsInfo = new Label(new LocStrFormatted(StatsInfoText()));
+
+            var speedRow = CheatWidgets.NewFloatInputRow(
+                "Geschwindigkeit", v =>
+                {
+                    CheatService.Instance?.VehicleStats?.SetSpeed(_statsSelected, v);
+                    RefreshStatsInfo();
+                    if (_statsSelected != null)
+                        CheatMenuStatus.Show($"Geschwindigkeit {CheatWidgets.ProtoDisplayName(_statsSelected)} = {v:0.##}");
+                },
+                min: 0.1f);
+
+            var capacityRow = CheatWidgets.NewIntInputRow(
+                "Ladekapazität", v =>
+                {
+                    CheatService.Instance?.VehicleStats?.SetCapacity(_statsSelected, v);
+                    RefreshStatsInfo();
+                    if (_statsSelected != null)
+                        CheatMenuStatus.Show($"Kapazität {CheatWidgets.ProtoDisplayName(_statsSelected)} = {v}");
+                },
+                min: 1);
+
+            var reset = CheatWidgets.DangerButton(
+                "Zurücksetzen",
+                () =>
+                {
+                    CheatService.Instance?.VehicleStats?.ResetSpeed(_statsSelected);
+                    CheatService.Instance?.VehicleStats?.ResetCapacity(_statsSelected);
+                    RefreshStatsInfo();
+                    CheatMenuStatus.Show("Fahrzeug-Stats zurückgesetzt");
+                },
+                "Setzt Geschwindigkeit + Kapazität des gewählten Fahrzeugtyps auf den Standard zurück.");
+
+            col.SetChildren(dropdown, _statsInfo, speedRow, capacityRow, reset,
+                CheatWidgets.SectionTitle("Übersicht"), BuildStatsOverview());
+            return col;
+        }
+
+        /// <summary>"LKW — Kapazität: 360 (Standard: 180)" — Default = gesnapshotteter Originalwert.</summary>
+        private string StatsInfoText()
+        {
+            var stats = CheatService.Instance?.VehicleStats;
+            if (stats == null || _statsSelected == null) return string.Empty;
+            string name = CheatWidgets.ProtoDisplayName(_statsSelected);
+
+            double sp = stats.GetSpeed(_statsSelected);
+            double spDef = stats.GetDefaultSpeed(_statsSelected);
+            string speedPart = Math.Abs(sp - spDef) < 0.005
+                ? $"Speed: {sp:0.##}"
+                : $"Speed: {sp:0.##} (Standard: {spDef:0.##})";
+
+            string capPart;
+            if (stats.HasCapacity(_statsSelected))
+            {
+                int cap = stats.GetCapacity(_statsSelected);
+                int capDef = stats.GetDefaultCapacity(_statsSelected);
+                capPart = cap == capDef ? $"Kapazität: {cap}" : $"Kapazität: {cap} (Standard: {capDef})";
+            }
+            else capPart = "Kapazität: —";
+
+            return $"{name} — {speedPart} | {capPart}";
+        }
+
+        private void RefreshStatsInfo()
+        {
+            if (_statsInfo is IComponentWithText t)
+                t.SetValue(new LocStrFormatted(StatsInfoText()));
+            RefreshStatsOverview();
+        }
+
+        /// <summary>Kachel-Übersicht (Icon + Geschwindigkeit + Kapazität) ALLER Stats-Fahrzeuge — alles auf einen
+        /// Blick, analog zur LKW-Kapazitätsliste. Die Labels werden in <see cref="_statOverview"/> gehalten und
+        /// nach jeder Änderung (Set/Reset) per <see cref="RefreshStatsOverview"/> neu berechnet.</summary>
+        private UiComponent BuildStatsOverview()
+        {
+            _statOverview.Clear();
+            var wrap = new Row((Px)18).Wrap(true);
+            var tiles = new List<UiComponent>(_statVehicles.Count);
+            foreach (var p in _statVehicles)
+            {
+                var icon = new ButtonIcon(Button.None, (IProtoWithIcon)p, () => { }).IconSize((Px)40);
+                var spd = new Label(new LocStrFormatted(OverviewSpeedText(p)));
+                var cap = new Label(new LocStrFormatted(OverviewCapText(p)));
+                var tile = new Column((Px)2).AlignItemsCenter();
+                tile.SetChildren(icon, spd, cap);
+                _statOverview.Add(new StatTile { Proto = p, Cap = cap, Speed = spd });
+                tiles.Add(tile);
+            }
+            wrap.SetChildren(tiles.ToArray());
+            return wrap;
+        }
+
+        // "Kap 360" bzw. "Kap —" (Typen ohne Ladekapazität, z. B. Raketen).
+        private static string OverviewCapText(DrivingEntityProto p)
+        {
+            var stats = CheatService.Instance?.VehicleStats;
+            return (stats != null && stats.HasCapacity(p)) ? $"Kap {stats.GetCapacity(p)}" : "Kap —";
+        }
+
+        // "v 2,5" (Tiles/Sek, eine Nachkommastelle).
+        private static string OverviewSpeedText(DrivingEntityProto p)
+        {
+            double s = CheatService.Instance?.VehicleStats?.GetSpeed(p) ?? -1;
+            return s < 0 ? "v —" : $"v {s:0.#}";
+        }
+
+        private void RefreshStatsOverview()
+        {
+            foreach (var r in _statOverview)
+            {
+                if (r.Cap is IComponentWithText ct) ct.SetValue(new LocStrFormatted(OverviewCapText(r.Proto)));
+                if (r.Speed is IComponentWithText st) st.SetValue(new LocStrFormatted(OverviewSpeedText(r.Proto)));
+            }
+        }
+
+        // ------------------------------------------------------------------------------------------
+        // Zug-Waggon-Kapazitaet pro Waggon-Typ (exakter Wert, via TrainCheats) — nur falls Zuege vorhanden
+        // ------------------------------------------------------------------------------------------
+
+        /// <summary>Haengt den Zug-Abschnitt nur an, wenn Cargo-Waggons existieren (Basis-Spiel ODER Zug-DLC).
+        /// Ohne Zuege bleibt der Reiter unveraendert.</summary>
+        private void AppendTrainSection(List<UiComponent> children)
+        {
+            var protos = CheatService.Instance?.Protos;
+            if (protos == null) return;
+
+            _trainWagons = protos.Filter<CargoWagonProto>(w => w is IProtoWithIcon)
+                                 .OrderBy(w => CheatWidgets.ProtoDisplayName(w))
+                                 .ToList();
+            if (_trainWagons.Count == 0) return; // keine Zuege/DLC -> Abschnitt komplett weglassen
+
+            _trainSelected = _trainWagons[0];
+            children.Add(CheatWidgets.SectionTitle("Zug-Waggon-Kapazität"));
+            children.Add(BuildTrainStatsSection());
+        }
+
+        private UiComponent BuildTrainStatsSection()
+        {
+            var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
+
+            Dropdown<CargoWagonProto>.OptionFactory factory =
+                (CargoWagonProto wagon, int index, bool isInDropdown) =>
+                    new ButtonIconText(Button.None, (IProtoWithIcon)wagon, CheatWidgets.ProtoDisplayLabel(wagon));
+
+            var dropdown = new Dropdown<CargoWagonProto>(factory, null, null, false);
+            dropdown.Label(new LocStrFormatted("Waggon"));
+            dropdown.SetOptions(_trainWagons);
+            dropdown.OnValueChanged((CargoWagonProto w, int idx) => { _trainSelected = w; RefreshTrainInfo(); });
+            dropdown.FlexGrow(1f);
+            if (_trainWagons.Count > 0) dropdown.SetValueIndex(0, notifyChangeListeners: false);
+
+            _trainInfo = new Label(new LocStrFormatted(TrainInfoText()));
+
+            var capacityRow = CheatWidgets.NewIntInputRow(
+                "Kapazität", v =>
+                {
+                    CheatService.Instance?.Train?.SetCapacity(_trainSelected, v);
+                    RefreshTrainInfo();
+                    if (_trainSelected != null)
+                        CheatMenuStatus.Show($"Waggon-Kapazität {CheatWidgets.ProtoDisplayName(_trainSelected)} = {v}");
+                },
+                min: 1);
+
+            var reset = CheatWidgets.DangerButton(
+                "Zurücksetzen",
+                () =>
+                {
+                    CheatService.Instance?.Train?.ResetCapacity(_trainSelected);
+                    RefreshTrainInfo();
+                    CheatMenuStatus.Show("Waggon-Kapazität zurückgesetzt");
+                },
+                "Setzt die Kapazität des gewählten Waggon-Typs auf den Standard zurück.");
+
+            col.SetChildren(dropdown, _trainInfo, capacityRow, reset);
+            return col;
+        }
+
+        private string TrainInfoText()
+        {
+            var train = CheatService.Instance?.Train;
+            if (train == null || _trainSelected == null) return string.Empty;
+            int cur = train.GetCapacity(_trainSelected);
+            int def = train.GetDefaultCapacity(_trainSelected);
+            string name = CheatWidgets.ProtoDisplayName(_trainSelected);
+            return cur == def ? $"{name} — Kapazität: {cur}" : $"{name} — Kapazität: {cur} (Standard: {def})";
+        }
+
+        private void RefreshTrainInfo()
+        {
+            if (_trainInfo is IComponentWithText t)
+                t.SetValue(new LocStrFormatted(TrainInfoText()));
         }
     }
 }

@@ -2,16 +2,17 @@
 
 <p align="center">
   <strong>Das In-Game-Cheat- &amp; Trainer-Menü für <em>Captain of Industry</em></strong><br>
-  Gib dir Ressourcen, schraube an Fahrzeugen und Gelände, beherrsche das Wetter und mehr – alles aus
-  einem Fenster. Ein Druck auf <kbd>F8</kbd>, und du bestimmst die Regeln.
+  Gib dir Ressourcen, schalte einen echten Kreativmodus frei, stoppe die Verschmutzung, beherrsche die
+  Weltkarte und schraube an Fahrzeugen, Zügen und Wetter – alles aus einem Fenster. Ein Druck auf
+  <kbd>F8</kbd>, und du bestimmst die Regeln.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Captain%20of%20Industry-0.8.5.0-E8730C?style=flat-square" alt="Captain of Industry 0.8.5.0">
-  <img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?style=flat-square&label=Release&color=blue" alt="Release-Version">
-  <img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&color=success&label=Downloads" alt="Downloads">
+  <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?style=flat-square&amp;label=Release&amp;color=blue" alt="Release-Version"></a>
+  <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&amp;color=success&amp;label=Downloads" alt="Downloads"></a>
   <img src="https://img.shields.io/badge/Modus-Singleplayer-blue?style=flat-square" alt="Singleplayer">
-  <img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell"></a>
 </p>
 
 ---
@@ -23,15 +24,11 @@
 übersichtlichen Reitern und schaltest per Klick frei, was du brauchst – von „gib mir 10.000 Stahl“ bis
 „fülle alle Lager auf einen Schlag“.
 
-> [!NOTE]
-> **Lust auf mehr?** Die **v2.0-Beta** bringt einen echten Kreativmodus, Verschmutzungs-Cheats, eine
-> Weltkarten-Ebene, ein God-Werkzeug und Profile/Presets – als **separater Test-Mod neben** diesem Stable,
-> ohne ihn anzutasten. Hol sie dir als **Pre-Release** auf der
-> [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases).
+> **Neu in v2.0:** 🧪 Kreativmodus · ⏱️ Spielgeschwindigkeit (bis ungebremst) · 🌫️ Verschmutzung aus · 🗺️ Weltkarte · 🪄 God-Werkzeug · 🚚 Fahrzeug- &amp; Zug-Stats pro Typ · 🎚️ Profile &amp; Presets
 
 ## 🚀 Schnellstart
 
-1. Lade `CompanySupplier-v1.0.0.zip` aus dem **Latest**-Release auf der
+1. Lade `CompanySupplier-v2.0.0.zip` aus dem **Latest**-Release auf der
    [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases) – oder baue ihn selbst (siehe unten).
 2. Schließe Captain of Industry komplett.
 3. Entpacke die ZIP nach `%APPDATA%\Captain of Industry\Mods\`. Es entsteht der Ordner
@@ -47,12 +44,15 @@ Alles erreichbar über die Reiter im <kbd>F8</kbd>-Fenster:
 | Reiter | Was du damit anstellst |
 |--------|------------------------|
 | 📦 **Ressourcen** | Schütte dir jedes Produkt – oder *alle* auf einmal – ins Lager. Per Welt-Klick ein einzelnes Lager füllen oder leeren (z. B. Atommüll loswerden), oder mit einem Klick **alle** Lager randvoll. |
-| 🏗️ **Allgemein** | Bau & Wartung, Bevölkerung & Zufriedenheit, Forschung freischalten, Unity gutschreiben. |
+| 🏗️ **Allgemein** | **Kreativmodus**: Fabrik läuft ohne Strom, Arbeiter, Computing, Unity oder Lebensmittel; Sofortbau, kein Treibstoff, keine Wartung. **Spielgeschwindigkeit** jenseits von 3× (5× / 10× / 20× + ungebremst). **Unerschöpfliche Quelle/Senke** als Bau-Gebäude. **God-Werkzeug** (Werft/Depot/Fahrzeug anklicken = vollgetankt). Plus Bevölkerung & Zufriedenheit, Forschung freischalten, Unity gutschreiben. |
+| 🌫️ **Umwelt** | Verschmutzung abschalten – Luft, Wasser, Deponie, Fahrzeuge, Schiffe und Züge (einzeln oder alles auf einmal). |
+| 🗺️ **Weltkarte** | Ganze Karte aufdecken, unerschöpfliche Welt-Minen, Minen ohne Unity, dazu Effizienz- und Handels-Boost. |
 | ⚡ **Erzeugung** | Strom-, Computing- und Unity-Erzeugung direkt setzen. |
 | 🚢 **Werft & Flotte** | Steuerung des Welt-Schiffs (Flotte). |
-| 🚚 **Fahrzeuge** | Treibstoffverbrauch aus, Fahrzeuglimit anheben, LKW-Ladekapazität vervielfachen. |
+| 🚚 **Fahrzeuge** | Treibstoffverbrauch aus, Fahrzeuglimit per Zahlenfeld, LKW-Kapazität – plus **Stats pro Fahrzeugtyp** (Geschwindigkeit + Ladekapazität exakt setzen) und **Zug-Waggon-Kapazität** pro Typ. |
 | ⛰️ **Gelände** | Sofort abbauen / verfüllen / umwandeln, Grundwasser & Erdöl auffüllen, Bäume pflanzen oder entfernen. |
 | ☀️ **Wetter** | Das Wetter dauerhaft auf einen Zustand fixieren. |
+| 🎚️ **Profil** | **Panik-Aus** (alle Dauer-Cheats mit einem Klick abschalten), **Auto-Restore** deines Setups beim Laden und **3 Preset-Slots**. |
 
 > Produkt- und Materialnamen erscheinen in deiner Spielsprache – sie kommen direkt aus der Lokalisierung des Spiels.
 
@@ -128,3 +128,7 @@ Mafisoft Limited (MaFi Games) und werden ausschließlich im Rahmen der
 Company Supplier ist ein **kostenloser, nicht-kommerzieller** Fan-Mod und **nicht** mit MaFi Games
 verbunden oder von ihnen unterstützt. Der Mod selbst darf gemäß der Modding Policy nicht verkauft, gegen
 Gebühr weiterlizenziert oder hinter einer Bezahlschranke angeboten werden. Viel Spaß beim Cheaten! 🚀
+
+## 👤 Autor
+
+Company Supplier wird von **[Spacedudee](https://github.com/Spacedudeee)** entwickelt (GitHub-Handle: [`Spacedudeee`](https://github.com/Spacedudeee)).

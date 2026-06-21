@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Mafi;
 using Mafi.Core;
@@ -7,6 +8,7 @@ using Mafi.Core.Economy;
 using Mafi.Core.Maintenance;
 using Mafi.Core.Products;
 using Mafi.Core.Prototypes;
+using CompanySupplier.Config;   // ModConfig, ConfigStore (Namespace auf Dateiebene -> nicht vom Typ CompanySupplier verdeckt)
 
 namespace CompanySupplier
 {
@@ -24,6 +26,13 @@ namespace CompanySupplier
         public static CheatService Instance { get; private set; }
 
         private readonly DependencyResolver _resolver;
+
+        /// <summary>Persistierte UI-/Komfort-Config (Toggle-Zustaende, Fenster, Presets). Liegt neben der
+        /// Mod-DLL und greift NICHT in Spielstaende ein. Nie null (Defaults bei Ladefehler).</summary>
+        public ModConfig Config { get; private set; } = new ModConfig();
+
+        /// <summary>Speichert die Config (best-effort) — von der UI nach Aenderungen aufgerufen.</summary>
+        public void SaveConfig() => ConfigStore.Save(Config);
 
         // Verifiziert gegen 0.8.5.0:
         private IAssetTransactionManager _assets;     // Produkte ins globale Lager legen
@@ -47,9 +56,16 @@ namespace CompanySupplier
         public Cheats.ResearchCheats     Research     { get; private set; }
         public Cheats.GenerationCheats   Generation   { get; private set; }
         public Cheats.FleetVehicleCheats FleetVehicle { get; private set; }
+        public Cheats.VehicleStatsCheats VehicleStats { get; private set; }
+        public Cheats.TrainCheats        Train        { get; private set; }
         public Cheats.TerrainCheats      Terrain      { get; private set; }
         public Cheats.WeatherCheats      Weather      { get; private set; }
         public Cheats.StorageToolCheats  StorageTool  { get; private set; }
+        public Cheats.SandboxCheats      Sandbox      { get; private set; }
+        public Cheats.GameSpeedCheats    GameSpeed    { get; private set; }
+        public Cheats.PollutionCheats    Pollution    { get; private set; }
+        public Cheats.SourceSinkCheats   SourceSink   { get; private set; }
+        public Cheats.WorldMapCheats     WorldMap     { get; private set; }
 
         private CheatService(DependencyResolver resolver) => _resolver = resolver;
 
@@ -57,6 +73,7 @@ namespace CompanySupplier
         public static void Create(DependencyResolver resolver)
         {
             Instance = new CheatService(resolver);
+            Instance.Config = ConfigStore.Load();
             Instance.ResolveManagers();
             Log.Info($"[{CompanySupplier.ModName}] CheatService bereit.");
         }
@@ -74,8 +91,15 @@ namespace CompanySupplier
             Research     = new Cheats.ResearchCheats(_resolver);
             Generation   = new Cheats.GenerationCheats(_resolver);
             FleetVehicle = new Cheats.FleetVehicleCheats(_resolver);
+            VehicleStats = new Cheats.VehicleStatsCheats(_resolver);
+            Train        = new Cheats.TrainCheats(_resolver);
             Terrain      = new Cheats.TerrainCheats(_resolver);
             Weather      = new Cheats.WeatherCheats(_resolver);
+            Sandbox      = new Cheats.SandboxCheats(_resolver);
+            GameSpeed    = new Cheats.GameSpeedCheats(_resolver);
+            Pollution    = new Cheats.PollutionCheats(_resolver);
+            SourceSink   = new Cheats.SourceSinkCheats(_resolver);
+            WorldMap     = new Cheats.WorldMapCheats(_resolver);
             // StorageToolCheats ist jetzt [GlobalDependency] (der StorageWandController bekommt es per DI
             // injiziert) -> hier DIESELBE DI-Instanz holen statt einer zweiten via new.
             StorageTool  = Resolve<Cheats.StorageToolCheats>(nameof(Cheats.StorageToolCheats));
@@ -137,6 +161,43 @@ namespace CompanySupplier
 
         /// <summary>True, falls das Lager-Welt-Werkzeug gerade aktiv ist (fuer die UI-Spiegelung).</summary>
         public bool IsStorageWandActive => _storageWand != null && _storageWand.IsActive;
+
+        // ----------------------------------------------------------------------------------------
+        // Welt-Klick-Werkzeug "God-Tool": klickt Werften/Cargo-Depots/Fahrzeuge an und tankt sie voll.
+        // Aktivierung analog zum Lager-Zauberstab ueber den IUnityInputMgr; lazy + robust aufgeloest.
+        // ----------------------------------------------------------------------------------------
+
+        private Tools.GodWandController _godWand;
+
+        /// <summary>Schaltet das God-Werkzeug an/aus. True bei Erfolg, false wenn DI-Teile fehlen.</summary>
+        public bool SetGodWandActive(bool active)
+        {
+            try
+            {
+                if (_godWand == null)
+                    _resolver.TryResolve<Tools.GodWandController>(out _godWand);
+                if (_inputMgr == null)
+                    _resolver.TryResolve<Mafi.Unity.IUnityInputMgr>(out _inputMgr);
+
+                if (_godWand == null || _inputMgr == null)
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] God-Werkzeug nicht verfuegbar (Controller/InputMgr nicht aufgeloest).");
+                    return false;
+                }
+
+                if (active) _inputMgr.ActivateNewController(_godWand);
+                else        _inputMgr.DeactivateController(_godWand);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] SetGodWandActive: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>True, falls das God-Werkzeug gerade aktiv ist (fuer die UI-Spiegelung).</summary>
+        public bool IsGodWandActive => _godWand != null && _godWand.IsActive;
 
         private T Resolve<T>(string name) where T : class
         {
@@ -216,6 +277,141 @@ namespace CompanySupplier
             {
                 Log.Warning($"[{CompanySupplier.ModName}] Wartung umschalten fehlgeschlagen: {ex.Message}");
             }
+        }
+
+        // ----------------------------------------------------------------------------------------
+        // Zentrale Dauer-Cheat-Verwaltung (Basis fuer Panik-Aus, Auto-Restore, Presets)
+        // ----------------------------------------------------------------------------------------
+
+        /// <summary>Ein Dauer-Toggle: stabiler Schluessel + Setter + Leser. Null-sichere Lambdas, weil
+        /// ein Provider bei Aufloesungsfehler null sein kann.</summary>
+        private struct ToggleEntry
+        {
+            public string Key;
+            public Action<bool> Apply;
+            public Func<bool> Read;
+        }
+
+        /// <summary>Registry aller persistier-/wiederherstellbaren Dauer-Toggles. Jeder Eintrag bindet
+        /// einen <see cref="ConfigKeys"/>-Schluessel an den passenden Provider-Setter/-Leser.</summary>
+        private List<ToggleEntry> BuildToggleRegistry()
+        {
+            return new List<ToggleEntry>
+            {
+                new ToggleEntry { Key = ConfigKeys.SandboxNoPower,     Apply = v => Sandbox?.SetNoPowerNeeded(v),     Read = () => Sandbox?.NoPowerNeeded ?? false },
+                new ToggleEntry { Key = ConfigKeys.SandboxNoWorkers,   Apply = v => Sandbox?.SetNoWorkersNeeded(v),   Read = () => Sandbox?.NoWorkersNeeded ?? false },
+                new ToggleEntry { Key = ConfigKeys.SandboxNoComputing, Apply = v => Sandbox?.SetNoComputingNeeded(v), Read = () => Sandbox?.NoComputingNeeded ?? false },
+                new ToggleEntry { Key = ConfigKeys.SandboxNoUnity,     Apply = v => Sandbox?.SetNoUnityNeeded(v),     Read = () => Sandbox?.NoUnityNeeded ?? false },
+                new ToggleEntry { Key = ConfigKeys.SandboxNoFood,      Apply = v => Sandbox?.SetNoFoodNeeded(v),      Read = () => Sandbox?.NoFoodNeeded ?? false },
+                new ToggleEntry { Key = ConfigKeys.InstaBuild,         Apply = v => Building?.SetInstaBuild(v),        Read = () => Building?.InstaBuildEnabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.NoFuel,             Apply = v => FleetVehicle?.SetFuelConsumptionDisabled(v), Read = () => FleetVehicle?.FuelConsumptionDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.NoMaintenance,      Apply = SetMaintenanceDisabled,                Read = () => MaintenanceDisabled },
+                new ToggleEntry { Key = ConfigKeys.DiseasesDisabled,   Apply = v => Population?.SetDiseasesDisabled(v),Read = () => Population?.DiseasesDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.MaxHappiness,       Apply = v => Population?.SetMaxConsumptionHappiness(v), Read = () => Population?.MaxConsumptionHappiness ?? false },
+
+                new ToggleEntry { Key = ConfigKeys.PollutionAir,       Apply = v => Pollution?.SetAirDisabled(v),      Read = () => Pollution?.AirDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.PollutionWater,     Apply = v => Pollution?.SetWaterDisabled(v),    Read = () => Pollution?.WaterDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.PollutionLandfill,  Apply = v => Pollution?.SetLandfillDisabled(v), Read = () => Pollution?.LandfillDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.PollutionVehicles,  Apply = v => Pollution?.SetVehiclesDisabled(v), Read = () => Pollution?.VehiclesDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.PollutionShips,     Apply = v => Pollution?.SetShipsDisabled(v),    Read = () => Pollution?.ShipsDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.PollutionTrains,    Apply = v => Pollution?.SetTrainsDisabled(v),   Read = () => Pollution?.TrainsDisabled ?? false },
+
+                new ToggleEntry { Key = ConfigKeys.WorldUnlimitedMines,Apply = v => WorldMap?.SetUnlimitedMines(v),    Read = () => WorldMap?.UnlimitedMines ?? false },
+                new ToggleEntry { Key = ConfigKeys.WorldMinesNoUnity,  Apply = v => WorldMap?.SetMinesNoUnity(v),      Read = () => WorldMap?.MinesNoUnity ?? false },
+                new ToggleEntry { Key = ConfigKeys.WorldMinesEffMax,   Apply = v => WorldMap?.SetMinesEfficiencyMax(v),Read = () => WorldMap?.MinesEfficiencyMax ?? false },
+                new ToggleEntry { Key = ConfigKeys.WorldTradeBoost,    Apply = v => WorldMap?.SetTradeBoost(v),        Read = () => WorldMap?.TradeBoosted ?? false },
+
+                new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
+            };
+        }
+
+        /// <summary>Liest den aktuellen Zustand ALLER Dauer-Toggles in eine Liste (fuer Speichern/Presets).</summary>
+        public List<ToggleState> CaptureCurrentState()
+        {
+            var result = new List<ToggleState>();
+            foreach (var e in BuildToggleRegistry())
+            {
+                bool val = false;
+                try { val = e.Read(); } catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] CaptureCurrentState({e.Key}): {ex.Message}"); }
+                result.Add(new ToggleState { Key = e.Key, Value = val });
+            }
+            return result;
+        }
+
+        /// <summary>Wendet eine Liste gespeicherter Toggle-Zustaende an (Auto-Restore / Preset laden).</summary>
+        public void ApplyState(List<ToggleState> toggles)
+        {
+            if (toggles == null) return;
+            var registry = BuildToggleRegistry();
+            foreach (var ts in toggles)
+            {
+                if (ts == null) continue;
+                foreach (var e in registry)
+                {
+                    if (e.Key != ts.Key) continue;
+                    try { e.Apply?.Invoke(ts.Value); }
+                    catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] ApplyState({ts.Key}): {ex.Message}"); }
+                    break;
+                }
+            }
+            Log.Info($"[{CompanySupplier.ModName}] {toggles.Count} Toggle-Zustaende angewendet.");
+        }
+
+        /// <summary>Panik-Aus: schaltet ALLE Dauer-Cheats ab und setzt die Geschwindigkeit zurueck.</summary>
+        public void DisableAllContinuousCheats()
+        {
+            foreach (var e in BuildToggleRegistry())
+            {
+                try { e.Apply?.Invoke(false); }
+                catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Panik-Aus({e.Key}): {ex.Message}"); }
+            }
+            GameSpeed?.SetSpeed(1);
+            GameSpeed?.SetUncapped(false);
+            Log.Info($"[{CompanySupplier.ModName}] Panik-Aus: alle Dauer-Cheats deaktiviert.");
+        }
+
+        /// <summary>Erfasst den aktuellen Zustand in die Config und speichert sie.</summary>
+        public void SaveCurrentStateToConfig()
+        {
+            Config.Toggles = CaptureCurrentState();
+            SaveConfig();
+        }
+
+        // -- Preset-Slots (feste Slots 1..N, kein Text-Input noetig) -------------------------------
+
+        private static string PresetName(int slot) => "Slot " + slot;
+
+        /// <summary>Speichert den aktuellen Dauer-Cheat-Zustand in den Preset-Slot <paramref name="slot"/>.</summary>
+        public void SavePreset(int slot)
+        {
+            if (Config.Presets == null) Config.Presets = new List<CheatPreset>();
+            string name = PresetName(slot);
+            CheatPreset preset = null;
+            foreach (var p in Config.Presets) if (p != null && p.Name == name) { preset = p; break; }
+            if (preset == null) { preset = new CheatPreset { Name = name }; Config.Presets.Add(preset); }
+            preset.Toggles = CaptureCurrentState();
+            SaveConfig();
+            Log.Info($"[{CompanySupplier.ModName}] Preset '{name}' gespeichert.");
+        }
+
+        /// <summary>Laedt und wendet den Preset-Slot <paramref name="slot"/> an. False, wenn der Slot leer ist.</summary>
+        public bool LoadPreset(int slot)
+        {
+            string name = PresetName(slot);
+            if (Config.Presets != null)
+                foreach (var p in Config.Presets)
+                    if (p != null && p.Name == name) { ApplyState(p.Toggles); return true; }
+            return false;
+        }
+
+        /// <summary>True, wenn der Preset-Slot belegt ist (fuer die UI-Beschriftung).</summary>
+        public bool HasPreset(int slot)
+        {
+            string name = PresetName(slot);
+            if (Config.Presets != null)
+                foreach (var p in Config.Presets)
+                    if (p != null && p.Name == name) return true;
+            return false;
         }
 
         // ----------------------------------------------------------------------------------------

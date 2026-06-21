@@ -32,6 +32,9 @@ namespace CompanySupplier.Cheats
         private IVehiclesManager _vehiclesManager;        // Fahrzeug-Limit (public IncreaseVehicleLimit)
         private IPropertiesDb _propertiesDb;              // globale Spiel-Properties (Treibstoff/LKW-Kapazitaet)
 
+        /// <summary>Zuletzt von uns gesetzter Treibstoff-aus-Zustand (fuer UI-Spiegelung / Zustands-Erfassung).</summary>
+        public bool FuelConsumptionDisabled { get; private set; }
+
         public FleetVehicleCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -158,6 +161,27 @@ namespace CompanySupplier.Cheats
             }
         }
 
+        /// <summary>Aktuelles Gesamt-Fahrzeug-Limit (Maximum), oder -1 wenn der Manager fehlt.</summary>
+        public int GetVehicleLimit() => _vehiclesManager?.MaxVehiclesLimit ?? -1;
+
+        /// <summary>Setzt das Fahrzeug-Limit ABSOLUT auf <paramref name="newLimit"/> (>= 0). Intern ueber das
+        /// Delta zur aktuellen Obergrenze, da der Manager nur <c>IncreaseVehicleLimit(diff)</c> bietet.</summary>
+        public void SetVehicleLimit(int newLimit)
+        {
+            if (_vehiclesManager == null) return;
+            if (newLimit < 0) newLimit = 0;
+            try
+            {
+                int cur = _vehiclesManager.MaxVehiclesLimit;
+                _vehiclesManager.IncreaseVehicleLimit(newLimit - cur);
+                Log.Info($"[{CompanySupplier.ModName}] Fahrzeug-Limit auf {newLimit} gesetzt (war {cur}).");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] SetVehicleLimit({newLimit}): {ex.Message}");
+            }
+        }
+
         /// <summary>Schaltet den Treibstoff-Verbrauch von Fahrzeugen global an/aus.</summary>
         /// <remarks>
         /// 0.8.5.0: globale bool-Property <c>IdsCore.PropertyIds.FuelConsumptionDisabled</c>
@@ -179,6 +203,7 @@ namespace CompanySupplier.Cheats
                 else
                     prop.TryRemoveModifier(ModifierOwner);
 
+                FuelConsumptionDisabled = disabled;
                 Log.Info($"[{CompanySupplier.ModName}] Treibstoff-Verbrauch deaktiviert = {disabled}.");
             }
             catch (Exception ex)
