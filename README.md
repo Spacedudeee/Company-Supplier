@@ -8,19 +8,19 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Captain%20of%20Industry-0.8.5.0-E8730C?style=flat-square" alt="Captain of Industry 0.8.5.0">
-  <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?include_prereleases&amp;style=flat-square&amp;label=Beta&amp;color=yellow" alt="Beta-Version"></a>
+  <a href="https://github.com/Spacedudeee/Company-Supplier/releases/latest"><img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?style=flat-square&amp;label=Release&amp;color=success" alt="Aktuelles Release"></a>
+  <a href="https://coigame.com/Mods"><img src="https://img.shields.io/badge/COI%20Hub-verf%C3%BCgbar-E8730C?style=flat-square" alt="Auf dem COI Hub verfügbar"></a>
   <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&amp;color=success&amp;label=Downloads" alt="Downloads"></a>
   <img src="https://img.shields.io/badge/Modus-Singleplayer-blue?style=flat-square" alt="Singleplayer">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell"></a>
 </p>
 
-> [!WARNING]
-> **Dies ist die v2.0-BETA.** Sie installiert sich als **eigener Mod** (`CompanySupplierBeta`, im Spiel
-> *Company Supplier (BETA)*) **neben** der stabilen Version – dein Stable-Mod, deine Spielstände und deine
-> Konfiguration bleiben unangetastet. Der stabile Stand liegt auf dem `stable`-Branch und als *Latest*-Release;
-> die Beta ist das **Pre-Release** auf der
-> [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases). Testsoftware – am besten auf
-> einem Wegwerf-Spielstand ausprobieren.
+> [!NOTE]
+> **v2.0 ist stabil!** Du bekommst den Mod als *Latest*-Release auf der
+> [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases/latest) **oder direkt auf dem
+> offiziellen [COI Hub](https://coigame.com/Mods)**. Der stabile Stand liegt auf dem `stable`-Branch;
+> auf dem `beta`-Branch wird die nächste Version entwickelt (Beta-Builds erscheinen dort als Pre-Release
+> unter eigener Mod-Id `CompanySupplierBeta` und laufen gefahrlos neben deinem Stable).
 
 ---
 
@@ -35,20 +35,19 @@
 
 ## 🚀 Schnellstart
 
-1. Lade `CompanySupplierBeta-v2.0.0-beta.1.zip` aus dem **Pre-Release** (gelb markiert, *nicht* das
-   *Latest*-Release) auf der [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases).
+1. Lade `CompanySupplier-v2.0.0.zip` aus dem
+   [**Latest-Release**](https://github.com/Spacedudeee/Company-Supplier/releases/latest) – oder installiere
+   den Mod direkt über den [COI Hub](https://coigame.com/Mods).
 2. Schließe Captain of Industry komplett.
-3. Entpacke die ZIP nach `%APPDATA%\Captain of Industry\Mods\`. Es entsteht ein **neuer** Ordner
-   `Mods\CompanySupplierBeta\` (mit `manifest.json` + `CompanySupplierBeta.dll`) – **neben** einem evtl.
-   vorhandenen `CompanySupplier`-Ordner (Stable). Den Stable-Ordner **nicht** löschen oder überschreiben.
-4. Starte das Spiel, aktiviere Mods in den Optionen und füge **Company Supplier (BETA)** deinem Spielstand hinzu.
+3. Entpacke die ZIP nach `%APPDATA%\Captain of Industry\Mods\`. Es entsteht der Ordner
+   `Mods\CompanySupplier\` (mit `manifest.json` + `CompanySupplier.dll`).
+4. Starte das Spiel, aktiviere Mods in den Optionen und füge **Company Supplier** deinem Spielstand hinzu.
 5. <kbd>F8</kbd> drücken – fertig. 🎉
 
 > [!TIP]
-> Teste auf einem **neuen oder kopierten** Spielstand, nie auf deinem Haupt-Save. Beide Varianten dürfen
-> gleichzeitig **installiert** sein – füge nur nicht beide **demselben Spielstand** hinzu, sonst liegen zwei
-> Menüs übereinander. Deinstallieren: Spiel schließen und den Ordner `Mods\CompanySupplierBeta\` löschen –
-> dein Stable bleibt unberührt.
+> Der Mod lässt sich auch aus bestehenden Spielständen wieder **entfernen**. Trotzdem gilt: Vor dem ersten
+> Einsatz ein **Backup deines Spielstands** machen. Deinstallieren: Spiel schließen und den Ordner
+> `Mods\CompanySupplier\` löschen.
 
 ## 🎛️ Funktionen
 
@@ -66,7 +65,7 @@ Alles erreichbar über die Reiter im <kbd>F8</kbd>-Fenster:
 | 🚚 **Fahrzeuge** | Treibstoffverbrauch aus, Fahrzeuglimit anheben, LKW-Ladekapazität vervielfachen. |
 | ⛰️ **Gelände** | Sofort abbauen / verfüllen / umwandeln, Grundwasser & Erdöl auffüllen, Bäume pflanzen oder entfernen. |
 | ☀️ **Wetter** | Das Wetter dauerhaft auf einen Zustand fixieren. |
-| 🎚️ **Profil** | **Panik-Aus** (alle Dauer-Cheats mit einem Klick abschalten), **Auto-Restore** deines Setups beim Laden und **3 Preset-Slots**. Liegt in der eigenen `config.json` des Beta-Mods – rührt deinen Stable nie an. |
+| 🎚️ **Profil** | **Panik-Aus** (alle Dauer-Cheats mit einem Klick abschalten), **Auto-Restore** deines Setups beim Laden und **3 Preset-Slots**. Liegt in der `config.json` im Mod-Ordner. |
 
 > Produkt- und Materialnamen erscheinen in deiner Spielsprache – sie kommen direkt aus der Lokalisierung des Spiels.
 
@@ -82,10 +81,11 @@ spieleigenen Assemblies – kein separates Targeting-Pack nötig).
 # COI_ROOT auf deine Installation zeigen lassen, falls sie vom Standard in build.ps1 abweicht:
 $env:COI_ROOT = "C:\Program Files (x86)\Steam\steamapps\common\Captain of Industry"
 
-# Beta-Variante – Mod-Id "CompanySupplierBeta", landet in ...\Mods\CompanySupplierBeta\:
-.\build.ps1 -Config Release -ModVariant beta
+# Stable-Variante – Mod-Id "CompanySupplier", landet in ...\Mods\CompanySupplier\:
+.\build.ps1 -Config Release
 
-# Stable-Variante (der stable-Branch) lässt das Flag weg:  .\build.ps1 -Config Release
+# Beta-Variante (eigene Mod-Id "CompanySupplierBeta", läuft neben dem Stable):
+.\build.ps1 -Config Release -ModVariant beta
 ```
 
 Der Build kompiliert `src/CompanySupplier` und deployt DLL + passendes Manifest automatisch in deinen
@@ -101,12 +101,12 @@ Der Build kompiliert `src/CompanySupplier` und deployt DLL + passendes Manifest 
 **Das Menü öffnet sich nicht bei <kbd>F8</kbd>.**
 Der Reihe nach prüfen: Mods sind in den Spieloptionen aktiviert, der Mod ist deinem aktuellen Spielstand
 hinzugefügt, du bist auf der **stabilen** Spielversion (0.8.5.0, nicht experimental), und
-`manifest.json` + `CompanySupplierBeta.dll` liegen in `%APPDATA%\Captain of Industry\Mods\CompanySupplierBeta\`.
+`manifest.json` + `CompanySupplier.dll` liegen in `%APPDATA%\Captain of Industry\Mods\CompanySupplier\`.
 
-**Beeinflusst die Beta meine stabile Installation oder meine Spielstände?**
-Nein. Die Beta ist ein eigener Mod (`CompanySupplierBeta`) in einem eigenen Ordner mit eigener `config.json`.
-Dein Stable-Mod, dessen Konfiguration und deine stabilen Spielstände bleiben unberührt – behandle die Beta
-trotzdem als Testsoftware und halte deine Test-Saves wegwerfbar.
+**Was ist mit der Beta-Version?**
+Auf dem `beta`-Branch wird die nächste Version entwickelt. Beta-Builds erscheinen als Pre-Release und
+installieren sich als **eigener Mod** (`CompanySupplierBeta`) mit eigenem Ordner und eigener `config.json` –
+dein Stable-Mod und deine Spielstände bleiben unberührt. Beta-Tests am besten auf Wegwerf-Spielständen.
 
 **Läuft es auf dem Experimental-Branch des Spiels?**
 Nein – der Mod zielt nur auf stabile Releases.
@@ -136,8 +136,8 @@ Dies ist ein Singleplayer-Cheat-Werkzeug – es umgeht die normale Wirtschaft de
 Der **Original-Quellcode** von Company Supplier steht unter einer eigenen, **nicht-kommerziellen
 [Personal-Use-Lizenz](LICENSE)**: Du darfst den Code **nutzen** und für dich **selbst verändern**, aber
 **nicht verkaufen, kommerziell nutzen oder weitergeben** – auch keine geänderten Versionen. Verteilt wird
-der Mod ausschließlich über die offiziellen Releases dieses Repos. (Das ist bewusst **keine**
-Open-Source-Lizenz, sondern *source-available*.)
+der Mod ausschließlich über die offiziellen Kanäle: die Releases dieses Repos und den offiziellen
+[COI Hub](https://coigame.com/Mods). (Das ist bewusst **keine** Open-Source-Lizenz, sondern *source-available*.)
 
 Diese Lizenz gilt **ausschließlich** für diesen eigenen Quellcode und **nicht** für *Captain of Industry*
 oder andere MaFi-Games-Materialien (Spielcode, Assets, `Mafi.*`-Assemblies). Diese bleiben Eigentum von
