@@ -10,7 +10,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Captain%20of%20Industry-0.8.5.0-E8730C?style=flat-square" alt="Captain of Industry 0.8.5.0">
   <a href="https://github.com/Spacedudeee/Company-Supplier/releases/latest"><img src="https://img.shields.io/github/v/release/Spacedudeee/Company-Supplier?style=flat-square&amp;label=Release&amp;color=success" alt="Aktuelles Release"></a>
-  <a href="https://coigame.com/Mods"><img src="https://img.shields.io/badge/COI%20Hub-verf%C3%BCgbar-E8730C?style=flat-square" alt="Auf dem COI Hub verfügbar"></a>
+  <a href="https://coigame.com/Mod/1100/Company-Supplier"><img src="https://img.shields.io/badge/COI%20Hub-verf%C3%BCgbar-E8730C?style=flat-square" alt="Auf dem COI Hub verfügbar"></a>
   <a href="https://github.com/Spacedudeee/Company-Supplier/releases"><img src="https://img.shields.io/github/downloads/Spacedudeee/Company-Supplier/total?style=flat-square&amp;color=success&amp;label=Downloads" alt="Downloads"></a>
   <img src="https://img.shields.io/badge/Modus-Singleplayer-blue?style=flat-square" alt="Singleplayer">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Lizenz-Personal--Use%20(nicht--kommerziell)-green?style=flat-square" alt="Lizenz Personal-Use, nicht-kommerziell"></a>
@@ -19,7 +19,7 @@
 > [!NOTE]
 > **v2.0 ist stabil!** Du bekommst den Mod als *Latest*-Release auf der
 > [Releases-Seite](https://github.com/Spacedudeee/Company-Supplier/releases/latest) **oder direkt auf dem
-> offiziellen [COI Hub](https://coigame.com/Mods)**. Der stabile Stand liegt auf dem `stable`-Branch;
+> offiziellen [COI Hub](https://coigame.com/Mod/1100/Company-Supplier)**. Der stabile Stand liegt auf dem `stable`-Branch;
 > auf dem `beta`-Branch wird die nächste Version entwickelt (Beta-Builds erscheinen dort als Pre-Release
 > unter eigener Mod-Id `CompanySupplierBeta` und laufen gefahrlos neben deinem Stable).
 
@@ -38,7 +38,7 @@
 
 1. Lade `CompanySupplier-v2.0.0.zip` aus dem
    [**Latest-Release**](https://github.com/Spacedudeee/Company-Supplier/releases/latest) – oder installiere
-   den Mod direkt über den [COI Hub](https://coigame.com/Mods).
+   den Mod direkt über den [COI Hub](https://coigame.com/Mod/1100/Company-Supplier).
 2. Schließe Captain of Industry komplett.
 3. Entpacke die ZIP nach `%APPDATA%\Captain of Industry\Mods\`. Es entsteht der Ordner
    `Mods\CompanySupplier\` (mit `manifest.json` + `CompanySupplier.dll`).
@@ -137,7 +137,7 @@ Der **Original-Quellcode** von Company Supplier steht unter einer eigenen, **nic
 [Personal-Use-Lizenz](LICENSE)**: Du darfst den Code **nutzen** und für dich **selbst verändern**, aber
 **nicht verkaufen, kommerziell nutzen oder weitergeben** – auch keine geänderten Versionen. Verteilt wird
 der Mod ausschließlich über die offiziellen Kanäle: die Releases dieses Repos und den offiziellen
-[COI Hub](https://coigame.com/Mods). (Das ist bewusst **keine** Open-Source-Lizenz, sondern *source-available*.)
+[COI Hub](https://coigame.com/Mod/1100/Company-Supplier). (Das ist bewusst **keine** Open-Source-Lizenz, sondern *source-available*.)
 
 Diese Lizenz gilt **ausschließlich** für diesen eigenen Quellcode und **nicht** für *Captain of Industry*
 oder andere MaFi-Games-Materialien (Spielcode, Assets, `Mafi.*`-Assemblies). Diese bleiben Eigentum von
