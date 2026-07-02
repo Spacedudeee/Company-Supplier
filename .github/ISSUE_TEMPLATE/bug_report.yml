@@ -78,6 +78,7 @@ body:
       options:
         # >>> auto-versions (managed by update-issue-versions workflow) >>>
         - 2.0.0-beta.1 (BETA)
+        - 2.0.0 (stable)
         - 1.0.0 (stable)
         # <<< auto-versions <<<
         - Built from source
