@@ -22,8 +22,27 @@ namespace CompanySupplier.Cheats
         private IEntitiesManager _entities;       // Enumeration aller Lager-Entitaeten im Spiel
         private InstaBuildManager _instaBuild;    // Sofortbau an/aus (public IsInstaBuildEnabled-Setter)
 
-        /// <summary>Zuletzt von uns gesetzter Sofortbau-Zustand (fuer UI-Spiegelung / Zustands-Erfassung).</summary>
-        public bool InstaBuildEnabled { get; private set; }
+        // Fallback, falls der Manager nicht lesbar ist (zuletzt von uns gesetzter Zustand).
+        private bool _instaBuildCached;
+
+        /// <summary>Sofortbau aktiv? Live vom Manager gelesen (der public Getter existiert; nur der
+        /// Setter ist non-public) — so stimmt der Wert auch, wenn der Spielzustand ihn anders setzt
+        /// (z. B. nach Save-Load). Fallback: zuletzt von uns gesetzter Zustand.</summary>
+        public bool InstaBuildEnabled
+        {
+            get
+            {
+                try
+                {
+                    if (_instaBuild != null) return _instaBuild.IsInstaBuildEnabled;
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] InstaBuildEnabled lesen: {ex.Message}");
+                }
+                return _instaBuildCached;
+            }
+        }
 
         public BuildingCheats(DependencyResolver resolver)
         {
@@ -99,7 +118,7 @@ namespace CompanySupplier.Cheats
                     return;
                 }
                 setInstaBuild.Invoke(_instaBuild, new object[] { enabled });
-                InstaBuildEnabled = enabled;
+                _instaBuildCached = enabled;
                 Log.Info($"[{CompanySupplier.ModName}] Sofortbau = {enabled}.");
             }
             catch (Exception ex)

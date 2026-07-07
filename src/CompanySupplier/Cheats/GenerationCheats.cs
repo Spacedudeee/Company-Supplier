@@ -34,6 +34,15 @@ namespace CompanySupplier.Cheats
         // Monatliche Unity-Gutschrift, die das NewMonth-Abo ausschuettet.
         private Upoints _unityPerMonth = Upoints.Zero;
 
+        /// <summary>Zuletzt gesetzter Gratis-Strom-Wert in kW (fuer die UI-Spiegelung).</summary>
+        public int FreeElectricityKw { get; private set; }
+
+        /// <summary>Zuletzt gesetzter Gratis-Computing-Wert in TFlops (fuer die UI-Spiegelung).</summary>
+        public int FreeComputingTFlops => _lastFreeComputingTFlops;
+
+        /// <summary>Zuletzt gesetzte Unity-Gutschrift pro Monat (fuer die UI-Spiegelung).</summary>
+        public int UnityPerMonthValue { get; private set; }
+
         public GenerationCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -75,6 +84,7 @@ namespace CompanySupplier.Cheats
                 _electricity.Cheat_ClearFreeElectricityPerTick();
                 if (kw != 0)
                     _electricity.Cheat_AddFreeElectricityPerTick(Electricity.FromKw(kw));
+                FreeElectricityKw = kw;
                 Log.Info($"[{CompanySupplier.ModName}] Gratis-Strom = {kw} kW/Tick.");
             }
             catch (Exception ex)
@@ -121,6 +131,7 @@ namespace CompanySupplier.Cheats
             try
             {
                 _unityPerMonth = amount > 0 ? new Upoints(amount) : Upoints.Zero;
+                UnityPerMonthValue = amount > 0 ? amount : 0;
                 Log.Info($"[{CompanySupplier.ModName}] Unity/Monat = {amount}.");
             }
             catch (Exception ex)

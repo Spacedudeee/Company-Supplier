@@ -79,7 +79,15 @@ namespace CompanySupplier.Cheats
             if (value < 1) value = 1;
             try
             {
-                SnapshotCapacity(proto);
+                // Erst lesen: liefert GetCapacity den Fehler-Sentinel -1, wird NICHT gesetzt — sonst
+                // landete -1 als "Original" im Snapshot und wuerde beim Reset zurueckgeschrieben.
+                int current = GetCapacity(proto);
+                if (current < 0)
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] SetCapacity({proto.Id}): aktueller Wert nicht lesbar — Abbruch.");
+                    return;
+                }
+                SnapshotCapacity(proto, current);
                 WriteCapacityField(proto, value);
                 UpdateLiveCapacity(proto, value);
                 Log.Info($"[{CompanySupplier.ModName}] Kapazitaet {proto.Id} = {value} gesetzt.");
@@ -101,10 +109,10 @@ namespace CompanySupplier.Cheats
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] ResetCapacity({proto.Id}): {ex.Message}"); }
         }
 
-        private void SnapshotCapacity(DrivingEntityProto proto)
+        private void SnapshotCapacity(DrivingEntityProto proto, int currentValue)
         {
             string id = proto.Id.ToString();
-            if (!_origCapacity.ContainsKey(id)) _origCapacity[id] = GetCapacity(proto);
+            if (!_origCapacity.ContainsKey(id)) _origCapacity[id] = currentValue;
         }
 
         // Schreibt das readonly Proto-Kapazitaetsfeld (TruckProto.CapacityBase / ExcavatorProto.Capacity) per
@@ -128,6 +136,15 @@ namespace CompanySupplier.Cheats
         {
             if (_vehiclesManager == null) return;
             var q = new Quantity(value);
+            // LKW fahren effektiv CapacityBase x TrucksCapacityMultiplier (das Spiel skaliert bei
+            // Multiplikator-Aenderung neu). Den SKALIERTEN Wert in lebende LKW schreiben, sonst
+            // weichen Bestandsfahrzeuge von neu gespawnten ab, sobald der globale Multiplikator
+            // (z. B. der +100/200/500%-Cheat aus FleetVehicleCheats) nicht 100 % ist.
+            if (proto is TruckProto)
+            {
+                Percent mult = CheatService.Instance?.FleetVehicle?.GetTruckCapacityMultiplier() ?? Percent.Hundred;
+                q = q.ScaledBy(mult); // ScaledBy(100 %) ist die Identitaet — kein Sonderfall noetig
+            }
             foreach (Vehicle v in _vehiclesManager.AllVehicles)
             {
                 try
@@ -173,7 +190,14 @@ namespace CompanySupplier.Cheats
             if (proto?.DrivingData == null) return;
             try
             {
-                SnapshotSpeed(proto);
+                // Erst lesen: -1 (Fehler-Sentinel) darf nie als "Original" gesnapshottet werden.
+                double current = GetSpeed(proto);
+                if (current < 0)
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] SetSpeed({proto.Id}): aktueller Wert nicht lesbar — Abbruch.");
+                    return;
+                }
+                SnapshotSpeed(proto, current);
                 double def = GetDefaultSpeed(proto);
                 double maxAllowed = Math.Max(def * 10.0, 5.0);
                 if (tilesPerSec > maxAllowed) tilesPerSec = maxAllowed;
@@ -199,10 +223,10 @@ namespace CompanySupplier.Cheats
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] ResetSpeed({proto.Id}): {ex.Message}"); }
         }
 
-        private void SnapshotSpeed(DrivingEntityProto proto)
+        private void SnapshotSpeed(DrivingEntityProto proto, double currentValue)
         {
             string id = proto.Id.ToString();
-            if (!_origSpeed.ContainsKey(id)) _origSpeed[id] = GetSpeed(proto);
+            if (!_origSpeed.ContainsKey(id)) _origSpeed[id] = currentValue;
         }
 
         // Schreibt das readonly DrivingData.MaxForwardsSpeed (RelTile1f) per Reflection.

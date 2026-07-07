@@ -18,7 +18,9 @@ namespace CompanySupplier.Cheats
     /// <c>Capacity = m_baseCapacity * TrainsCapacityMultiplier</c>. Wir ueberschreiben daher BEIDE Felder per
     /// Reflection (nur das Capacity-Backing-Field zu setzen wuerde von der naechsten Neuberechnung geklobbert).
     /// Vor dem ersten Edit wird der Originalwert je Waggon gesnapshottet (Protos werden je Sitzung neu gebaut,
-    /// also nicht im Savegame) -> Reset stellt ihn wieder her.
+    /// also nicht im Savegame) -> Reset stellt ihn wieder her. Gesnapshottet wird das BASIS-Feld
+    /// (m_baseCapacity), NICHT die effektive Capacity: bei TrainsCapacityMultiplier != 100 % wuerde ein
+    /// Effektiv-Snapshot beim Reset als Basis zurueckgeschrieben und die Kapazitaet dauerhaft aufblasen.
     ///
     /// Robustheit: jeder Reflection-Zugriff in try/catch + Log (private/readonly Interna koennen driften).
     /// </summary>
@@ -57,7 +59,11 @@ namespace CompanySupplier.Cheats
             if (value < 1) value = 1;
             try
             {
-                Snapshot(wagon);
+                if (!Snapshot(wagon))
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] Train.SetCapacity({wagon.Id}): Originalwert nicht lesbar — Abbruch.");
+                    return;
+                }
                 WriteCapacity(wagon, value);
                 Log.Info($"[{CompanySupplier.ModName}] Waggon-Kapazitaet {wagon.Id} = {value} gesetzt.");
             }
@@ -77,10 +83,31 @@ namespace CompanySupplier.Cheats
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Train.ResetCapacity({wagon.Id}): {ex.Message}"); }
         }
 
-        private void Snapshot(CargoWagonProto wagon)
+        /// <summary>Snapshottet die BASIS-Kapazitaet (m_baseCapacity) vor dem ersten Edit. Faellt auf die
+        /// effektive Capacity zurueck, wenn das Feld nicht lesbar ist. Liefert false, wenn gar kein
+        /// brauchbarer Originalwert lesbar ist (dann darf nicht geschrieben werden — der Fehler-Sentinel
+        /// -1 wuerde sonst beim Reset als "Original" zurueckgeschrieben).</summary>
+        private bool Snapshot(CargoWagonProto wagon)
         {
             string id = wagon.Id.ToString();
-            if (!_origCapacity.ContainsKey(id)) _origCapacity[id] = GetCapacity(wagon);
+            if (_origCapacity.ContainsKey(id)) return true;
+            int baseVal = ReadBaseCapacity(wagon);
+            if (baseVal < 0) baseVal = GetCapacity(wagon);
+            if (baseVal < 0) return false;
+            _origCapacity[id] = baseVal;
+            return true;
+        }
+
+        // Liest m_baseCapacity (die Basis der Spiel-Neuberechnung), oder -1 wenn nicht lesbar.
+        private static int ReadBaseCapacity(CargoWagonProto wagon)
+        {
+            try
+            {
+                FieldInfo fi = FindField(wagon.GetType(), "m_baseCapacity");
+                if (fi != null && fi.GetValue(wagon) is Quantity q) return q.Value;
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Train.ReadBaseCapacity({wagon?.Id}): {ex.Message}"); }
+            return -1;
         }
 
         // Schreibt sowohl das Capacity-Backing-Field als auch m_baseCapacity (Basis fuer die Neuberechnung).

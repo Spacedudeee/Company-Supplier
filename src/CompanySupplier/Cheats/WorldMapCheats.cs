@@ -33,10 +33,38 @@ namespace CompanySupplier.Cheats
         private IWorldMapManager _worldMap;
         private IPropertiesDb _propertiesDb;
 
-        public bool UnlimitedMines { get; private set; }
-        public bool MinesNoUnity { get; private set; }
-        public bool MinesEfficiencyMax { get; private set; }
-        public bool TradeBoosted { get; private set; }
+        // Fallback-Werte, falls die PropertiesDb nicht lesbar ist (zuletzt von uns gesetzter Zustand).
+        private bool _unlimitedCached, _noUnityCached, _effMaxCached, _tradeCached;
+
+        // Status live aus der Praesenz UNSERES Modifiers gelesen: PropertyModifier ueberleben im
+        // Spielstand — reine Session-Mirror wuerden nach einem Save-Load luegen.
+        public bool UnlimitedMines     => HasOurBoolModifier(IdsCore.PropertyIds.UnlimitedWorldMines, _unlimitedCached);
+        public bool MinesNoUnity       => HasOurBoolModifier(IdsCore.PropertyIds.WorldMinesCanRunWithoutUnity, _noUnityCached);
+        public bool MinesEfficiencyMax => HasOurPercentModifier(IdsCore.PropertyIds.WorldMinesEfficiency, _effMaxCached);
+        // Der Handels-Boost besteht aus drei Modifiern; das Volumen ist der Leitindikator.
+        public bool TradeBoosted       => HasOurPercentModifier(IdsCore.PropertyIds.TradeVolumeMultiplier, _tradeCached);
+
+        private bool HasOurBoolModifier(PropertyId<bool> id, bool fallback)
+        {
+            try
+            {
+                IProperty<bool> prop = _propertiesDb?.GetProperty(id);
+                if (prop != null) return prop.TryGetModifier(ModifierOwner, out PropertyModifier<bool> _);
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Welt-Status lesen: {ex.Message}"); }
+            return fallback;
+        }
+
+        private bool HasOurPercentModifier(PropertyId<Percent> id, bool fallback)
+        {
+            try
+            {
+                IProperty<Percent> prop = _propertiesDb?.GetProperty(id);
+                if (prop != null) return prop.TryGetModifier(ModifierOwner, out PropertyModifier<Percent> _);
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Welt-Status lesen: {ex.Message}"); }
+            return fallback;
+        }
 
         public WorldMapCheats(DependencyResolver resolver)
         {
@@ -70,23 +98,25 @@ namespace CompanySupplier.Cheats
 
         public void SetUnlimitedMines(bool enabled)
         {
-            if (ApplyBool(IdsCore.PropertyIds.UnlimitedWorldMines, enabled, "Unbegrenzte Welt-Minen")) UnlimitedMines = enabled;
+            if (ApplyBool(IdsCore.PropertyIds.UnlimitedWorldMines, enabled, "Unbegrenzte Welt-Minen")) _unlimitedCached = enabled;
         }
 
         public void SetMinesNoUnity(bool enabled)
         {
-            if (ApplyBool(IdsCore.PropertyIds.WorldMinesCanRunWithoutUnity, enabled, "Welt-Minen ohne Unity")) MinesNoUnity = enabled;
+            if (ApplyBool(IdsCore.PropertyIds.WorldMinesCanRunWithoutUnity, enabled, "Welt-Minen ohne Unity")) _noUnityCached = enabled;
         }
 
         public void SetMinesEfficiencyMax(bool enabled)
         {
             if (ApplyPercent(IdsCore.PropertyIds.WorldMinesEfficiency, enabled, EfficiencyBoostPercent, "Welt-Minen-Effizienz"))
-                MinesEfficiencyMax = enabled;
+                _effMaxCached = enabled;
         }
 
         // -- Handel -------------------------------------------------------------------------------
 
-        /// <summary>Boostet den Handel: mehr Handelsvolumen, mehr Kontrakt-Gewinn, gratis Kontrakt-Unity.</summary>
+        /// <summary>Boostet den Handel: mehr Handelsvolumen, mehr Kontrakt-Gewinn, gratis Kontrakt-Unity.
+        /// Alles-oder-nichts: schlaegt beim Aktivieren ein Teil fehl, werden die bereits gesetzten
+        /// Modifier zurueckgerollt — sonst bliebe ein halber Boost aktiv, den die UI als "aus" zeigt.</summary>
         public void SetTradeBoost(bool enabled)
         {
             bool ok = true;
@@ -94,8 +124,15 @@ namespace CompanySupplier.Cheats
             ok &= ApplyPercent(IdsCore.PropertyIds.ContractsProfitMultiplier, enabled, TradeProfitBoostPercent, "Kontrakt-Gewinn");
             // Kontrakt-Unity-Kosten auf 0 (-100% Delta).
             ok &= ApplyPercent(IdsCore.PropertyIds.ContractsUnityCostMultiplier, enabled, -100, "Kontrakt-Unity-Kosten");
-            if (ok) TradeBoosted = enabled;
-            Log.Info($"[{CompanySupplier.ModName}] Handels-Boost = {enabled}.");
+            if (!ok && enabled)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Handels-Boost nur teilweise anwendbar — rolle zurueck.");
+                ApplyPercent(IdsCore.PropertyIds.TradeVolumeMultiplier, false, 0, "Handelsvolumen (Rollback)");
+                ApplyPercent(IdsCore.PropertyIds.ContractsProfitMultiplier, false, 0, "Kontrakt-Gewinn (Rollback)");
+                ApplyPercent(IdsCore.PropertyIds.ContractsUnityCostMultiplier, false, 0, "Kontrakt-Unity-Kosten (Rollback)");
+            }
+            if (ok) _tradeCached = enabled;
+            Log.Info($"[{CompanySupplier.ModName}] Handels-Boost = {enabled} (ok={ok}).");
         }
 
         // -- Kern ---------------------------------------------------------------------------------

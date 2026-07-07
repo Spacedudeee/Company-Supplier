@@ -110,7 +110,6 @@ namespace CompanySupplier.Cheats
         /// laufende Seuche sofort beendet (und der taegliche Hook beendet kuenftige Seuchen).</summary>
         public void SetDiseasesDisabled(bool disabled)
         {
-            DiseasesDisabled = disabled;
             if (_popsHealth == null)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] SetDiseasesDisabled: PopsHealthManager nicht aufgeloest.");
@@ -120,7 +119,10 @@ namespace CompanySupplier.Cheats
             {
                 // 0.8.5.0: Der Setter von DisableDiseases ist NICHT public (verifiziert -> CS0200);
                 // gesetzt wird ueber die internal Methode SetDisableDiseases(bool) per Reflection.
-                CallNonPublic(_popsHealth, "SetDisableDiseases", disabled);
+                // Das Mirror-Flag erst NACH erfolgreichem Backend-Aufruf setzen — sonst luegen
+                // UI-Spiegelung und gespeicherter Zustand, wenn die Reflection fehlschlaegt.
+                if (!CallNonPublic(_popsHealth, "SetDisableDiseases", disabled)) return;
+                DiseasesDisabled = disabled;
                 if (disabled) EndActiveDisease();
                 Log.Info($"[{CompanySupplier.ModName}] Krankheiten deaktiviert = {disabled}.");
             }
@@ -165,7 +167,6 @@ namespace CompanySupplier.Cheats
         /// </summary>
         public void SetMaxConsumptionHappiness(bool enabled)
         {
-            MaxConsumptionHappiness = enabled;
             if (_settlements == null)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] SetMaxConsumptionHappiness: SettlementsManager nicht aufgeloest.");
@@ -175,7 +176,13 @@ namespace CompanySupplier.Cheats
             {
                 // 0.8.5.0: Der Setter von IgnoreMissingFood ist NICHT public (verifiziert -> CS0200);
                 // gesetzt ueber die internal Methode Cheat_IgnoreMissingFood(bool) per Reflection.
-                CallNonPublic(_settlements, "Cheat_IgnoreMissingFood", enabled);
+                //
+                // WICHTIG: Dasselbe Spiel-Flag wird auch von SandboxCheats.SetNoFoodNeeded ("Keine
+                // Lebensmittel noetig") gesteuert. Damit sich die beiden Toggles nicht gegenseitig
+                // ueberschreiben, wird immer das ODER beider Wuensche geschrieben.
+                bool sandboxWantsIt = CheatService.Instance?.Sandbox?.NoFoodNeeded ?? false;
+                if (!CallNonPublic(_settlements, "Cheat_IgnoreMissingFood", enabled || sandboxWantsIt)) return;
+                MaxConsumptionHappiness = enabled;          // Mirror erst nach erfolgreichem Backend-Aufruf
                 if (enabled) ApplyMaxHappiness();           // sofort einmal anwenden, dann taeglich im Hook
                 Log.Info($"[{CompanySupplier.ModName}] Versorgungs-Zufriedenheit max = {enabled}.");
             }
@@ -228,18 +235,20 @@ namespace CompanySupplier.Cheats
         // Reflection-Hilfen (mehrere 0.8.5.0-Member haben non-public Setter/Methoden)
         // ----------------------------------------------------------------------------------------
 
-        /// <summary>Ruft eine internal/private Instanzmethode per Reflection auf.</summary>
-        private static void CallNonPublic(object target, string method, params object[] args)
+        /// <summary>Ruft eine internal/private Instanzmethode per Reflection auf. Liefert true bei
+        /// Erfolg — Aufrufer setzen ihre Mirror-Flags nur dann (UI-/Persistenz-Wahrheit).</summary>
+        private static bool CallNonPublic(object target, string method, params object[] args)
         {
-            if (target == null) return;
+            if (target == null) return false;
             var mi = target.GetType().GetMethod(method,
                 BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             if (mi == null)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] Methode {method} nicht gefunden.");
-                return;
+                return false;
             }
             mi.Invoke(target, args.Length == 0 ? null : args);
+            return true;
         }
 
         /// <summary>Setzt eine Property mit non-public Setter per Reflection.</summary>

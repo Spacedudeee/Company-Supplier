@@ -86,20 +86,23 @@ namespace CompanySupplier
 
             // Themengruppen-Provider instanziieren. Jeder Provider-Ctor loest seine eigenen Manager
             // robust auf und haengt ggf. seine Kalender-Hooks ein — daher kein weiterer Wiring-Schritt.
-            Building     = new Cheats.BuildingCheats(_resolver);
-            Population   = new Cheats.PopulationCheats(_resolver);
-            Research     = new Cheats.ResearchCheats(_resolver);
-            Generation   = new Cheats.GenerationCheats(_resolver);
-            FleetVehicle = new Cheats.FleetVehicleCheats(_resolver);
-            VehicleStats = new Cheats.VehicleStatsCheats(_resolver);
-            Train        = new Cheats.TrainCheats(_resolver);
-            Terrain      = new Cheats.TerrainCheats(_resolver);
-            Weather      = new Cheats.WeatherCheats(_resolver);
-            Sandbox      = new Cheats.SandboxCheats(_resolver);
-            GameSpeed    = new Cheats.GameSpeedCheats(_resolver);
-            Pollution    = new Cheats.PollutionCheats(_resolver);
-            SourceSink   = new Cheats.SourceSinkCheats(_resolver);
-            WorldMap     = new Cheats.WorldMapCheats(_resolver);
+            // Jeder Ctor ist einzeln gekapselt: wirft einer (z. B. TypeLoadException bei API-Drift),
+            // wird nur DIESER Provider null (Toggle-Registry und Tabs null-checken bereits) statt dass
+            // das komplette Mod-Laden abbricht.
+            Building     = TryCreate(() => new Cheats.BuildingCheats(_resolver),     nameof(Cheats.BuildingCheats));
+            Population   = TryCreate(() => new Cheats.PopulationCheats(_resolver),   nameof(Cheats.PopulationCheats));
+            Research     = TryCreate(() => new Cheats.ResearchCheats(_resolver),     nameof(Cheats.ResearchCheats));
+            Generation   = TryCreate(() => new Cheats.GenerationCheats(_resolver),   nameof(Cheats.GenerationCheats));
+            FleetVehicle = TryCreate(() => new Cheats.FleetVehicleCheats(_resolver), nameof(Cheats.FleetVehicleCheats));
+            VehicleStats = TryCreate(() => new Cheats.VehicleStatsCheats(_resolver), nameof(Cheats.VehicleStatsCheats));
+            Train        = TryCreate(() => new Cheats.TrainCheats(_resolver),        nameof(Cheats.TrainCheats));
+            Terrain      = TryCreate(() => new Cheats.TerrainCheats(_resolver),      nameof(Cheats.TerrainCheats));
+            Weather      = TryCreate(() => new Cheats.WeatherCheats(_resolver),      nameof(Cheats.WeatherCheats));
+            Sandbox      = TryCreate(() => new Cheats.SandboxCheats(_resolver),      nameof(Cheats.SandboxCheats));
+            GameSpeed    = TryCreate(() => new Cheats.GameSpeedCheats(_resolver),    nameof(Cheats.GameSpeedCheats));
+            Pollution    = TryCreate(() => new Cheats.PollutionCheats(_resolver),    nameof(Cheats.PollutionCheats));
+            SourceSink   = TryCreate(() => new Cheats.SourceSinkCheats(_resolver),   nameof(Cheats.SourceSinkCheats));
+            WorldMap     = TryCreate(() => new Cheats.WorldMapCheats(_resolver),     nameof(Cheats.WorldMapCheats));
             // StorageToolCheats ist jetzt [GlobalDependency] (der StorageWandController bekommt es per DI
             // injiziert) -> hier DIESELBE DI-Instanz holen statt einer zweiten via new.
             StorageTool  = Resolve<Cheats.StorageToolCheats>(nameof(Cheats.StorageToolCheats));
@@ -146,6 +149,11 @@ namespace CompanySupplier
                 _storageWand.TargetMode = targetMode;
                 if (active) _inputMgr.ActivateNewController(_storageWand);
                 else        _inputMgr.DeactivateController(_storageWand);
+                // NACH dem (De-)Aktivieren synchronisieren: beim Werkzeug-Wechsel deaktiviert der
+                // Input-Manager zuerst den alten Controller (dessen Deactivate feuert SyncAll im
+                // Zwischenstand, in dem DIESES Werkzeug noch nicht aktiv ist). Dieser abschliessende
+                // Sync sieht den endgueltigen Zustand -> der zuletzt geklickte Toggle stimmt.
+                UI.CheatUiSync.SyncAll();
                 return true;
             }
             catch (Exception ex)
@@ -187,6 +195,10 @@ namespace CompanySupplier
 
                 if (active) _inputMgr.ActivateNewController(_godWand);
                 else        _inputMgr.DeactivateController(_godWand);
+                // Abschliessender Sync nach dem Werkzeug-Wechsel (vgl. SetStorageWandActive): der
+                // endgueltige Aktiv-Zustand gewinnt gegen den Zwischenstand aus dem Deactivate des
+                // zuvor aktiven Werkzeugs.
+                UI.CheatUiSync.SyncAll();
                 return true;
             }
             catch (Exception ex)
@@ -198,6 +210,18 @@ namespace CompanySupplier
 
         /// <summary>True, falls das God-Werkzeug gerade aktiv ist (fuer die UI-Spiegelung).</summary>
         public bool IsGodWandActive => _godWand != null && _godWand.IsActive;
+
+        /// <summary>Kapselt einen Provider-Ctor: wirft er, bleibt der Provider null und nur die
+        /// betroffene Cheat-Gruppe ist inaktiv (Log statt Absturz beim Mod-/Save-Laden).</summary>
+        private static T TryCreate<T>(Func<T> factory, string name) where T : class
+        {
+            try { return factory(); }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Provider {name} nicht verfuegbar: {ex.Message}");
+                return null;
+            }
+        }
 
         private T Resolve<T>(string name) where T : class
         {
@@ -269,8 +293,14 @@ namespace CompanySupplier
             {
                 // 0.8.5.0: public Cheat-API statt frueherem Reflection-Hack auf m_maintenanceDisabled.
                 _maintenance.Cheat_IgnoreMissingMaintenance(disabled);
-                if (disabled) CallNonPublic(_maintenance, "Cheat_RepairAllEntities");
+                // Tracking SOFORT nach dem Umschalten setzen — der Repair-Sweep darunter darf den
+                // gespiegelten Zustand nicht mehr kippen (sonst luegen UI + gespeicherter Zustand).
                 MaintenanceDisabled = disabled;
+                if (disabled)
+                {
+                    try { CallNonPublic(_maintenance, "Cheat_RepairAllEntities"); }
+                    catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Reparatur-Sweep fehlgeschlagen (Wartung bleibt deaktiviert): {ex.Message}"); }
+                }
                 Log.Info($"[{CompanySupplier.ModName}] Wartung deaktiviert = {disabled}.");
             }
             catch (Exception ex)
@@ -322,6 +352,11 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.WorldTradeBoost,    Apply = v => WorldMap?.SetTradeBoost(v),        Read = () => WorldMap?.TradeBoosted ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
+
+                // Nur bei tatsaechlicher Aenderung anwenden: SetUncapped(false) setzt intern die
+                // Geschwindigkeit auf 1x zurueck — ein blindes Re-Apply von "aus" wuerde sonst bei
+                // jedem Preset-Laden/Auto-Restore die laufende Spielgeschwindigkeit kippen.
+                new ToggleEntry { Key = ConfigKeys.GameSpeedUncapped,  Apply = v => { if (GameSpeed != null && GameSpeed.Uncapped != v) GameSpeed.SetUncapped(v); }, Read = () => GameSpeed?.Uncapped ?? false },
             };
         }
 
@@ -355,9 +390,13 @@ namespace CompanySupplier
                 }
             }
             Log.Info($"[{CompanySupplier.ModName}] {toggles.Count} Toggle-Zustaende angewendet.");
+            // Menue-Toggles nachziehen: die Tabs bauen ihren Content nur einmal (DI-Ctor), ohne diesen
+            // Sync wuerden sie nach Auto-Restore/Preset-Laden den alten Zustand anzeigen.
+            UI.CheatUiSync.SyncAll();
         }
 
-        /// <summary>Panik-Aus: schaltet ALLE Dauer-Cheats ab und setzt die Geschwindigkeit zurueck.</summary>
+        /// <summary>Panik-Aus: schaltet ALLE Dauer-Cheats ab (inkl. Dauer-Erzeugung) und setzt die
+        /// Geschwindigkeit zurueck.</summary>
         public void DisableAllContinuousCheats()
         {
             foreach (var e in BuildToggleRegistry())
@@ -365,9 +404,18 @@ namespace CompanySupplier
                 try { e.Apply?.Invoke(false); }
                 catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Panik-Aus({e.Key}): {ex.Message}"); }
             }
+            // Dauer-Erzeugung (Werte statt Toggles, daher nicht in der Registry) ebenfalls stoppen —
+            // "alle Dauer-Cheats" muss auch Gratis-Strom/-Computing/-Unity umfassen.
+            try
+            {
+                Generation?.SetFreeElectricityPerTick(0);
+                Generation?.SetFreeComputingPerTick(0);
+                Generation?.SetUnityPerMonth(0);
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Panik-Aus(Erzeugung): {ex.Message}"); }
             GameSpeed?.SetSpeed(1);
-            GameSpeed?.SetUncapped(false);
             Log.Info($"[{CompanySupplier.ModName}] Panik-Aus: alle Dauer-Cheats deaktiviert.");
+            UI.CheatUiSync.SyncAll();
         }
 
         /// <summary>Erfasst den aktuellen Zustand in die Config und speichert sie.</summary>

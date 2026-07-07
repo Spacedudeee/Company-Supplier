@@ -28,7 +28,6 @@ namespace CompanySupplier.Cheats
 
         // GameSpeedController liegt Unity-seitig; lazy aufgeloest (kann je nach Ladephase erst spaeter da sein).
         private object _speedController;
-        private bool _speedControllerResolved;
 
         /// <summary>Zuletzt von uns gesetzter Multiplikator (fuer die UI-Spiegelung; 0 = unbekannt/Default).</summary>
         public int LastSpeedMultiplier { get; private set; }
@@ -147,8 +146,10 @@ namespace CompanySupplier.Cheats
 
         private object ResolveSpeedController()
         {
-            if (_speedControllerResolved) return _speedController;
-            _speedControllerResolved = true;
+            // Erfolg wird gecacht; ein FEHLSCHLAG dagegen nicht — der Controller kann je nach
+            // Ladephase erst spaeter verfuegbar sein, daher bei jedem Aufruf erneut versuchen
+            // (TryResolve ist billig und wird nur bei Button-Klicks aufgerufen).
+            if (_speedController != null) return _speedController;
             try
             {
                 if (_resolver.TryResolve<Mafi.Unity.InputControl.GameSpeedController>(out var c))

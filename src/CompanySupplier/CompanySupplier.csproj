@@ -88,6 +88,12 @@
 
   <!-- Auto-Deploy in den Mods-Ordner nach erfolgreichem Build. -->
   <Target Name="DeployToModsFolder" AfterTargets="Build" Condition="'$(DeployToModsFolder)' == 'true'">
+    <!-- Kollisions-Warnung: Stable + Beta gleichzeitig im Mods-Ordner fuehrt zu einer Typ-Kollision,
+         die die Beta in-game still ungueltig macht. Den jeweils anderen Ordner loeschen! -->
+    <Warning Condition="'$(AssemblyName)' == 'CompanySupplierBeta' And Exists('$(COI_MODS)\CompanySupplier')"
+             Text="Stable-Mod-Ordner '$(COI_MODS)\CompanySupplier' existiert neben der Beta — Typ-Kollision macht die Beta in-game ungueltig. Stable-Ordner loeschen!" />
+    <Warning Condition="'$(AssemblyName)' == 'CompanySupplier' And Exists('$(COI_MODS)\CompanySupplierBeta')"
+             Text="Beta-Mod-Ordner '$(COI_MODS)\CompanySupplierBeta' existiert neben dem Stable — Typ-Kollision. Einen der beiden Ordner entfernen!" />
     <MakeDir Directories="$(COI_MODS)\$(AssemblyName)" />
     <!-- Variant-aware: kopiert das passende Manifest (manifest.json bzw. manifest.beta.json) und benennt es
          im Zielordner immer auf manifest.json um (CoI erwartet exakt diesen Dateinamen). -->

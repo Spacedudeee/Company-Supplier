@@ -59,6 +59,8 @@ namespace CompanySupplier.Tools
         {
             _isActive = false;
             Log.Info($"[{CompanySupplier.ModName}] God-Werkzeug deaktiviert.");
+            // Auch der Input-Manager kann deaktivieren (anderes Werkzeug aktiviert) — Menue-Toggle nachziehen.
+            UI.CheatUiSync.SyncAll();
         }
 
         private void EnsureResolved()
@@ -81,16 +83,25 @@ namespace CompanySupplier.Tools
             try
             {
                 // Prioritaet: Werft -> Cargo-Depot -> Fahrzeug. Erster Treffer gewinnt.
+                // Erfolg nur melden, wenn der Scheduler das Kommando auch wirklich einplanen konnte.
                 if (_picker.TryPickEntity<Shipyard>(out var shipyard) && shipyard != null)
                 {
-                    _scheduler?.ScheduleInputCmd(new ShipyardCheatFullFuelCmd(shipyard.Id));
-                    UI.CheatMenuStatus.Show($"Werft {shipyard.Id}: vollgetankt");
+                    if (_scheduler != null)
+                    {
+                        _scheduler.ScheduleInputCmd(new ShipyardCheatFullFuelCmd(shipyard.Id));
+                        UI.CheatMenuStatus.Show($"Werft {shipyard.Id}: vollgetankt");
+                    }
+                    else UI.CheatMenuStatus.Show($"Werft {shipyard.Id}: Volltanken nicht verfügbar");
                     return true;
                 }
                 if (_picker.TryPickEntity<CargoDepot>(out var depot) && depot != null)
                 {
-                    _scheduler?.ScheduleInputCmd(new CargoDepotCheatFullFuelCmd(depot.Id));
-                    UI.CheatMenuStatus.Show($"Cargo-Depot {depot.Id}: vollgetankt");
+                    if (_scheduler != null)
+                    {
+                        _scheduler.ScheduleInputCmd(new CargoDepotCheatFullFuelCmd(depot.Id));
+                        UI.CheatMenuStatus.Show($"Cargo-Depot {depot.Id}: vollgetankt");
+                    }
+                    else UI.CheatMenuStatus.Show($"Cargo-Depot {depot.Id}: Volltanken nicht verfügbar");
                     return true;
                 }
                 if (_picker.TryPickEntity<Vehicle>(out var vehicle) && vehicle != null)

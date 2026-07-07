@@ -27,12 +27,33 @@ namespace CompanySupplier.Cheats
         private readonly DependencyResolver _resolver;
         private IPropertiesDb _propertiesDb;
 
-        public bool AirDisabled { get; private set; }
-        public bool WaterDisabled { get; private set; }
-        public bool LandfillDisabled { get; private set; }
-        public bool VehiclesDisabled { get; private set; }
-        public bool ShipsDisabled { get; private set; }
-        public bool TrainsDisabled { get; private set; }
+        // Fallback-Werte, falls die PropertiesDb nicht lesbar ist (zuletzt von uns gesetzter Zustand).
+        private bool _airCached, _waterCached, _landfillCached, _vehiclesCached, _shipsCached, _trainsCached;
+
+        // Status live aus der Praesenz UNSERES Modifiers gelesen: PropertyModifier ueberleben im
+        // Spielstand (vgl. FleetVehicleCheats.SanitizeTruckCapacityIfAbsurd) — reine Session-Mirror
+        // wuerden nach einem Save-Load luegen (Cheat aktiv, UI/Zustands-Erfassung sagt aus).
+        public bool AirDisabled      => HasOurModifier(IdsCore.PropertyIds.AirPollutionMultiplier, _airCached);
+        public bool WaterDisabled    => HasOurModifier(IdsCore.PropertyIds.WaterPollutionMultiplier, _waterCached);
+        public bool LandfillDisabled => HasOurModifier(IdsCore.PropertyIds.LandfillPollutionMultiplier, _landfillCached);
+        public bool VehiclesDisabled => HasOurModifier(IdsCore.PropertyIds.VehiclesPollutionMultiplier, _vehiclesCached);
+        public bool ShipsDisabled    => HasOurModifier(IdsCore.PropertyIds.ShipsPollutionMultiplier, _shipsCached);
+        public bool TrainsDisabled   => HasOurModifier(IdsCore.PropertyIds.TrainsPollutionMultiplier, _trainsCached);
+
+        /// <summary>True, wenn die Property aktuell UNSEREN Modifier traegt (Fallback bei Lesefehler).</summary>
+        private bool HasOurModifier(PropertyId<Percent> id, bool fallback)
+        {
+            try
+            {
+                IProperty<Percent> prop = _propertiesDb?.GetProperty(id);
+                if (prop != null) return prop.TryGetModifier(ModifierOwner, out PropertyModifier<Percent> _);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Verschmutzungs-Status lesen: {ex.Message}");
+            }
+            return fallback;
+        }
 
         public PollutionCheats(DependencyResolver resolver)
         {
@@ -44,32 +65,32 @@ namespace CompanySupplier.Cheats
 
         public void SetAirDisabled(bool disabled)
         {
-            if (Apply(IdsCore.PropertyIds.AirPollutionMultiplier, disabled, "Luft")) AirDisabled = disabled;
+            if (Apply(IdsCore.PropertyIds.AirPollutionMultiplier, disabled, "Luft")) _airCached = disabled;
         }
 
         public void SetWaterDisabled(bool disabled)
         {
-            if (Apply(IdsCore.PropertyIds.WaterPollutionMultiplier, disabled, "Wasser")) WaterDisabled = disabled;
+            if (Apply(IdsCore.PropertyIds.WaterPollutionMultiplier, disabled, "Wasser")) _waterCached = disabled;
         }
 
         public void SetLandfillDisabled(bool disabled)
         {
-            if (Apply(IdsCore.PropertyIds.LandfillPollutionMultiplier, disabled, "Deponie")) LandfillDisabled = disabled;
+            if (Apply(IdsCore.PropertyIds.LandfillPollutionMultiplier, disabled, "Deponie")) _landfillCached = disabled;
         }
 
         public void SetVehiclesDisabled(bool disabled)
         {
-            if (Apply(IdsCore.PropertyIds.VehiclesPollutionMultiplier, disabled, "Fahrzeuge")) VehiclesDisabled = disabled;
+            if (Apply(IdsCore.PropertyIds.VehiclesPollutionMultiplier, disabled, "Fahrzeuge")) _vehiclesCached = disabled;
         }
 
         public void SetShipsDisabled(bool disabled)
         {
-            if (Apply(IdsCore.PropertyIds.ShipsPollutionMultiplier, disabled, "Schiffe")) ShipsDisabled = disabled;
+            if (Apply(IdsCore.PropertyIds.ShipsPollutionMultiplier, disabled, "Schiffe")) _shipsCached = disabled;
         }
 
         public void SetTrainsDisabled(bool disabled)
         {
-            if (Apply(IdsCore.PropertyIds.TrainsPollutionMultiplier, disabled, "Züge")) TrainsDisabled = disabled;
+            if (Apply(IdsCore.PropertyIds.TrainsPollutionMultiplier, disabled, "Züge")) _trainsCached = disabled;
         }
 
         /// <summary>Schaltet alle sechs Verschmutzungsquellen auf einmal.</summary>
@@ -100,6 +121,10 @@ namespace CompanySupplier.Cheats
                     return false;
                 }
 
+                // Annahme: die Basis dieser Multiplikatoren ist 100 % und sonst greifen keine weiteren
+                // NEGATIVEN Modifier — dann bringt -100 % den Effektivwert exakt auf 0 %. Sollten
+                // Edicts/Forschung negativ eingreifen, koennte der Wert unter 0 % fallen (das Spiel
+                // klemmt Prozente selbst; hier nur dokumentiert, nicht kompensierbar per Delta).
                 if (disabled)
                     prop.AddOrSetModifier(ModifierOwner, Percent.FromPercentVal(-100), PropertyModifiers.NO_GROUP);
                 else

@@ -43,11 +43,14 @@ namespace CompanySupplier.UI
 
         /// <summary>Wird von der Basis beim Aktivieren aufgerufen — baut das Fenster ueber den View.
         /// Beim ERSTEN Oeffnen nach einem Laden wird (falls aktiviert) der gespeicherte Cheat-Zustand
-        /// automatisch wiederhergestellt.</summary>
+        /// automatisch wiederhergestellt. Reihenfolge wichtig: ZUERST das Fenster bauen (bindet die
+        /// Statuszeile), DANN wiederherstellen — so ist die Restore-Meldung sichtbar und ApplyState()
+        /// synchronisiert die Toggles des frisch gebauten Fensters (CheatUiSync).</summary>
         protected override Window CreateWindow()
         {
+            Window window = _view.BuildWindow();
             TryAutoRestoreOnce();
-            return _view.BuildWindow();
+            return window;
         }
 
         /// <summary>Wendet den gespeicherten Cheat-Zustand einmalig an, wenn Auto-Restore aktiv ist und

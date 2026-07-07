@@ -149,11 +149,16 @@ namespace CompanySupplier.UI
                 return true;
             });
 
-        /// <summary>Beschriftetes Dezimal-Eingabefeld + "Setzen"-Button (z. B. fuer Geschwindigkeit).</summary>
+        /// <summary>Beschriftetes Dezimal-Eingabefeld + "Setzen"-Button (z. B. fuer Geschwindigkeit).
+        /// Akzeptiert Punkt UND Komma als Dezimaltrenner: die UI ist deutsch und zeigt Werte selbst
+        /// mit Komma an ("v 2,5") — ein reiner InvariantCulture-Parse wuerde genau diese Eingabe
+        /// ablehnen. Tausendertrenner sind bei max. 12 Zeichen Cheat-Eingabe nicht sinnvoll, daher
+        /// ist das simple Ersetzen eindeutig.</summary>
         public static Row NewFloatInputRow(string label, Action<float> onSet, float? min = null, float? max = null,
                                            string hint = null, string setLabel = "Setzen")
             => NewInputRow(label, hint, setLabel, raw =>
             {
+                raw = raw.Replace(',', '.');
                 if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float f)) return false;
                 if (min.HasValue && f < min.Value) f = min.Value;
                 if (max.HasValue && f > max.Value) f = max.Value;

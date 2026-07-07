@@ -8,10 +8,12 @@ namespace CompanySupplier.UI
     /// Zentrale Statuszeile des Cheat-Fensters. Tabs rufen <see cref="Show"/> auf;
     /// die Meldung erscheint unten im Fenster (ausserhalb des scrollenden Tab-Bodys).
     /// Die Label-Referenz wird bei jedem Fensterbau (<c>CheatMenuWindowView.BuildWindow</c>)
-    /// neu gesetzt — bei geschlossenem Fenster ist <c>_label</c> null und <see cref="Show"/>
-    /// ist ein No-Op (kein Crash). Bewusst statisch: die Tabs sind [GlobalDependency]-Singletons,
-    /// die ihren Content einmalig im Ctor bauen und nur statisch auf diese Zeile verweisen — sie
-    /// brauchen keine eigene Label-Referenz.
+    /// neu gesetzt. Nach dem Schliessen bleibt die letzte Referenz gebunden (es gibt keinen
+    /// Close-Hook) — <see cref="Show"/> schreibt dann in das unsichtbare alte Label; harmlos,
+    /// beim naechsten Oeffnen wird frisch gebunden. Vor dem allerersten Fensterbau ist
+    /// <c>_label</c> null und <see cref="Show"/> ein No-Op (kein Crash). Bewusst statisch: die
+    /// Tabs sind [GlobalDependency]-Singletons, die ihren Content einmalig im Ctor bauen und nur
+    /// statisch auf diese Zeile verweisen — sie brauchen keine eigene Label-Referenz.
     /// </summary>
     internal static class CheatMenuStatus
     {

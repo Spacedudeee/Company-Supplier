@@ -61,9 +61,14 @@ namespace CompanySupplier.UI.Tabs
         private Label _trainInfo;
         private IReadOnlyList<CargoWagonProto> _trainWagons;
 
+        // V1-Toggle als Feld + Suppress-Flag fuer den zentralen UI-Sync (CheatUiSync).
+        private Toggle _fuelToggle;
+        private bool _suppress;
+
         public FahrzeugeTab()
         {
             _content = BuildContent();
+            CheatUiSync.Register(nameof(FahrzeugeTab), SyncFromState);
 
             // Heilung nach Save-Laden: der alte +10000%-Bug-Modifier (zeigte "20 → 2020") wird einmalig
             // beim Fenster-Aufbau entfernt; legitime Werte (+100/+200/+500 %) bleiben erhalten. Lief die
@@ -71,6 +76,23 @@ namespace CompanySupplier.UI.Tabs
             // Zeilen-Referenzen in _capacityRows bereit fuer RefreshCapacityLabels().
             if (CheatService.Instance?.FleetVehicle?.SanitizeTruckCapacityIfAbsurd() == true)
                 RefreshCapacityLabels();
+        }
+
+        /// <summary>Zieht Toggle- und Anzeige-Zustaende dieses Tabs aus dem Backend nach (via CheatUiSync).
+        /// Deckt auch den Fall ab, dass der Treibstoff-Toggle im Allgemein-Tab (oder per Kreativmodus-
+        /// Master) umgeschaltet wurde — beide Toggles steuern dasselbe Backend-Flag.</summary>
+        private void SyncFromState()
+        {
+            _suppress = true;
+            try
+            {
+                _fuelToggle?.Value(CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false);
+                RefreshLimit();
+                RefreshCapacityLabels();
+                RefreshStatsInfo();
+                RefreshTrainInfo();
+            }
+            finally { _suppress = false; }
         }
 
         public string Name => "Fahrzeuge";
@@ -110,15 +132,17 @@ namespace CompanySupplier.UI.Tabs
             return column;
         }
 
-        // V1: Treibstoff-Verbrauch global an/aus. Aktiv = Verbrauch AUS. Anfangszustand aus dem Backend
-        // gespiegelt (FuelConsumptionDisabled), damit der Toggle nach Auto-Restore/Allgemein-Tab stimmt.
+        // V1: Treibstoff-Verbrauch global an/aus. Aktiv = Verbrauch AUS. Der Anfangswert ist nur der
+        // Ctor-Zeitpunkt-Zustand; aktuell gehalten wird der Toggle vom zentralen Sync (SyncFromState),
+        // der nach Auto-Restore/Panik-Aus/Allgemein-Tab-Aenderungen laeuft.
         private UiComponent BuildFuelToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _fuelToggle = CheatWidgets.NewToggleRow(
                 "Treibstoff-Verbrauch aus (aktiv = AUS)",
                 CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false,
-                v => CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v),
+                v => { if (!_suppress) CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v); },
                 "Aktiv = Fahrzeuge verbrauchen keinen Treibstoff mehr.");
+            return _fuelToggle;
         }
 
         // V2: aktuelles Limit (Label) + absolutes Zahlenfeld + ±Stepper. Alle drei aktualisieren das Label.
@@ -233,7 +257,10 @@ namespace CompanySupplier.UI.Tabs
                 return fallback;
             }
 
-            var trucks = protos.Filter<TruckProto>(t => !t.Id.ToString().EndsWith("H", StringComparison.Ordinal))
+            // t is IProtoWithIcon: die Kachel castet darauf — ein Proto ohne Icon wuerde sonst beim
+            // Tab-Bau eine InvalidCastException werfen (ganzes Menue tot).
+            var trucks = protos.Filter<TruckProto>(t => t is IProtoWithIcon
+                                    && !t.Id.ToString().EndsWith("H", StringComparison.Ordinal))
                                .OrderBy(t => t.CapacityBase.Value)
                                .ToList();
 

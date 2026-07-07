@@ -84,6 +84,9 @@ namespace CompanySupplier.Tools
         {
             _isActive = false;
             Log.Info($"[{CompanySupplier.ModName}] Lager-Zauberstab deaktiviert.");
+            // Auch der Input-Manager kann deaktivieren (z. B. wenn ein anderes Werkzeug/Bau-Tool
+            // aktiviert wird) — die Menue-Toggles muessen das mitbekommen, sonst zeigen sie AN.
+            UI.CheatUiSync.SyncAll();
         }
 
         /// <summary>
@@ -96,25 +99,36 @@ namespace CompanySupplier.Tools
             if (!_isActive) return false;
             var picker = Picker();
             if (picker == null) return false;
+            if (!Input.GetMouseButtonDown(0)) return false;
 
-            if (Input.GetMouseButtonDown(0) && picker.TryPickEntity<Storage>(out var storage) && storage != null)
+            // Gekapselt wie beim GodWandController: InputUpdate laeuft im Frame-Loop des Spiels —
+            // eine Exception aus Picking/Spiel-Interna darf dort niemals hochschlagen.
+            try
             {
-                if (TargetMode == Storage.StorageCheatMode.KeepEmpty)
+                if (picker.TryPickEntity<Storage>(out var storage) && storage != null)
                 {
-                    // "Leeren"-Werkzeug: Lager EINMALIG leeren (Inhalt raus), KEIN Dauer-Modus -> das Lager
-                    // laeuft danach normal weiter (z. B. Atommuell entsorgen, ohne es dauerhaft leer zu halten).
-                    _tool.ClearStorage(storage);
-                    UI.CheatMenuStatus.Show($"Lager {storage.Id}: geleert");
+                    if (TargetMode == Storage.StorageCheatMode.KeepEmpty)
+                    {
+                        // "Leeren"-Werkzeug: Lager EINMALIG leeren (Inhalt raus), KEIN Dauer-Modus -> das Lager
+                        // laeuft danach normal weiter (z. B. Atommuell entsorgen, ohne es dauerhaft leer zu halten).
+                        _tool.ClearStorage(storage);
+                        UI.CheatMenuStatus.Show($"Lager {storage.Id}: geleert");
+                    }
+                    else
+                    {
+                        // "Fuellen"-Werkzeug: Gott-Modus KeepFull <-> None toggeln (dauerhaft voll = unendlich
+                        // liefern). ToggleMode liefert den TATSAECHLICH aktiven Modus (unveraendert bei Fehler).
+                        var mode = _tool.ToggleMode(storage, TargetMode);
+                        UI.CheatMenuStatus.Show(mode == Storage.StorageCheatMode.None
+                            ? $"Lager {storage.Id}: normal (Cheat AUS)"
+                            : $"Lager {storage.Id}: Gott-Modus AN (liefert unendlich)");
+                    }
+                    return true;
                 }
-                else
-                {
-                    // "Fuellen"-Werkzeug: Gott-Modus KeepFull <-> None toggeln (dauerhaft voll = unendlich liefern).
-                    var mode = _tool.ToggleMode(storage, TargetMode);
-                    UI.CheatMenuStatus.Show(mode == Storage.StorageCheatMode.None
-                        ? $"Lager {storage.Id}: normal (Cheat AUS)"
-                        : $"Lager {storage.Id}: Gott-Modus AN (liefert unendlich)");
-                }
-                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Lager-Zauberstab Klick: {ex.Message}");
             }
 
             return false;

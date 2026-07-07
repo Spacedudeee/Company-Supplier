@@ -93,10 +93,16 @@ namespace CompanySupplier.Config
                 if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                using (var fs = File.Create(path))
+                // Atomar schreiben: erst in eine Temp-Datei, dann ersetzen. Ein Absturz mitten im
+                // Schreiben laesst so die alte config.json (inkl. aller Presets) intakt statt sie
+                // mit einer halben Datei zu ueberschreiben.
+                string tmp = path + ".tmp";
+                using (var fs = File.Create(tmp))
                 {
                     Serializer.WriteObject(fs, config);
                 }
+                if (File.Exists(path)) File.Replace(tmp, path, destinationBackupFileName: null);
+                else File.Move(tmp, path);
             }
             catch (Exception ex)
             {

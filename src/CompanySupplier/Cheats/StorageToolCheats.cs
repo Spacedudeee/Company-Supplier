@@ -44,35 +44,44 @@ namespace CompanySupplier.Cheats
         public bool IsAvailable => _setCheatMode != null;
 
         /// <summary>Setzt den Cheat-Modus EINES Lagers (KeepFull = unendlich liefern,
-        /// KeepEmpty = staendig geleert, None = aus).</summary>
-        public void SetCheatMode(Storage storage, Storage.StorageCheatMode mode)
+        /// KeepEmpty = staendig geleert, None = aus). Liefert true bei Erfolg — Aufrufer duerfen
+        /// nur dann den neuen Modus melden/spiegeln.</summary>
+        public bool SetCheatMode(Storage storage, Storage.StorageCheatMode mode)
         {
-            if (storage == null || _setCheatMode == null) return;
+            if (storage == null || _setCheatMode == null) return false;
             try
             {
                 _setCheatMode.Invoke(storage, new object[] { mode });
                 Log.Info($"[{CompanySupplier.ModName}] Lager {storage.Id} Cheat-Modus = {mode}.");
+                return true;
             }
             catch (Exception ex)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] Lager {storage?.Id} Cheat-Modus setzen fehlgeschlagen: {ex.Message}");
+                return false;
             }
         }
 
         /// <summary>
         /// Schaltet ein Lager zwischen <paramref name="targetMode"/> und
         /// <see cref="Storage.StorageCheatMode.None"/> um: ist es bereits im Zielmodus, wird es
-        /// ausgeschaltet (None), sonst auf den Zielmodus gesetzt. Liefert den neuen Modus zurueck
-        /// (oder None, falls nicht setzbar).
+        /// ausgeschaltet (None), sonst auf den Zielmodus gesetzt. Liefert den TATSAECHLICH aktiven
+        /// Modus zurueck: den neuen bei Erfolg, sonst den unveraenderten aktuellen.
         /// </summary>
         public Storage.StorageCheatMode ToggleMode(Storage storage, Storage.StorageCheatMode targetMode)
         {
             if (storage == null) return Storage.StorageCheatMode.None;
-            var next = storage.CheatMode == targetMode
+            Storage.StorageCheatMode current;
+            try { current = storage.CheatMode; }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Lager {storage?.Id} Cheat-Modus lesen fehlgeschlagen: {ex.Message}");
+                return Storage.StorageCheatMode.None;
+            }
+            var next = current == targetMode
                 ? Storage.StorageCheatMode.None
                 : targetMode;
-            SetCheatMode(storage, next);
-            return next;
+            return SetCheatMode(storage, next) ? next : current;
         }
 
         /// <summary>

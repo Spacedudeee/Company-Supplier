@@ -31,7 +31,8 @@ namespace CompanySupplier.UI.Tabs
         private const int QtyDefault = 250;
 
         private readonly UiComponent _content;
-        private readonly IReadOnlyList<ProductProto> _products;
+        private IReadOnlyList<ProductProto> _products;
+        private Dropdown<ProductProto> _productDropdown;
 
         private ProductProto _selectedProduct;
         private int _quantity = QtyDefault;
@@ -48,11 +49,64 @@ namespace CompanySupplier.UI.Tabs
         private Toggle _fillWandToggle;
         private Toggle _emptyWandToggle;
 
+        // Unterdrueckt die onChanged-Backend-Aufrufe, waehrend Toggles programmatisch gesetzt werden
+        // (Sync, Zwei-Klick-Zuruecksetzen, gegenseitiges Abwaehlen). Gleiches Muster wie AllgemeinTab —
+        // so ist das Verhalten unabhaengig davon, ob Toggle.Value(bool) den Callback feuert.
+        private bool _suppress;
+
         public RessourcenTab()
         {
             _products = LoadProducts();
             _selectedProduct = _products.Count > 0 ? _products[0] : null;
             _content = BuildContent();
+            CheatUiSync.Register(nameof(RessourcenTab), SyncFromState);
+        }
+
+        /// <summary>Zieht Werkzeug-Toggles und Produktliste aus dem Backend nach (via CheatUiSync).</summary>
+        private void SyncFromState()
+        {
+            _suppress = true;
+            try
+            {
+                // Scharfschaltung der Zwei-Klick-Bestaetigung verfaellt beim Fensterbau/Sync: der
+                // zugehoerige Statuszeilen-Hinweis ist dann laengst weg -> ein spaeterer EINZELNER Klick
+                // darf nicht ungefragt ALLE Lager fuellen (nicht sauber rueckgaengig).
+                _godModeArmed = false;
+                var svc = CheatService.Instance;
+                bool wandActive = svc?.IsStorageWandActive ?? false;
+                var wandMode = svc?.StorageWandTargetMode ?? Storage.StorageCheatMode.None;
+                _activeWandMode = wandActive ? (Storage.StorageCheatMode?)wandMode : null;
+                _fillWandToggle?.Value(wandActive && wandMode == Storage.StorageCheatMode.KeepFull);
+                _emptyWandToggle?.Value(wandActive && wandMode == Storage.StorageCheatMode.KeepEmpty);
+                _godModeToggle?.Value(_storageGodMode);
+
+                RetryLoadProductsIfEmpty();
+            }
+            finally { _suppress = false; }
+        }
+
+        /// <summary>Setzt einen Toggle-Wert programmatisch mit <c>_suppress</c>-Schutz (der Callback wird
+        /// zum No-Op), try/finally-abgesichert — so bleibt <c>_suppress</c> nie haengen, falls
+        /// <c>Toggle.Value</c> wirft (haette sonst alle Tab-Callbacks stumm geschaltet).</summary>
+        private void SetToggleSuppressed(Toggle toggle, bool value)
+        {
+            _suppress = true;
+            try { toggle?.Value(value); }
+            finally { _suppress = false; }
+        }
+
+        /// <summary>Recovery: war die ProtosDb beim Tab-Bau noch nicht verfuegbar, blieb das Dropdown leer.
+        /// Beim naechsten Sync (z. B. Fensterbau) wird die Liste nachgeladen statt die ganze Session tot zu sein.</summary>
+        private void RetryLoadProductsIfEmpty()
+        {
+            if (_products.Count > 0 || _productDropdown == null) return;
+            var reloaded = LoadProducts();
+            if (reloaded.Count == 0) return;
+            _products = reloaded;
+            _selectedProduct = _products[0];
+            _productDropdown.SetOptions(_products);
+            _productDropdown.SetValueIndex(0, notifyChangeListeners: false);
+            Log.Info($"[{CompanySupplier.ModName}] RessourcenTab: Produktliste nachgeladen ({_products.Count}).");
         }
 
         public string Name => "Ressourcen";
@@ -72,7 +126,9 @@ namespace CompanySupplier.UI.Tabs
                 Log.Warning($"[{CompanySupplier.ModName}] RessourcenTab: ProtosDb nicht verfuegbar — Dropdown bleibt leer.");
                 return Array.Empty<ProductProto>();
             }
-            return protos.Filter<ProductProto>(p => p.CanBeLoadedOnTruck)
+            // p is IProtoWithIcon: die Dropdown-OptionFactory castet darauf — ein Proto ohne Icon
+            // wuerde sonst beim Fensterbau eine InvalidCastException werfen (ganzes Menue tot).
+            return protos.Filter<ProductProto>(p => p.CanBeLoadedOnTruck && p is IProtoWithIcon)
                          .OrderBy(p => CheatWidgets.ProtoDisplayName(p))
                          .ToList();
         }
@@ -120,6 +176,7 @@ namespace CompanySupplier.UI.Tabs
             if (_products.Count > 0)
                 dropdown.SetValueIndex(0, notifyChangeListeners: false);
 
+            _productDropdown = dropdown;
             return dropdown;
         }
 
@@ -190,9 +247,10 @@ namespace CompanySupplier.UI.Tabs
         // deutlich als Warnung beschriftet UND zwei-Klick-bestaetigt. Fuer gezielte EINZELNE Lager: R6 "Lager-Zauberstab".
         //
         // Zwei-Klick-Ablauf (nur beim EINSCHALTEN): erster Klick schaltet "scharf" und schnappt den Toggle sofort
-        // wieder auf AUS zurueck (Value(false) feuert OnValueChanged NICHT erneut -> keine Rekursion), zweiter Klick
-        // loest tatsaechlich aus. AUSSCHALTEN/None wirkt ohne Bestaetigung sofort; jeder Aus-Klick verwirft die
-        // Scharfschaltung.
+        // wieder auf AUS zurueck, zweiter Klick loest tatsaechlich aus. Das programmatische Zuruecksetzen laeuft
+        // _suppress-geschuetzt — so kann ein evtl. von Value(false) gefeuerter Callback die Scharfschaltung nicht
+        // sofort wieder aufheben (frueher stillschweigend vorausgesetzt, jetzt explizit abgesichert).
+        // AUSSCHALTEN/None wirkt ohne Bestaetigung sofort; jeder Aus-Klick verwirft die Scharfschaltung.
         private UiComponent BuildGodModeToggle()
         {
             _godModeToggle = CheatWidgets.NewToggleRow(
@@ -200,6 +258,7 @@ namespace CompanySupplier.UI.Tabs
                 _storageGodMode,
                 v =>
                 {
+                    if (_suppress) return;
                     if (v)
                     {
                         // EINSCHALTEN: erster Klick = nur scharfschalten, zweiter Klick loest aus.
@@ -207,8 +266,8 @@ namespace CompanySupplier.UI.Tabs
                         {
                             _godModeArmed = true;
                             CheatMenuStatus.Show("Sicher? Nochmal klicken zum Bestätigen — füllt ALLE Lager.");
-                            // Toggle wieder auf AUS, ohne den Callback erneut zu feuern.
-                            _godModeToggle?.Value(false);
+                            // Toggle wieder auf AUS — suppress-geschuetzt gegen Callback-Re-Entry.
+                            SetToggleSuppressed(_godModeToggle, false);
                             return;
                         }
 
@@ -270,6 +329,7 @@ namespace CompanySupplier.UI.Tabs
         /// </summary>
         private void OnWandToggleChanged(Storage.StorageCheatMode mode, bool on)
         {
+            if (_suppress) return;
             string label = mode == Storage.StorageCheatMode.KeepEmpty ? "leeren" : "füllen";
             var otherToggle = mode == Storage.StorageCheatMode.KeepEmpty ? _fillWandToggle : _emptyWandToggle;
 
@@ -279,15 +339,15 @@ namespace CompanySupplier.UI.Tabs
                 if (ok)
                 {
                     _activeWandMode = mode;
-                    // Den anderen Toggle optisch abwaehlen (Value(false) feuert dessen Callback NICHT erneut,
-                    // da OnValueChanged nur bei tatsaechlichem Wertwechsel auslost und wir hier auf false setzen).
-                    otherToggle?.Value(false);
+                    // Den anderen Toggle optisch abwaehlen — suppress-geschuetzt, damit ein evtl.
+                    // gefeuerter Callback keinen Backend-Aufruf ausloest.
+                    SetToggleSuppressed(otherToggle, false);
                     CheatMenuStatus.Show($"Lager {label} AN — ein Lager im Spiel anklicken");
                 }
                 else
                 {
                     // DI-Teil fehlt: Toggle wieder zuruecksetzen, Zustand unveraendert lassen.
-                    (mode == Storage.StorageCheatMode.KeepEmpty ? _emptyWandToggle : _fillWandToggle)?.Value(false);
+                    SetToggleSuppressed(mode == Storage.StorageCheatMode.KeepEmpty ? _emptyWandToggle : _fillWandToggle, false);
                     CheatMenuStatus.Show($"Lager-Werkzeug ({label}) nicht verfügbar");
                 }
             }

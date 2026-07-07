@@ -84,9 +84,13 @@ namespace CompanySupplier.Cheats
         }
 
         /// <summary>Ignoriert fehlende Lebensmittel (keine Hunger-/Starvation-Strafe).</summary>
+        /// <remarks>Dasselbe Spiel-Flag steuert auch PopulationCheats.SetMaxConsumptionHappiness (A4).
+        /// Es wird daher immer das ODER beider Wuensche geschrieben, damit das Abschalten dieses
+        /// Toggles den A4-Cheat nicht still mit deaktiviert (und umgekehrt).</remarks>
         public void SetNoFoodNeeded(bool enabled)
         {
-            if (CallIgnore(_settlements, "Cheat_IgnoreMissingFood", enabled)) NoFoodNeeded = enabled;
+            bool populationWantsIt = CheatService.Instance?.Population?.MaxConsumptionHappiness ?? false;
+            if (CallIgnore(_settlements, "Cheat_IgnoreMissingFood", enabled || populationWantsIt)) NoFoodNeeded = enabled;
         }
 
         // ----------------------------------------------------------------------------------------

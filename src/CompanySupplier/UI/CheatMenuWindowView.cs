@@ -12,7 +12,7 @@ namespace CompanySupplier.UI
     /// <see cref="ICheatTab"/>-Implementierungen. Pro Aufruf entsteht eine frische <see cref="Window"/>
     /// (der Controller oeffnet/schliesst sie je F8-Toggle).
     ///
-    /// Layout (ab v2.0): Bei elf Reitern wird die klassische horizontale Tab-Leiste zu eng — daher eine
+    /// Layout (ab v2.0): Bei so vielen Reitern wird die klassische horizontale Tab-Leiste zu eng — daher eine
     /// VERTIKALE Reiter-Leiste LINKS (Button-Spalte) plus einen scrollbaren Inhaltsbereich rechts. Das
     /// Spiel-<c>TabContainer</c> kann nur horizontal (Tab-Leiste ist eine <c>Row</c>), deshalb bauen wir
     /// die Seiten-Navigation selbst — nach demselben Muster wie der TabContainer: ALLE Tab-Inhalte werden
@@ -96,6 +96,11 @@ namespace CompanySupplier.UI
                 .PaddingTopBottom((Px)6)
                 .PaddingLeft((Px)10);
             CheatMenuStatus.Bind(statusLabel);
+
+            // Toggle-/Anzeige-Zustaende aus dem Backend nachziehen: die Tab-Inhalte wurden nur einmal
+            // (im DI-Ctor) gebaut — ohne diesen Sync zeigt jedes neu geoeffnete Fenster den Zustand
+            // von damals (z. B. nach externem Werkzeug-Deactivate oder Zustandsaenderungen per Hotkey).
+            CheatUiSync.SyncAll();
 
             window.AddBodySingle(bodyRow, statusLabel);
             return window;

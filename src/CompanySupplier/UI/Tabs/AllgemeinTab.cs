@@ -25,12 +25,51 @@ namespace CompanySupplier.UI.Tabs
         // Einzel-Toggles des Kreativmodus, damit der Master-Schalter sie auch optisch mitzieht.
         private Toggle _noPower, _noWorkers, _noComputing, _noUnity, _noFood, _instaBuild, _noFuel, _noMaintenance;
 
-        // Unterdrückt die onChanged-Backend-Aufrufe der Kinder, während der Master sie optisch setzt.
+        // Weitere Zustands-Toggles dieses Tabs — Referenzen fuer den zentralen UI-Sync (CheatUiSync).
+        private Toggle _master, _uncapped, _sourceSink, _godWand, _diseases, _happiness;
+
+        // Unterdrückt die onChanged-Backend-Aufrufe, während der Sync/Master die Toggles optisch setzt.
         private bool _suppress;
 
         public AllgemeinTab()
         {
             _content = BuildContent();
+            CheatUiSync.Register(nameof(AllgemeinTab), SyncFromState);
+        }
+
+        /// <summary>Zieht alle Toggle-Zustaende dieses Tabs aus dem Backend nach (via CheatUiSync).</summary>
+        private void SyncFromState()
+        {
+            _suppress = true;
+            try
+            {
+                bool noPower     = Svc?.Sandbox?.NoPowerNeeded ?? false;
+                bool noWorkers   = Svc?.Sandbox?.NoWorkersNeeded ?? false;
+                bool noComputing = Svc?.Sandbox?.NoComputingNeeded ?? false;
+                bool noUnity     = Svc?.Sandbox?.NoUnityNeeded ?? false;
+                bool noFood      = Svc?.Sandbox?.NoFoodNeeded ?? false;
+                bool instaBuild  = Svc?.Building?.InstaBuildEnabled ?? false;
+                bool noFuel      = Svc?.FleetVehicle?.FuelConsumptionDisabled ?? false;
+                bool noMaint     = Svc?.MaintenanceDisabled ?? false;
+
+                _noPower?.Value(noPower);
+                _noWorkers?.Value(noWorkers);
+                _noComputing?.Value(noComputing);
+                _noUnity?.Value(noUnity);
+                _noFood?.Value(noFood);
+                _instaBuild?.Value(instaBuild);
+                _noFuel?.Value(noFuel);
+                _noMaintenance?.Value(noMaint);
+                // Master zeigt AN, wenn wirklich alles an ist (sonst wuerde er nach Panik-Aus AN bleiben).
+                _master?.Value(noPower && noWorkers && noComputing && noUnity && noFood && instaBuild && noFuel && noMaint);
+
+                _uncapped?.Value(Svc?.GameSpeed?.Uncapped ?? false);
+                _sourceSink?.Value(Svc?.SourceSink?.Enabled ?? false);
+                _godWand?.Value(Svc?.IsGodWandActive ?? false);
+                _diseases?.Value(Svc?.Population?.DiseasesDisabled ?? false);
+                _happiness?.Value(Svc?.Population?.MaxConsumptionHappiness ?? false);
+            }
+            finally { _suppress = false; }
         }
 
         public string Name => "Allgemein";
@@ -117,27 +156,27 @@ namespace CompanySupplier.UI.Tabs
         // Master: schaltet alle Dauer-Cheats des Kreativmodus auf einmal und zieht die Einzel-Toggles optisch mit.
         private UiComponent BuildMasterToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _master = CheatWidgets.NewToggleRow(
                 "Kreativmodus (alles auf einmal)",
                 false,
                 v =>
                 {
+                    if (_suppress) return;
+
                     // Backend: alle Flags setzen.
                     Svc?.Sandbox?.SetAllIgnoreMissing(v);
                     Svc?.Building?.SetInstaBuild(v);
                     Svc?.FleetVehicle?.SetFuelConsumptionDisabled(v);
                     Svc?.SetMaintenanceDisabled(v);
 
-                    // UI: Einzel-Toggles mitziehen (ohne ihre Backend-onChanged erneut auszulösen).
-                    _suppress = true;
-                    _noPower?.Value(v); _noWorkers?.Value(v); _noComputing?.Value(v);
-                    _noUnity?.Value(v); _noFood?.Value(v);
-                    _instaBuild?.Value(v); _noFuel?.Value(v); _noMaintenance?.Value(v);
-                    _suppress = false;
+                    // UI: ALLE Toggles (auch die des Fahrzeuge-Tabs) aus dem Backend nachziehen —
+                    // der zentrale Sync setzt die Werte mit _suppress-Schutz, ohne onChanged-Backend-Aufrufe.
+                    CheatUiSync.SyncAll();
 
                     CheatMenuStatus.Show(v ? "Kreativmodus AN" : "Kreativmodus AUS");
                 },
                 "Aktiviert auf einen Schlag: kein Strom/Arbeiter/Computing/Unity/Lebensmittel nötig, Sofortbau, kein Treibstoff, keine Wartung.");
+            return _master;
         }
 
         // Einzel-Toggle, dessen onChanged während Master-Updates unterdrückt wird.
@@ -171,43 +210,48 @@ namespace CompanySupplier.UI.Tabs
 
         private UiComponent BuildUncappedToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _uncapped = CheatWidgets.NewToggleRow(
                 "Uncapped (so schnell wie die CPU kann)",
                 Svc?.GameSpeed?.Uncapped ?? false,
-                v => Svc?.GameSpeed?.SetUncapped(v),
+                v => { if (!_suppress) Svc?.GameSpeed?.SetUncapped(v); },
                 "Hebt das Sim-Geschwindigkeitslimit auf — die Simulation läuft so schnell, wie der Rechner erlaubt.");
+            return _uncapped;
         }
 
         // Schaltet das eingebaute Unendlich-Quelle/Senke-Cheat-Gebäude in der Bau-Toolbar frei.
         private UiComponent BuildSourceSinkToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _sourceSink = CheatWidgets.NewToggleRow(
                 "In Bau-Toolbar freischalten",
                 Svc?.SourceSink?.Enabled ?? false,
                 v =>
                 {
+                    if (_suppress) return;
                     Svc?.SourceSink?.SetEnabled(v);
                     CheatMenuStatus.Show(v
                         ? "Quelle/Senke in der Bau-Toolbar freigeschaltet"
                         : "Quelle/Senke deaktiviert");
                 },
                 "Schaltet das eingebaute Cheat-Gebäude frei: unendliche Quelle für jedes Produkt + bodenlose Senke. Danach ganz normal über die Bau-Toolbar platzieren.");
+            return _sourceSink;
         }
 
         // Aktiviert das Welt-Klick-Werkzeug: Werften/Cargo-Depots/Fahrzeuge per Klick volltanken.
         private UiComponent BuildGodWandToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _godWand = CheatWidgets.NewToggleRow(
                 "God-Werkzeug aktiv",
                 Svc?.IsGodWandActive ?? false,
                 v =>
                 {
+                    if (_suppress) return;
                     bool ok = Svc?.SetGodWandActive(v) ?? false;
                     CheatMenuStatus.Show(!ok
                         ? "God-Werkzeug nicht verfügbar"
                         : v ? "God-Werkzeug AN — Werft/Depot/Fahrzeug anklicken" : "God-Werkzeug AUS");
                 },
                 "Solange aktiv: Linksklick auf eine Werft, ein Cargo-Depot oder ein Fahrzeug tankt es sofort voll.");
+            return _godWand;
         }
 
         // ------------------------------------------------------------------------------------------
@@ -218,22 +262,24 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildDiseasesToggle()
         {
             bool initial = CheatService.Instance?.Population?.DiseasesDisabled ?? false;
-            return CheatWidgets.NewToggleRow(
+            _diseases = CheatWidgets.NewToggleRow(
                 "Krankheiten deaktivieren",
                 initial,
-                v => CheatService.Instance?.Population?.SetDiseasesDisabled(v),
+                v => { if (!_suppress) CheatService.Instance?.Population?.SetDiseasesDisabled(v); },
                 "Jede neu auftretende Seuche wird automatisch sofort beendet.");
+            return _diseases;
         }
 
         // A4: Versorgungs-Zufriedenheit max. Status aus Population.MaxConsumptionHappiness.
         private UiComponent BuildHappinessToggle()
         {
             bool initial = CheatService.Instance?.Population?.MaxConsumptionHappiness ?? false;
-            return CheatWidgets.NewToggleRow(
+            _happiness = CheatWidgets.NewToggleRow(
                 "Versorgungs-Zufriedenheit max.",
                 initial,
-                v => CheatService.Instance?.Population?.SetMaxConsumptionHappiness(v),
+                v => { if (!_suppress) CheatService.Instance?.Population?.SetMaxConsumptionHappiness(v); },
                 "Hält die Siedlungs-Zufriedenheit aus Versorgung/Lebensmitteln dauerhaft auf Maximum.");
+            return _happiness;
         }
 
         // A5: Bevölkerung-Stepper ±5/±25/±50 -> Population.AddPopulation(int).

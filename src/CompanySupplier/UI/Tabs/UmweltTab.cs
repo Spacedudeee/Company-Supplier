@@ -20,11 +20,33 @@ namespace CompanySupplier.UI.Tabs
         private readonly UiComponent _content;
 
         private Toggle _air, _water, _landfill, _vehicles, _ships, _trains;
+        private Toggle _master;
         private bool _suppress;
 
         public UmweltTab()
         {
             _content = BuildContent();
+            CheatUiSync.Register(nameof(UmweltTab), SyncFromState);
+        }
+
+        /// <summary>Zieht alle Toggle-Zustaende dieses Tabs aus dem Backend nach (via CheatUiSync).</summary>
+        private void SyncFromState()
+        {
+            _suppress = true;
+            try
+            {
+                bool air = Svc?.Pollution?.AirDisabled ?? false;
+                bool water = Svc?.Pollution?.WaterDisabled ?? false;
+                bool landfill = Svc?.Pollution?.LandfillDisabled ?? false;
+                bool vehicles = Svc?.Pollution?.VehiclesDisabled ?? false;
+                bool ships = Svc?.Pollution?.ShipsDisabled ?? false;
+                bool trains = Svc?.Pollution?.TrainsDisabled ?? false;
+
+                _air?.Value(air); _water?.Value(water); _landfill?.Value(landfill);
+                _vehicles?.Value(vehicles); _ships?.Value(ships); _trains?.Value(trains);
+                _master?.Value(air && water && landfill && vehicles && ships && trains);
+            }
+            finally { _suppress = false; }
         }
 
         public string Name => "Umwelt";
@@ -69,19 +91,19 @@ namespace CompanySupplier.UI.Tabs
 
         private UiComponent BuildMasterToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _master = CheatWidgets.NewToggleRow(
                 "Keine Verschmutzung (alles aus)",
                 false,
                 v =>
                 {
+                    if (_suppress) return;
                     Svc?.Pollution?.SetAllDisabled(v);
-                    _suppress = true;
-                    _air?.Value(v); _water?.Value(v); _landfill?.Value(v);
-                    _vehicles?.Value(v); _ships?.Value(v); _trains?.Value(v);
-                    _suppress = false;
+                    // Alle Toggles (inkl. Master selbst) aus dem Backend nachziehen — suppress-geschuetzt.
+                    CheatUiSync.SyncAll();
                     CheatMenuStatus.Show(v ? "Verschmutzung AUS" : "Verschmutzung normal");
                 },
                 "Schaltet alle sechs Verschmutzungsquellen auf einmal ab. Bestehende Verschmutzung baut sich danach selbst ab.");
+            return _master;
         }
 
         private Toggle BuildToggle(string label, Func<bool> initial, Action<bool> apply, string tooltip)

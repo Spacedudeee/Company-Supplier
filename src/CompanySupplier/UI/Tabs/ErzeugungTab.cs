@@ -30,9 +30,20 @@ namespace CompanySupplier.UI.Tabs
         private int _computingTFlops;
         private int _unityPerMonth;
 
+        // Sync-Aktionen der drei Zeilen (Slider + lokaler Wert aus dem Backend nachziehen).
+        private readonly List<Action> _syncActions = new List<Action>();
+
         public ErzeugungTab()
         {
             _content = BuildContent();
+            CheatUiSync.Register(nameof(ErzeugungTab), SyncFromState);
+        }
+
+        /// <summary>Zieht Slider + lokale Werte aus dem Backend nach (via CheatUiSync) — z. B. nachdem
+        /// Panik-Aus die Dauer-Erzeugung auf 0 gesetzt hat.</summary>
+        private void SyncFromState()
+        {
+            foreach (var sync in _syncActions) sync();
         }
 
         public string Name => "Erzeugung";
@@ -54,19 +65,25 @@ namespace CompanySupplier.UI.Tabs
                 BuildSliderStepperRow(
                     100000f, "KW", new[] { 1, 100, 1000, 100000 },
                     () => _powerKw,
-                    v => { _powerKw = v; CheatService.Instance?.Generation?.SetFreeElectricityPerTick(v); }),
+                    v => { _powerKw = v; CheatService.Instance?.Generation?.SetFreeElectricityPerTick(v); },
+                    v => _powerKw = v,
+                    () => CheatService.Instance?.Generation?.FreeElectricityKw ?? 0),
 
                 CheatWidgets.SectionTitle("Gratis-Rechenleistung (TFlops) pro Tick"),
                 BuildSliderStepperRow(
                     10000f, "TFlops", new[] { 1, 25, 100, 1000 },
                     () => _computingTFlops,
-                    v => { _computingTFlops = v; CheatService.Instance?.Generation?.SetFreeComputingPerTick(v); }),
+                    v => { _computingTFlops = v; CheatService.Instance?.Generation?.SetFreeComputingPerTick(v); },
+                    v => _computingTFlops = v,
+                    () => CheatService.Instance?.Generation?.FreeComputingTFlops ?? 0),
 
                 CheatWidgets.SectionTitle("Gratis-Unity pro Monat"),
                 BuildSliderStepperRow(
                     1000f, "Unity", new[] { 1, 5, 10, 25, 100 },
                     () => _unityPerMonth,
-                    v => { _unityPerMonth = v; CheatService.Instance?.Generation?.SetUnityPerMonth(v); }),
+                    v => { _unityPerMonth = v; CheatService.Instance?.Generation?.SetUnityPerMonth(v); },
+                    v => _unityPerMonth = v,
+                    () => CheatService.Instance?.Generation?.UnityPerMonthValue ?? 0),
             };
 
             column.SetChildren(children.ToArray());
@@ -78,9 +95,12 @@ namespace CompanySupplier.UI.Tabs
         /// Mitte das Werte-Label, rechts die +Buttons (gruen, aufsteigend). Jeder Klick verschiebt den
         /// lokalen Wert um ±Stufe, begrenzt ihn bei 0 nach unten, schreibt das Label fort und setzt den
         /// neuen ABSOLUTEN Zielwert ueber <paramref name="setValue"/> ins Backend.
+        /// <paramref name="setLocal"/>/<paramref name="readBackend"/> dienen dem zentralen UI-Sync:
+        /// damit zieht die Zeile ihren Wert aus dem Backend nach, OHNE ihn erneut dorthin zu schreiben.
         /// </summary>
         // E1–E3: Slider (grob/schnell) + Werte-Label + Stepper (praezise) — alle synchron auf denselben Wert.
-        private static UiComponent BuildSliderStepperRow(float max, string unit, int[] steps, Func<int> getValue, Action<int> setValue)
+        private UiComponent BuildSliderStepperRow(float max, string unit, int[] steps, Func<int> getValue, Action<int> setValue,
+                                                  Action<int> setLocal, Func<int> readBackend)
         {
             Slider slider = null;
 
@@ -112,6 +132,15 @@ namespace CompanySupplier.UI.Tabs
                 children.Add(new ButtonText(Button.Primary, new LocStrFormatted($"+{s}"), () => ApplyAbsolute(getValue() + s)));
             }
             stepperRow.SetChildren(children.ToArray());
+
+            // Sync-Aktion registrieren: lokalen Wert + Slider aus dem Backend nachziehen (kein Backend-Write).
+            _syncActions.Add(() =>
+            {
+                int backend = readBackend();
+                if (backend < 0) backend = 0;
+                setLocal(backend);
+                slider?.Value(backend, notify: false);
+            });
 
             var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
             col.SetChildren(slider, stepperRow);

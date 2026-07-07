@@ -33,6 +33,21 @@ namespace CompanySupplier.Config
         [DataMember(Name = "presets", Order = 3)]
         public List<CheatPreset> Presets { get; set; } = new List<CheatPreset>();
 
+        /// <summary>
+        /// WICHTIG: <see cref="System.Runtime.Serialization.Json.DataContractJsonSerializer"/> erzeugt
+        /// Instanzen OHNE Konstruktor/Initializer (GetUninitializedObject). Fehlt ein Member im JSON,
+        /// bliebe er sonst auf dem CLR-Default (false/null) statt auf dem deklarierten Default —
+        /// z. B. wuerde <see cref="AutoRestore"/> still zu false. Dieser Callback stellt die Defaults
+        /// VOR der Member-Zuweisung wieder her (vorhandene JSON-Werte ueberschreiben sie danach).
+        /// </summary>
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context)
+        {
+            Toggles = new List<ToggleState>();
+            AutoRestore = true;
+            Presets = new List<CheatPreset>();
+        }
+
         // ----------------------------------------------------------------------------------------
         // Komfort-Helfer fuer den Toggle-Zustand
         // ----------------------------------------------------------------------------------------
@@ -78,6 +93,14 @@ namespace CompanySupplier.Config
 
         [DataMember(Name = "toggles", Order = 1)]
         public List<ToggleState> Toggles { get; set; } = new List<ToggleState>();
+
+        // Initializer laufen beim Deserialisieren nicht (s. ModConfig.OnDeserializing) — Default hier
+        // ebenfalls per Callback absichern, damit Toggles nie null ist.
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context)
+        {
+            Toggles = new List<ToggleState>();
+        }
     }
 
     /// <summary>Stabile Schluessel fuer die persistierten Dauer-Toggles (ein Ort, damit UI + Auto-Restore
@@ -108,5 +131,7 @@ namespace CompanySupplier.Config
         public const string WorldTradeBoost     = "world.tradeBoost";
 
         public const string SourceSinkEnabled   = "sandbox.sourceSink";
+
+        public const string GameSpeedUncapped   = "speed.uncapped";
     }
 }

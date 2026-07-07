@@ -32,7 +32,16 @@ namespace CompanySupplier
         public override void EarlyInit(DependencyResolver resolver)
         {
             base.EarlyInit(resolver);
-            CheatService.Create(resolver);
+            // Gekapselt: ein Fehler beim Aufbau der Cheat-Engine (Config/DI/API-Drift) darf niemals
+            // das Laden des Spiels bzw. des Spielstands abbrechen — der Mod ist dann eben inaktiv.
+            try
+            {
+                CheatService.Create(resolver);
+            }
+            catch (System.Exception ex)
+            {
+                Log.Warning($"[{ModName}] CheatService-Aufbau fehlgeschlagen — Mod inaktiv: {ex.Message}");
+            }
             Log.Info($"[{ModName}] EarlyInit abgeschlossen.");
         }
     }

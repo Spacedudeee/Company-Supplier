@@ -18,9 +18,21 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
+        private Toggle _autoRestoreToggle;
+        private bool _suppress;
+
         public ProfilTab()
         {
             _content = BuildContent();
+            CheatUiSync.Register(nameof(ProfilTab), SyncFromState);
+        }
+
+        /// <summary>Zieht den Auto-Restore-Toggle aus der Config nach (via CheatUiSync).</summary>
+        private void SyncFromState()
+        {
+            _suppress = true;
+            try { _autoRestoreToggle?.Value(Svc?.Config?.AutoRestore ?? true); }
+            finally { _suppress = false; }
         }
 
         public string Name => "Profil";
@@ -92,11 +104,12 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildAutoRestoreToggle()
         {
             bool initial = Svc?.Config?.AutoRestore ?? true;
-            return CheatWidgets.NewToggleRow(
+            _autoRestoreToggle = CheatWidgets.NewToggleRow(
                 "Auto-Restore beim Laden",
                 initial,
                 v =>
                 {
+                    if (_suppress) return;
                     if (Svc?.Config != null)
                     {
                         Svc.Config.AutoRestore = v;
@@ -105,6 +118,7 @@ namespace CompanySupplier.UI.Tabs
                     CheatMenuStatus.Show(v ? "Auto-Restore AN" : "Auto-Restore AUS");
                 },
                 "Wendet den zuletzt gespeicherten Cheat-Zustand beim Öffnen des Menüs nach einem Spielstand-Laden automatisch an.");
+            return _autoRestoreToggle;
         }
 
         // Zustand speichern / manuell wiederherstellen.

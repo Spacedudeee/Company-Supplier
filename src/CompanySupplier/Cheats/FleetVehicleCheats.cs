@@ -32,8 +32,29 @@ namespace CompanySupplier.Cheats
         private IVehiclesManager _vehiclesManager;        // Fahrzeug-Limit (public IncreaseVehicleLimit)
         private IPropertiesDb _propertiesDb;              // globale Spiel-Properties (Treibstoff/LKW-Kapazitaet)
 
-        /// <summary>Zuletzt von uns gesetzter Treibstoff-aus-Zustand (fuer UI-Spiegelung / Zustands-Erfassung).</summary>
-        public bool FuelConsumptionDisabled { get; private set; }
+        // Fallback fuer FuelConsumptionDisabled, falls die PropertiesDb nicht lesbar ist.
+        private bool _fuelDisabledCached;
+
+        /// <summary>Treibstoff-aus aktiv? Live aus der Praesenz UNSERES PropertyModifiers gelesen —
+        /// Modifier ueberleben im Spielstand (siehe <see cref="SanitizeTruckCapacityIfAbsurd"/>), ein
+        /// reiner Session-Mirror wuerde daher nach einem Save-Load luegen. Fallback: zuletzt gesetzter
+        /// Wert, wenn die PropertiesDb nicht verfuegbar ist.</summary>
+        public bool FuelConsumptionDisabled
+        {
+            get
+            {
+                try
+                {
+                    IProperty<bool> prop = _propertiesDb?.GetProperty(IdsCore.PropertyIds.FuelConsumptionDisabled);
+                    if (prop != null) return prop.TryGetModifier(ModifierOwner, out PropertyModifier<bool> _);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] FuelConsumptionDisabled lesen: {ex.Message}");
+                }
+                return _fuelDisabledCached;
+            }
+        }
 
         public FleetVehicleCheats(DependencyResolver resolver)
         {
@@ -203,7 +224,7 @@ namespace CompanySupplier.Cheats
                 else
                     prop.TryRemoveModifier(ModifierOwner);
 
-                FuelConsumptionDisabled = disabled;
+                _fuelDisabledCached = disabled;
                 Log.Info($"[{CompanySupplier.ModName}] Treibstoff-Verbrauch deaktiviert = {disabled}.");
             }
             catch (Exception ex)

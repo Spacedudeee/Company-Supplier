@@ -32,18 +32,51 @@ namespace CompanySupplier.UI.Tabs
     public sealed class GelaendeTab : ICheatTab
     {
         private readonly UiComponent _content;
-        private readonly IReadOnlyList<LooseProductProto> _materials;
+        private IReadOnlyList<LooseProductProto> _materials;
+        private Dropdown<LooseProductProto> _materialDropdown;
 
         private LooseProductProto _selectedMaterial;
 
         // T2 "Gelände-Physik deaktivieren" hat keine Backend-Status-Property -> lokal gehalten (Default aus).
         private bool _physicsDisabled;
 
+        // Toggle-Referenzen + Suppress-Flag fuer den zentralen UI-Sync (CheatUiSync).
+        private Toggle _physicsToggle, _towerToggle;
+        private bool _suppress;
+
         public GelaendeTab()
         {
             _materials = LoadMaterials();
             _selectedMaterial = _materials.Count > 0 ? _materials[0] : null;
             _content = BuildContent();
+            CheatUiSync.Register(nameof(GelaendeTab), SyncFromState);
+        }
+
+        /// <summary>Zieht Toggle-Zustaende und Materialliste aus dem Backend nach (via CheatUiSync).</summary>
+        private void SyncFromState()
+        {
+            _suppress = true;
+            try
+            {
+                _physicsToggle?.Value(_physicsDisabled);
+                _towerToggle?.Value(CheatService.Instance?.Terrain?.IgnoreTowerDesignations ?? true);
+                RetryLoadMaterialsIfEmpty();
+            }
+            finally { _suppress = false; }
+        }
+
+        /// <summary>Recovery: war TerrainCheats beim Tab-Bau noch nicht verfuegbar, blieb das Dropdown leer.
+        /// Beim naechsten Sync (z. B. Fensterbau) wird die Liste nachgeladen statt die ganze Session tot zu sein.</summary>
+        private void RetryLoadMaterialsIfEmpty()
+        {
+            if (_materials.Count > 0 || _materialDropdown == null) return;
+            var reloaded = LoadMaterials();
+            if (reloaded.Count == 0) return;
+            _materials = reloaded;
+            _selectedMaterial = _materials[0];
+            _materialDropdown.SetOptions(_materials);
+            _materialDropdown.SetValueIndex(0, notifyChangeListeners: false);
+            Log.Info($"[{CompanySupplier.ModName}] GelaendeTab: Materialliste nachgeladen ({_materials.Count}).");
         }
 
         public string Name => "Gelände";
@@ -64,7 +97,10 @@ namespace CompanySupplier.UI.Tabs
                 return Array.Empty<LooseProductProto>();
             }
             // Nach dem lokalisierten Anzeigenamen sortieren -> Dropdown-Reihenfolge passt zur Beschriftung.
+            // p is IProtoWithIcon: die Dropdown-OptionFactory castet darauf — ein Proto ohne Icon
+            // wuerde sonst beim Fensterbau eine InvalidCastException werfen (ganzes Menue tot).
             return terrain.GetTerrainMaterials()
+                          .Where(p => p is IProtoWithIcon)
                           .OrderBy(p => CheatWidgets.ProtoDisplayName(p))
                           .ToList();
         }
@@ -106,6 +142,7 @@ namespace CompanySupplier.UI.Tabs
                 customButton: null,
                 customBtnHolder: null,
                 doNotUpdateBtnView: false);
+            _materialDropdown = dropdown;
             dropdown.Label(new LocStrFormatted("Material"));
             // Suche matcht sowohl den angezeigten dt. Namen als auch die (englische) Id.
             dropdown.SetSearchStringLookup((LooseProductProto proto) => CheatWidgets.ProtoDisplayName(proto) + " " + proto.Id.ToString());
@@ -122,15 +159,17 @@ namespace CompanySupplier.UI.Tabs
         // T2: Gelaende-Physik global an/aus. Aktiv = Physik AUS (scharfe Kanten beim Abbau/Verfuellen).
         private UiComponent BuildPhysicsToggle()
         {
-            return CheatWidgets.NewToggleRow(
+            _physicsToggle = CheatWidgets.NewToggleRow(
                 "Gelände-Physik deaktivieren (aktiv = AUS)",
                 _physicsDisabled,
                 v =>
                 {
+                    if (_suppress) return;
                     _physicsDisabled = v;
                     CheatService.Instance?.Terrain?.SetTerrainPhysicsDisabled(v);
                 },
                 "Aktiv = keine Physik-Simulation bei Abbau/Verfüllen (scharfe Kanten).");
+            return _physicsToggle;
         }
 
         // T3: Turm-Markierungen ignorieren. Backend hat ein Status-Flag (IgnoreTowerDesignations,
@@ -138,11 +177,12 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildIgnoreTowerToggle()
         {
             bool initial = CheatService.Instance?.Terrain?.IgnoreTowerDesignations ?? true;
-            return CheatWidgets.NewToggleRow(
+            _towerToggle = CheatWidgets.NewToggleRow(
                 "Turm-Markierungen ignorieren",
                 initial,
-                v => CheatService.Instance?.Terrain?.SetIgnoreTowerDesignations(v),
+                v => { if (!_suppress) CheatService.Instance?.Terrain?.SetIgnoreTowerDesignations(v); },
                 "Aktiv = von Minen-Türmen verwaltete Markierungen werden bei Sofort-Operationen übersprungen.");
+            return _towerToggle;
         }
 
         // T4 + T5 + T6: drei Sofort-Aktions-Buttons auf die Markierungen, nutzen das T1-Material.
