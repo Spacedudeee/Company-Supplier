@@ -130,9 +130,14 @@ namespace CompanySupplier.UI.Tabs
                 Log.Warning($"[{CompanySupplier.ModName}] RessourcenTab: ProtosDb nicht verfuegbar — Dropdown bleibt leer.");
                 return Array.Empty<ProductProto>();
             }
-            // p is IProtoWithIcon: die Dropdown-OptionFactory castet darauf — ein Proto ohne Icon
-            // wuerde sonst beim Fensterbau eine InvalidCastException werfen (ganzes Menue tot).
-            return protos.Filter<ProductProto>(p => p.CanBeLoadedOnTruck && p is IProtoWithIcon)
+            // Auf-LKW-ladbare Produkte (Feststoffe) PLUS speicherbare Fluessigkeiten (FluidProductProto):
+            // StoreProduct nimmt jedes ProductProto, der CanBeLoadedOnTruck-Filter schloss Fluids nur im
+            // Dropdown aus. So lassen sich auch Fluessigkeiten (Wasser, Rohoel, Saeure …) direkt spawnen.
+            // p is IProtoWithIcon: die Dropdown-OptionFactory castet darauf — ein Proto ohne Icon wuerde
+            // sonst beim Fensterbau eine InvalidCastException werfen (ganzes Menue tot).
+            return protos.Filter<ProductProto>(p =>
+                             (p.CanBeLoadedOnTruck || (p is FluidProductProto && p.IsStorable))
+                             && p is IProtoWithIcon)
                          .OrderBy(p => CheatWidgets.ProtoDisplayName(p))
                          .ToList();
         }
