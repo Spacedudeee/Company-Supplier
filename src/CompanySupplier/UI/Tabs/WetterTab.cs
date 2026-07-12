@@ -4,6 +4,7 @@ using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -29,7 +30,7 @@ namespace CompanySupplier.UI.Tabs
             _content = BuildContent();
         }
 
-        public string Name => "Wetter";
+        public string Name => L.Tab_Wetter;
 
         // Temperature-Icon (Thermometer) — das Spiel hat kein Sonne/Wolke-Asset; das ist das naechstliegende
         // saubere Wetter/Klima-Glyph und passt stilistisch zu den uebrigen Reiter-Icons. (Fog.svg war eine Welle.)
@@ -43,9 +44,9 @@ namespace CompanySupplier.UI.Tabs
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Wetter dauerhaft fixieren"),
+                CheatWidgets.SectionTitle(L.Wet_TitleFix),
                 BuildWeatherButtons(),
-                CheatWidgets.SectionTitle("Natürlicher Zyklus"),
+                CheatWidgets.SectionTitle(L.Wet_TitleCycle),
                 BuildResetButton()
             };
 
@@ -57,32 +58,32 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildWeatherButtons()
         {
             var sunny = new ButtonText(
-                Button.General, new LocStrFormatted("Sonnig"),
+                Button.General, new LocStrFormatted(L.Wet_Sunny),
                 () =>
                 {
                     CheatService.Instance?.Weather?.SetSunny();
-                    CheatMenuStatus.Show("Wetter fixiert: Sonnig");
+                    CheatMenuStatus.Show(L.Wet_StatusSunny);
                 });
             var cloudy = new ButtonText(
-                Button.General, new LocStrFormatted("Bewölkt"),
+                Button.General, new LocStrFormatted(L.Wet_Cloudy),
                 () =>
                 {
                     CheatService.Instance?.Weather?.SetCloudy();
-                    CheatMenuStatus.Show("Wetter fixiert: Bewölkt");
+                    CheatMenuStatus.Show(L.Wet_StatusCloudy);
                 });
             var rainy = new ButtonText(
-                Button.General, new LocStrFormatted("Regen"),
+                Button.General, new LocStrFormatted(L.Wet_Rainy),
                 () =>
                 {
                     CheatService.Instance?.Weather?.SetRainy();
-                    CheatMenuStatus.Show("Wetter fixiert: Regen");
+                    CheatMenuStatus.Show(L.Wet_StatusRainy);
                 });
             var heavyRain = new ButtonText(
-                Button.General, new LocStrFormatted("Starkregen"),
+                Button.General, new LocStrFormatted(L.Wet_HeavyRain),
                 () =>
                 {
                     CheatService.Instance?.Weather?.SetHeavyRain();
-                    CheatMenuStatus.Show("Wetter fixiert: Starkregen");
+                    CheatMenuStatus.Show(L.Wet_StatusHeavyRain);
                 });
 
             var row = new Row((Px)CheatWidgets.Gap);
@@ -94,13 +95,13 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildResetButton()
         {
             return CheatWidgets.DangerButton(
-                "Zurücksetzen",
+                L.Common_Reset,
                 () =>
                 {
                     CheatService.Instance?.Weather?.ResetWeather();
-                    CheatMenuStatus.Show("Wetter zurückgesetzt (natürlicher Zyklus)");
+                    CheatMenuStatus.Show(L.Wet_StatusReset);
                 },
-                "Hebt die Wetter-Fixierung auf und gibt den natürlichen Wetterzyklus wieder frei.");
+                L.Wet_ResetTip);
         }
     }
 }

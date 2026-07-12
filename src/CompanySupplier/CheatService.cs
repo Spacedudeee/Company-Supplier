@@ -66,6 +66,8 @@ namespace CompanySupplier
         public Cheats.PollutionCheats    Pollution    { get; private set; }
         public Cheats.SourceSinkCheats   SourceSink   { get; private set; }
         public Cheats.WorldMapCheats     WorldMap     { get; private set; }
+        public Cheats.ShipCheats         Ships        { get; private set; }
+        public Cheats.BoostCheats        Boost        { get; private set; }
 
         private CheatService(DependencyResolver resolver) => _resolver = resolver;
 
@@ -103,6 +105,8 @@ namespace CompanySupplier
             Pollution    = TryCreate(() => new Cheats.PollutionCheats(_resolver),    nameof(Cheats.PollutionCheats));
             SourceSink   = TryCreate(() => new Cheats.SourceSinkCheats(_resolver),   nameof(Cheats.SourceSinkCheats));
             WorldMap     = TryCreate(() => new Cheats.WorldMapCheats(_resolver),     nameof(Cheats.WorldMapCheats));
+            Ships        = TryCreate(() => new Cheats.ShipCheats(_resolver),         nameof(Cheats.ShipCheats));
+            Boost        = TryCreate(() => new Cheats.BoostCheats(_resolver),        nameof(Cheats.BoostCheats));
             // StorageToolCheats ist jetzt [GlobalDependency] (der StorageWandController bekommt es per DI
             // injiziert) -> hier DIESELBE DI-Instanz holen statt einer zweiten via new.
             StorageTool  = Resolve<Cheats.StorageToolCheats>(nameof(Cheats.StorageToolCheats));
@@ -350,6 +354,14 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.WorldMinesNoUnity,  Apply = v => WorldMap?.SetMinesNoUnity(v),      Read = () => WorldMap?.MinesNoUnity ?? false },
                 new ToggleEntry { Key = ConfigKeys.WorldMinesEffMax,   Apply = v => WorldMap?.SetMinesEfficiencyMax(v),Read = () => WorldMap?.MinesEfficiencyMax ?? false },
                 new ToggleEntry { Key = ConfigKeys.WorldTradeBoost,    Apply = v => WorldMap?.SetTradeBoost(v),        Read = () => WorldMap?.TradeBoosted ?? false },
+
+                new ToggleEntry { Key = ConfigKeys.ShipsNoFuel,        Apply = v => Ships?.SetShipsFuelDisabled(v),    Read = () => Ships?.ShipsFuelDisabled ?? false },
+
+                new ToggleEntry { Key = ConfigKeys.ProdMining,         Apply = v => Boost?.SetMiningBoost(v),          Read = () => Boost?.MiningBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.ProdFarm,           Apply = v => Boost?.SetFarmBoost(v),            Read = () => Boost?.FarmBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.ProdSolar,          Apply = v => Boost?.SetSolarBoost(v),           Read = () => Boost?.SolarBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.ProdForceRun,       Apply = v => Boost?.SetForceRunMachines(v),     Read = () => Boost?.ForceRunMachines ?? false },
+                new ToggleEntry { Key = ConfigKeys.ProdUnlimitedWater, Apply = v => Boost?.SetUnlimitedWater(v),       Read = () => Boost?.UnlimitedWater ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
 

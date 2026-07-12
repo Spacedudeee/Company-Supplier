@@ -8,6 +8,7 @@ using Mafi.Core.Vehicles;
 using Mafi.Unity;
 using Mafi.Unity.InputControl;
 using UnityEngine;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.Tools
 {
@@ -89,9 +90,9 @@ namespace CompanySupplier.Tools
                     if (_scheduler != null)
                     {
                         _scheduler.ScheduleInputCmd(new ShipyardCheatFullFuelCmd(shipyard.Id));
-                        UI.CheatMenuStatus.Show($"Werft {shipyard.Id}: vollgetankt");
+                        UI.CheatMenuStatus.Show(L.Wand_ShipyardFueled(shipyard.Id));
                     }
-                    else UI.CheatMenuStatus.Show($"Werft {shipyard.Id}: Volltanken nicht verfügbar");
+                    else UI.CheatMenuStatus.Show(L.Wand_ShipyardUnavail(shipyard.Id));
                     return true;
                 }
                 if (_picker.TryPickEntity<CargoDepot>(out var depot) && depot != null)
@@ -99,17 +100,17 @@ namespace CompanySupplier.Tools
                     if (_scheduler != null)
                     {
                         _scheduler.ScheduleInputCmd(new CargoDepotCheatFullFuelCmd(depot.Id));
-                        UI.CheatMenuStatus.Show($"Cargo-Depot {depot.Id}: vollgetankt");
+                        UI.CheatMenuStatus.Show(L.Wand_DepotFueled(depot.Id));
                     }
-                    else UI.CheatMenuStatus.Show($"Cargo-Depot {depot.Id}: Volltanken nicht verfügbar");
+                    else UI.CheatMenuStatus.Show(L.Wand_DepotUnavail(depot.Id));
                     return true;
                 }
                 if (_picker.TryPickEntity<Vehicle>(out var vehicle) && vehicle != null)
                 {
                     if (RefuelVehicle(vehicle))
-                        UI.CheatMenuStatus.Show($"Fahrzeug {vehicle.Id}: vollgetankt");
+                        UI.CheatMenuStatus.Show(L.Wand_VehicleFueled(vehicle.Id));
                     else
-                        UI.CheatMenuStatus.Show($"Fahrzeug {vehicle.Id}: kein Tank");
+                        UI.CheatMenuStatus.Show(L.Wand_VehicleNoTank(vehicle.Id));
                     return true;
                 }
             }

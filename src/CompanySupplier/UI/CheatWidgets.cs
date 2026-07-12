@@ -6,6 +6,7 @@ using Mafi;
 using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI
 {
@@ -99,6 +100,45 @@ namespace CompanySupplier.UI
         /// <summary>Section-Titel (ersetzt das alte <c>AddSectionTitle</c>).</summary>
         public static Title SectionTitle(string text) => new Title(new LocStrFormatted(text));
 
+        /// <summary>Feste Zellbreite fuers Toggle-Raster -> genau zwei Spalten, dann Umbruch. Die Px-Werte
+        /// sind LOGISCH (von der UI-Skalierung ×-genommen), daher passt der Inhaltsbereich nur ~2×360; bei
+        /// 400 brach es auf eine Spalte um. 350 laesst auch bei hoher Skalierung sicher zwei nebeneinander.</summary>
+        private const int ToggleCellWidth = 350;
+
+        /// <summary>Ordnet mehrere Toggles/Zeilen in einem 2-Spalten-Raster an: spart vertikalen Platz und
+        /// nutzt die sonst leere rechte Fensterhaelfte. Umbruch ueber eine Wrap-Row mit fester Zellbreite
+        /// (dasselbe Muster wie die LKW-Kacheln). Die uebergebenen Komponenten bleiben dieselben Objekte
+        /// (nur mit gesetzter Breite) -> der UI-Sync ueber ihre Referenzen funktioniert unveraendert.</summary>
+        public static Row ToggleGrid(params UiComponent[] cells)
+        {
+            var wrap = new Row((Px)Gap).Wrap(true);
+            var list = new List<UiComponent>(cells.Length);
+            foreach (var c in cells)
+            {
+                // Breite auf einen umschliessenden Container legen (nicht direkt auf den Toggle — dessen
+                // Eigenstil ueberschreibt eine inline gesetzte Breite). Der Toggle fuellt den Container
+                // (AlignItemsStretch); FlexShrink(0) verhindert Schrumpfen, sodass sauber umgebrochen wird.
+                var box = new Column((Px)0).AlignItemsStretch().Width((Px)ToggleCellWidth).FlexShrink(0f);
+                box.SetChildren(c);
+                list.Add(box);
+            }
+            wrap.SetChildren(list.ToArray());
+            return wrap;
+        }
+
+        /// <summary>Duenne, dezente Trennlinie (z. B. zur Gruppierung der Sidebar). Rohes VisualElement,
+        /// da das UiToolkit keinen fertigen Divider bereitstellt; ueber den oeffentlichen UiComponent(VisualElement)-
+        /// ctor in den Mafi-UI-Baum gewrappt.</summary>
+        public static UiComponent Separator(int marginPx = 6)
+        {
+            var ve = new UnityEngine.UIElements.VisualElement();
+            ve.style.height = 1f;
+            ve.style.marginTop = marginPx;
+            ve.style.marginBottom = marginPx;
+            ve.style.backgroundColor = new UnityEngine.Color(1f, 1f, 1f, 0.12f);
+            return new UiComponent(ve);
+        }
+
         // ------------------------------------------------------------------------------------------
         // Zahlen-Eingabefelder (direkte Werteingabe)
         // ------------------------------------------------------------------------------------------
@@ -122,7 +162,7 @@ namespace CompanySupplier.UI
             {
                 string raw = (field.value ?? string.Empty).Trim();
                 if (!tryApply(raw))
-                    CheatMenuStatus.Show($"Ungültige Zahl: \"{raw}\"");
+                    CheatMenuStatus.Show(L.Common_InvalidNumber(raw));
             }
 
             field.RegisterCallback<UnityEngine.UIElements.KeyDownEvent>(e =>
@@ -132,14 +172,16 @@ namespace CompanySupplier.UI
             });
 
             var row = new Row((Px)Gap).AlignItemsCenter();
-            row.SetChildren(caption, fieldComp, PrimaryButton(setLabel, Commit));
+            // setLabel == null -> lokalisierter Standard ("Setzen"/"Set"/…). Default-Parameterwerte muessen
+            // Compile-Konstanten sein, daher hier (statt in der Signatur) auf die Laufzeit-Lokalisierung mappen.
+            row.SetChildren(caption, fieldComp, PrimaryButton(setLabel ?? L.Common_Set, Commit));
             return row;
         }
 
         /// <summary>Beschriftetes Ganzzahl-Eingabefeld + "Setzen"-Button. <paramref name="onSet"/> bekommt den
         /// geparsten Wert (geklemmt auf <paramref name="min"/>/<paramref name="max"/>, falls gesetzt).</summary>
         public static Row NewIntInputRow(string label, Action<int> onSet, int? min = null, int? max = null,
-                                         string hint = null, string setLabel = "Setzen")
+                                         string hint = null, string setLabel = null)
             => NewInputRow(label, hint, setLabel, raw =>
             {
                 if (!int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int n)) return false;
@@ -155,7 +197,7 @@ namespace CompanySupplier.UI
         /// ablehnen. Tausendertrenner sind bei max. 12 Zeichen Cheat-Eingabe nicht sinnvoll, daher
         /// ist das simple Ersetzen eindeutig.</summary>
         public static Row NewFloatInputRow(string label, Action<float> onSet, float? min = null, float? max = null,
-                                           string hint = null, string setLabel = "Setzen")
+                                           string hint = null, string setLabel = null)
             => NewInputRow(label, hint, setLabel, raw =>
             {
                 raw = raw.Replace(',', '.');

@@ -3,6 +3,7 @@ using Mafi;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -35,7 +36,7 @@ namespace CompanySupplier.UI.Tabs
             finally { _suppress = false; }
         }
 
-        public string Name => "Profil";
+        public string Name => L.Tab_Profil;
 
         // Save-Icon (General) — passt zum Profil-Tab (Cheat-Setup/Presets speichern & laden).
         public string IconPath => "Assets/Unity/UserInterface/General/Save.svg";
@@ -50,21 +51,21 @@ namespace CompanySupplier.UI.Tabs
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Sicherheit"),
+                CheatWidgets.SectionTitle(L.Prf_TitleSafety),
                 CheatWidgets.DangerButton(
-                    "Panik-Aus (alle Dauer-Cheats aus)",
+                    L.Prf_PanicOff,
                     () =>
                     {
                         Svc?.DisableAllContinuousCheats();
-                        CheatMenuStatus.Show("Alle Dauer-Cheats abgeschaltet");
+                        CheatMenuStatus.Show(L.Prf_StatusPanic);
                     },
-                    "Schaltet auf einen Schlag ALLE laufenden Dauer-Cheats ab und setzt die Geschwindigkeit auf 1x."),
+                    L.Prf_PanicOffTip),
 
-                CheatWidgets.SectionTitle("Cheat-Profil"),
+                CheatWidgets.SectionTitle(L.Prf_TitleProfile),
                 BuildAutoRestoreToggle(),
                 BuildSaveRestoreButtons(),
 
-                CheatWidgets.SectionTitle("Preset-Slots"),
+                CheatWidgets.SectionTitle(L.Prf_TitlePresets),
                 BuildPresetRow(1),
                 BuildPresetRow(2),
                 BuildPresetRow(3)
@@ -78,22 +79,22 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildPresetRow(int slot)
         {
             var save = CheatWidgets.PrimaryButton(
-                $"Slot {slot} speichern",
+                L.Prf_SlotSave(slot),
                 () =>
                 {
                     Svc?.SavePreset(slot);
-                    CheatMenuStatus.Show($"Preset-Slot {slot} gespeichert");
+                    CheatMenuStatus.Show(L.Prf_StatusSlotSaved(slot));
                 },
-                "Speichert den aktuellen Dauer-Cheat-Zustand in diesen Slot.");
+                L.Prf_SlotSaveTip);
 
             var load = CheatWidgets.GeneralButton(
-                $"Slot {slot} laden",
+                L.Prf_SlotLoad(slot),
                 () =>
                 {
                     bool ok = Svc?.LoadPreset(slot) ?? false;
-                    CheatMenuStatus.Show(ok ? $"Preset-Slot {slot} geladen" : $"Preset-Slot {slot} ist leer");
+                    CheatMenuStatus.Show(ok ? L.Prf_StatusSlotLoaded(slot) : L.Prf_StatusSlotEmpty(slot));
                 },
-                "Wendet den in diesem Slot gespeicherten Zustand an.");
+                L.Prf_SlotLoadTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(save, load);
@@ -105,7 +106,7 @@ namespace CompanySupplier.UI.Tabs
         {
             bool initial = Svc?.Config?.AutoRestore ?? true;
             _autoRestoreToggle = CheatWidgets.NewToggleRow(
-                "Auto-Restore beim Laden",
+                L.Prf_AutoRestore,
                 initial,
                 v =>
                 {
@@ -115,9 +116,9 @@ namespace CompanySupplier.UI.Tabs
                         Svc.Config.AutoRestore = v;
                         Svc.SaveConfig();
                     }
-                    CheatMenuStatus.Show(v ? "Auto-Restore AN" : "Auto-Restore AUS");
+                    CheatMenuStatus.Show(v ? L.Prf_StatusAutoRestoreOn : L.Prf_StatusAutoRestoreOff);
                 },
-                "Wendet den zuletzt gespeicherten Cheat-Zustand beim Öffnen des Menüs nach einem Spielstand-Laden automatisch an.");
+                L.Prf_AutoRestoreTip);
             return _autoRestoreToggle;
         }
 
@@ -125,22 +126,22 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildSaveRestoreButtons()
         {
             var save = CheatWidgets.PrimaryButton(
-                "Zustand speichern",
+                L.Prf_SaveState,
                 () =>
                 {
                     Svc?.SaveCurrentStateToConfig();
-                    CheatMenuStatus.Show("Aktueller Cheat-Zustand gespeichert");
+                    CheatMenuStatus.Show(L.Prf_StatusStateSaved);
                 },
-                "Merkt sich alle aktuell aktiven Dauer-Cheats (für Auto-Restore und manuelles Wiederherstellen).");
+                L.Prf_SaveStateTip);
 
             var restore = CheatWidgets.GeneralButton(
-                "Zustand wiederherstellen",
+                L.Prf_RestoreState,
                 () =>
                 {
                     if (Svc?.Config != null) Svc.ApplyState(Svc.Config.Toggles);
-                    CheatMenuStatus.Show("Gespeicherter Cheat-Zustand angewendet");
+                    CheatMenuStatus.Show(L.Prf_StatusStateApplied);
                 },
-                "Wendet den zuletzt gespeicherten Cheat-Zustand sofort an.");
+                L.Prf_RestoreStateTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(save, restore);

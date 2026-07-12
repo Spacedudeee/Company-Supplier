@@ -31,12 +31,15 @@ namespace CompanySupplier.UI
         private const int BodyHeightPx = 500;
 
         /// <summary>Feste, vom Design vorgegebene Reiter-Reihenfolge (Headliner zuerst, Werkzeuge danach).
-        /// Tabs, deren Name hier nicht vorkommt, werden hinten alphabetisch angehaengt. Muss mit der
-        /// Reihenfolge in der README-Funktionstabelle uebereinstimmen.</summary>
+        /// Tabs, deren Typ hier nicht vorkommt, werden hinten alphabetisch (nach Anzeigename) angehaengt.
+        /// Muss mit der Reihenfolge in der README-Funktionstabelle uebereinstimmen.
+        /// WICHTIG: Sortierung ueber den TYP-Namen (sprachunabhaengig), NICHT ueber den lokalisierten
+        /// <c>Name</c> — sonst zerfiele die Reihenfolge, sobald das Menue in einer anderen Sprache laeuft.</summary>
         private static readonly string[] TabOrder =
         {
-            "Ressourcen", "Allgemein", "Umwelt", "Weltkarte",
-            "Erzeugung", "Werft & Flotte", "Fahrzeuge", "Gelände", "Wetter", "Profil"
+            nameof(Tabs.RessourcenTab), nameof(Tabs.AllgemeinTab), nameof(Tabs.UmweltTab), nameof(Tabs.WeltkarteTab),
+            nameof(Tabs.ErzeugungTab), nameof(Tabs.ProduktionTab), nameof(Tabs.WerftFlotteTab), nameof(Tabs.FahrzeugeTab),
+            nameof(Tabs.GelaendeTab), nameof(Tabs.WetterTab), nameof(Tabs.ProfilTab)
         };
 
         private readonly IReadOnlyList<ICheatTab> _tabs;
@@ -91,18 +94,22 @@ namespace CompanySupplier.UI
             RefreshSidebarAndVisibility(); // Buttons hervorheben + Sichtbarkeit gemaess _activeIndex
 
             // Persistente Statuszeile unter dem Body (ausserhalb des Scrollbereichs -> immer sichtbar).
+            // Mit dezenter Trennlinie darueber als eigene "Statusleisten"-Zone abgesetzt.
             var statusLabel = new Label(LocStrFormatted.Empty)
                 .TinyFontSize()
-                .PaddingTopBottom((Px)6)
+                .PaddingTopBottom((Px)8)
                 .PaddingLeft((Px)10);
             CheatMenuStatus.Bind(statusLabel);
+
+            var statusBar = new Column((Px)0).AlignItemsStretch();
+            statusBar.SetChildren(CheatWidgets.Separator(0), statusLabel);
 
             // Toggle-/Anzeige-Zustaende aus dem Backend nachziehen: die Tab-Inhalte wurden nur einmal
             // (im DI-Ctor) gebaut — ohne diesen Sync zeigt jedes neu geoeffnete Fenster den Zustand
             // von damals (z. B. nach externem Werkzeug-Deactivate oder Zustandsaenderungen per Hotkey).
             CheatUiSync.SyncAll();
 
-            window.AddBodySingle(bodyRow, statusLabel);
+            window.AddBodySingle(bodyRow, statusBar);
             return window;
         }
 
@@ -112,9 +119,14 @@ namespace CompanySupplier.UI
         {
             if (_sidebar == null) return;
 
-            var buttons = new List<UiComponent>(_tabs.Count);
+            var buttons = new List<UiComponent>(_tabs.Count + 1);
             for (int i = 0; i < _tabs.Count; i++)
+            {
+                // Dezente Trennlinie zwischen den Cheat-Reitern und dem Verwaltungs-Reiter "Profil".
+                if (_tabs[i] is Tabs.ProfilTab && i > 0)
+                    buttons.Add(CheatWidgets.Separator());
                 buttons.Add(BuildNavButton(i));
+            }
             _sidebar.SetChildren(buttons.ToArray());
 
             for (int i = 0; i < _tabs.Count; i++)
@@ -159,13 +171,14 @@ namespace CompanySupplier.UI
 
         private static IReadOnlyList<ICheatTab> OrderTabs(IEnumerable<ICheatTab> tabs)
         {
+            // Ueber den TYP-Namen sortieren (stabil, sprachunabhaengig) — der Anzeigename ist lokalisiert.
             return tabs
                 .OrderBy(t =>
                 {
-                    int idx = System.Array.IndexOf(TabOrder, t.Name);
+                    int idx = System.Array.IndexOf(TabOrder, t.GetType().Name);
                     return idx < 0 ? int.MaxValue : idx;
                 })
-                .ThenBy(t => t.Name)
+                .ThenBy(t => t.GetType().Name)
                 .ToList();
         }
     }

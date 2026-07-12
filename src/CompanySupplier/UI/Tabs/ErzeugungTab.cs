@@ -5,6 +5,7 @@ using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -46,7 +47,7 @@ namespace CompanySupplier.UI.Tabs
             foreach (var sync in _syncActions) sync();
         }
 
-        public string Name => "Erzeugung";
+        public string Name => L.Tab_Erzeugung;
 
         // "Power"-Toolbar-Icon (Erzeugung). Verifizierter Const-Pfad aus Mafi.Base.IconsPaths
         // (ToolbarElectricity → .../Toolbar/Power.svg). String-Pfad ist in 0.8.5.0 die robuste Variante
@@ -61,7 +62,7 @@ namespace CompanySupplier.UI.Tabs
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Gratis-Strom (KW) pro Tick"),
+                CheatWidgets.SectionTitle(L.Erz_TitlePower),
                 BuildSliderStepperRow(
                     100000f, "KW", new[] { 1, 100, 1000, 100000 },
                     () => _powerKw,
@@ -69,7 +70,7 @@ namespace CompanySupplier.UI.Tabs
                     v => _powerKw = v,
                     () => CheatService.Instance?.Generation?.FreeElectricityKw ?? 0),
 
-                CheatWidgets.SectionTitle("Gratis-Rechenleistung (TFlops) pro Tick"),
+                CheatWidgets.SectionTitle(L.Erz_TitleComputing),
                 BuildSliderStepperRow(
                     10000f, "TFlops", new[] { 1, 25, 100, 1000 },
                     () => _computingTFlops,
@@ -77,7 +78,7 @@ namespace CompanySupplier.UI.Tabs
                     v => _computingTFlops = v,
                     () => CheatService.Instance?.Generation?.FreeComputingTFlops ?? 0),
 
-                CheatWidgets.SectionTitle("Gratis-Unity pro Monat"),
+                CheatWidgets.SectionTitle(L.Erz_TitleUnity),
                 BuildSliderStepperRow(
                     1000f, "Unity", new[] { 1, 5, 10, 25, 100 },
                     () => _unityPerMonth,
@@ -104,16 +105,22 @@ namespace CompanySupplier.UI.Tabs
         {
             Slider slider = null;
 
-            // Setzt den ABSOLUTEN Zielwert (geklemmt 0..max); der Slider zeigt ihn via ValueFormatter live.
+            // Konkrete Wertanzeige ("12000 KW") ueber dem Regler — der Regler selbst zeigt nur seine
+            // Position in Prozent, was den tatsaechlichen Wert verdeckte.
+            var valueLabel = new Label(new LocStrFormatted(getValue() + " " + unit));
+            void RefreshValue(int v) { if (valueLabel is IComponentWithText t) t.SetValue(new LocStrFormatted(v + " " + unit)); }
+
+            // Setzt den ABSOLUTEN Zielwert (geklemmt 0..max).
             void ApplyAbsolute(int target)
             {
                 if (target < 0) target = 0;             // E1–E3: nie negativ
                 if (target > max) target = (int)max;
                 slider?.Value(target, notify: false);   // Slider nachziehen (ohne Re-Trigger)
                 setValue(target);                       // absoluten Zielwert ins Backend
+                RefreshValue(target);                   // konkrete Anzeige nachziehen
             }
 
-            slider = new Slider().Range(0f, max).Value(getValue(), notify: false).Label(new LocStrFormatted("Wert"))
+            slider = new Slider().Range(0f, max).Value(getValue(), notify: false).Label(LocStrFormatted.Empty)
                 .ValueFormatter(CheatWidgets.UnitFormatter(0f, max, unit));
             slider.OnValueChanged((OnSliderValueChanged)((oldValue, newValue) => ApplyAbsolute((int)Math.Round(newValue))));
             slider.FlexGrow(1f);
@@ -140,10 +147,11 @@ namespace CompanySupplier.UI.Tabs
                 if (backend < 0) backend = 0;
                 setLocal(backend);
                 slider?.Value(backend, notify: false);
+                RefreshValue(backend);
             });
 
             var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
-            col.SetChildren(slider, stepperRow);
+            col.SetChildren(valueLabel, slider, stepperRow);
             return col;
         }
     }

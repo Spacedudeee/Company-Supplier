@@ -5,6 +5,7 @@ using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -72,7 +73,7 @@ namespace CompanySupplier.UI.Tabs
             finally { _suppress = false; }
         }
 
-        public string Name => "Allgemein";
+        public string Name => L.Tab_Allgemein;
 
         // "Settlement"-Toolbar-Icon (Allgemein). Verifizierter Const-Pfad aus Mafi.Base.IconsPaths.
         public string IconPath => "Assets/Unity/UserInterface/Toolbar/Settlement.svg";
@@ -86,62 +87,61 @@ namespace CompanySupplier.UI.Tabs
             var column = new Column((Px)CheatWidgets.Gap).AlignItemsStretch().Padding((Px)15);
 
             // Kreativmodus-Einzel-Toggles erst in ihre Felder bauen (Collection-Initializer erlauben keine Zuweisung).
-            _noPower = BuildIgnoreToggle("Kein Strom nötig", () => Svc?.Sandbox?.NoPowerNeeded ?? false,
+            _noPower = BuildIgnoreToggle(L.Gen_NoPower, () => Svc?.Sandbox?.NoPowerNeeded ?? false,
                 v => Svc?.Sandbox?.SetNoPowerNeeded(v),
-                "Maschinen laufen weiter, auch wenn nicht genug Strom da ist.");
-            _noWorkers = BuildIgnoreToggle("Keine Arbeiter nötig", () => Svc?.Sandbox?.NoWorkersNeeded ?? false,
+                L.Gen_NoPowerTip);
+            _noWorkers = BuildIgnoreToggle(L.Gen_NoWorkers, () => Svc?.Sandbox?.NoWorkersNeeded ?? false,
                 v => Svc?.Sandbox?.SetNoWorkersNeeded(v),
-                "Gebäude arbeiten ohne zugewiesene Arbeiter.");
-            _noComputing = BuildIgnoreToggle("Kein Computing nötig", () => Svc?.Sandbox?.NoComputingNeeded ?? false,
+                L.Gen_NoWorkersTip);
+            _noComputing = BuildIgnoreToggle(L.Gen_NoComputing, () => Svc?.Sandbox?.NoComputingNeeded ?? false,
                 v => Svc?.Sandbox?.SetNoComputingNeeded(v),
-                "Maschinen laufen ohne ausreichendes Computing.");
-            _noUnity = BuildIgnoreToggle("Keine Unity nötig", () => Svc?.Sandbox?.NoUnityNeeded ?? false,
+                L.Gen_NoComputingTip);
+            _noUnity = BuildIgnoreToggle(L.Gen_NoUnity, () => Svc?.Sandbox?.NoUnityNeeded ?? false,
                 v => Svc?.Sandbox?.SetNoUnityNeeded(v),
-                "Aktionen/Gebäude, die Unity verlangen, laufen ohne Unity.");
-            _noFood = BuildIgnoreToggle("Keine Lebensmittel nötig", () => Svc?.Sandbox?.NoFoodNeeded ?? false,
+                L.Gen_NoUnityTip);
+            _noFood = BuildIgnoreToggle(L.Gen_NoFood, () => Svc?.Sandbox?.NoFoodNeeded ?? false,
                 v => Svc?.Sandbox?.SetNoFoodNeeded(v),
-                "Keine Hunger-/Versorgungs-Strafe bei fehlenden Lebensmitteln.");
-            _instaBuild = BuildIgnoreToggle("Sofortbau", () => Svc?.Building?.InstaBuildEnabled ?? false,
+                L.Gen_NoFoodTip);
+            _instaBuild = BuildIgnoreToggle(L.Gen_InstaBuild, () => Svc?.Building?.InstaBuildEnabled ?? false,
                 v => Svc?.Building?.SetInstaBuild(v),
-                "Gebäude, Forschung, Upgrades und Reparaturen werden sofort fertig.");
-            _noFuel = BuildIgnoreToggle("Kein Treibstoffverbrauch", () => Svc?.FleetVehicle?.FuelConsumptionDisabled ?? false,
+                L.Gen_InstaBuildTip);
+            _noFuel = BuildIgnoreToggle(L.Gen_NoFuel, () => Svc?.FleetVehicle?.FuelConsumptionDisabled ?? false,
                 v => Svc?.FleetVehicle?.SetFuelConsumptionDisabled(v),
-                "Fahrzeuge verbrauchen keinen Treibstoff mehr.");
-            _noMaintenance = BuildIgnoreToggle("Wartung deaktivieren", () => Svc?.MaintenanceDisabled ?? false,
+                L.Gen_NoFuelTip);
+            _noMaintenance = BuildIgnoreToggle(L.Gen_NoMaintenance, () => Svc?.MaintenanceDisabled ?? false,
                 v => Svc?.SetMaintenanceDisabled(v),
-                "Kein Wartungsverbrauch; vorhandene Schäden werden repariert.");
+                L.Gen_NoMaintenanceTip);
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Kreativmodus"),
+                CheatWidgets.SectionTitle(L.Gen_TitleCreative),
                 BuildMasterToggle(),
 
-                CheatWidgets.SectionTitle("Läuft trotz Mangel"),
-                _noPower, _noWorkers, _noComputing, _noUnity, _noFood,
+                CheatWidgets.SectionTitle(L.Gen_TitleDespiteShortage),
+                CheatWidgets.ToggleGrid(_noPower, _noWorkers, _noComputing, _noUnity, _noFood),
 
-                CheatWidgets.SectionTitle("Bau & Betrieb"),
-                _instaBuild, _noFuel, _noMaintenance,
+                CheatWidgets.SectionTitle(L.Gen_TitleBuildOps),
+                CheatWidgets.ToggleGrid(_instaBuild, _noFuel, _noMaintenance),
 
-                CheatWidgets.SectionTitle("Spielgeschwindigkeit"),
+                CheatWidgets.SectionTitle(L.Gen_TitleSpeed),
                 BuildSpeedButtons(),
                 BuildUncappedToggle(),
 
-                CheatWidgets.SectionTitle("Unendlich-Quelle/Senke"),
+                CheatWidgets.SectionTitle(L.Gen_TitleSourceSink),
                 BuildSourceSinkToggle(),
 
-                CheatWidgets.SectionTitle("God-Werkzeug (Welt-Klick)"),
+                CheatWidgets.SectionTitle(L.Gen_TitleGodTool),
                 BuildGodWandToggle(),
 
-                CheatWidgets.SectionTitle("Bevölkerung & Versorgung"),
-                BuildDiseasesToggle(),
-                BuildHappinessToggle(),
-                CheatWidgets.SectionTitle("Bevölkerung hinzufügen"),
+                CheatWidgets.SectionTitle(L.Gen_TitlePopulation),
+                CheatWidgets.ToggleGrid(BuildDiseasesToggle(), BuildHappinessToggle()),
+                CheatWidgets.SectionTitle(L.Gen_TitleAddPopulation),
                 BuildPopulationStepper(),
 
-                CheatWidgets.SectionTitle("Forschung"),
+                CheatWidgets.SectionTitle(L.Gen_TitleResearch),
                 BuildResearchButtons(),
 
-                CheatWidgets.SectionTitle("Unity hinzufügen"),
+                CheatWidgets.SectionTitle(L.Gen_TitleAddUnity),
                 BuildUnityStepper()
             };
 
@@ -157,7 +157,7 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildMasterToggle()
         {
             _master = CheatWidgets.NewToggleRow(
-                "Kreativmodus (alles auf einmal)",
+                L.Gen_Master,
                 false,
                 v =>
                 {
@@ -173,9 +173,9 @@ namespace CompanySupplier.UI.Tabs
                     // der zentrale Sync setzt die Werte mit _suppress-Schutz, ohne onChanged-Backend-Aufrufe.
                     CheatUiSync.SyncAll();
 
-                    CheatMenuStatus.Show(v ? "Kreativmodus AN" : "Kreativmodus AUS");
+                    CheatMenuStatus.Show(v ? L.Gen_StatusCreativeOn : L.Gen_StatusCreativeOff);
                 },
-                "Aktiviert auf einen Schlag: kein Strom/Arbeiter/Computing/Unity/Lebensmittel nötig, Sofortbau, kein Treibstoff, keine Wartung.");
+                L.Gen_MasterTip);
             return _master;
         }
 
@@ -192,10 +192,10 @@ namespace CompanySupplier.UI.Tabs
         // Geschwindigkeit: 1x (Reset) + 5x/10x/20x.
         private UiComponent BuildSpeedButtons()
         {
-            var reset = CheatWidgets.GeneralButton("1x", () => Speed(1), "Zurück auf Normalgeschwindigkeit.");
-            var x5  = CheatWidgets.PrimaryButton("5x",  () => Speed(5),  "Simulation 5-fach.");
-            var x10 = CheatWidgets.PrimaryButton("10x", () => Speed(10), "Simulation 10-fach.");
-            var x20 = CheatWidgets.PrimaryButton("20x", () => Speed(20), "Simulation 20-fach (CPU-abhängig).");
+            var reset = CheatWidgets.GeneralButton("1x", () => Speed(1), L.Gen_SpeedResetTip);
+            var x5  = CheatWidgets.PrimaryButton("5x",  () => Speed(5),  L.Gen_Speed5Tip);
+            var x10 = CheatWidgets.PrimaryButton("10x", () => Speed(10), L.Gen_Speed10Tip);
+            var x20 = CheatWidgets.PrimaryButton("20x", () => Speed(20), L.Gen_Speed20Tip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(reset, x5, x10, x20);
@@ -205,16 +205,16 @@ namespace CompanySupplier.UI.Tabs
         private static void Speed(int mult)
         {
             Svc?.GameSpeed?.SetSpeed(mult);
-            CheatMenuStatus.Show($"Spielgeschwindigkeit: {mult}x");
+            CheatMenuStatus.Show(L.Gen_StatusSpeed(mult));
         }
 
         private UiComponent BuildUncappedToggle()
         {
             _uncapped = CheatWidgets.NewToggleRow(
-                "Uncapped (so schnell wie die CPU kann)",
+                L.Gen_Uncapped,
                 Svc?.GameSpeed?.Uncapped ?? false,
                 v => { if (!_suppress) Svc?.GameSpeed?.SetUncapped(v); },
-                "Hebt das Sim-Geschwindigkeitslimit auf — die Simulation läuft so schnell, wie der Rechner erlaubt.");
+                L.Gen_UncappedTip);
             return _uncapped;
         }
 
@@ -222,17 +222,17 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildSourceSinkToggle()
         {
             _sourceSink = CheatWidgets.NewToggleRow(
-                "In Bau-Toolbar freischalten",
+                L.Gen_SourceSink,
                 Svc?.SourceSink?.Enabled ?? false,
                 v =>
                 {
                     if (_suppress) return;
                     Svc?.SourceSink?.SetEnabled(v);
                     CheatMenuStatus.Show(v
-                        ? "Quelle/Senke in der Bau-Toolbar freigeschaltet"
-                        : "Quelle/Senke deaktiviert");
+                        ? L.Gen_StatusSourceSinkOn
+                        : L.Gen_StatusSourceSinkOff);
                 },
-                "Schaltet das eingebaute Cheat-Gebäude frei: unendliche Quelle für jedes Produkt + bodenlose Senke. Danach ganz normal über die Bau-Toolbar platzieren.");
+                L.Gen_SourceSinkTip);
             return _sourceSink;
         }
 
@@ -240,17 +240,17 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildGodWandToggle()
         {
             _godWand = CheatWidgets.NewToggleRow(
-                "God-Werkzeug aktiv",
+                L.Gen_GodWand,
                 Svc?.IsGodWandActive ?? false,
                 v =>
                 {
                     if (_suppress) return;
                     bool ok = Svc?.SetGodWandActive(v) ?? false;
                     CheatMenuStatus.Show(!ok
-                        ? "God-Werkzeug nicht verfügbar"
-                        : v ? "God-Werkzeug AN — Werft/Depot/Fahrzeug anklicken" : "God-Werkzeug AUS");
+                        ? L.Gen_StatusGodWandUnavail
+                        : v ? L.Gen_StatusGodWandOn : L.Gen_StatusGodWandOff);
                 },
-                "Solange aktiv: Linksklick auf eine Werft, ein Cargo-Depot oder ein Fahrzeug tankt es sofort voll.");
+                L.Gen_GodWandTip);
             return _godWand;
         }
 
@@ -263,10 +263,10 @@ namespace CompanySupplier.UI.Tabs
         {
             bool initial = CheatService.Instance?.Population?.DiseasesDisabled ?? false;
             _diseases = CheatWidgets.NewToggleRow(
-                "Krankheiten deaktivieren",
+                L.Gen_Diseases,
                 initial,
                 v => { if (!_suppress) CheatService.Instance?.Population?.SetDiseasesDisabled(v); },
-                "Jede neu auftretende Seuche wird automatisch sofort beendet.");
+                L.Gen_DiseasesTip);
             return _diseases;
         }
 
@@ -275,10 +275,10 @@ namespace CompanySupplier.UI.Tabs
         {
             bool initial = CheatService.Instance?.Population?.MaxConsumptionHappiness ?? false;
             _happiness = CheatWidgets.NewToggleRow(
-                "Versorgungs-Zufriedenheit max.",
+                L.Gen_Happiness,
                 initial,
                 v => { if (!_suppress) CheatService.Instance?.Population?.SetMaxConsumptionHappiness(v); },
-                "Hält die Siedlungs-Zufriedenheit aus Versorgung/Lebensmitteln dauerhaft auf Maximum.");
+                L.Gen_HappinessTip);
             return _happiness;
         }
 
@@ -298,22 +298,22 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildResearchButtons()
         {
             var finishCurrent = CheatWidgets.PrimaryButton(
-                "Aktuelle Forschung abschließen",
+                L.Gen_ResearchFinish,
                 () =>
                 {
                     CheatService.Instance?.Research?.FinishCurrentResearch();
-                    CheatMenuStatus.Show("Aktuelle Forschung abgeschlossen");
+                    CheatMenuStatus.Show(L.Gen_StatusResearchFinished);
                 },
-                "Beendet die aktuell laufende Forschung sofort.");
+                L.Gen_ResearchFinishTip);
 
             var unlockAll = CheatWidgets.GeneralButton(
-                "Alle Forschung freischalten",
+                L.Gen_ResearchUnlockAll,
                 () =>
                 {
                     CheatService.Instance?.Research?.UnlockAllResearch();
-                    CheatMenuStatus.Show("Kompletter Forschungsbaum freigeschaltet");
+                    CheatMenuStatus.Show(L.Gen_StatusResearchUnlocked);
                 },
-                "Schaltet den kompletten Forschungsbaum frei.");
+                L.Gen_ResearchUnlockAllTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(finishCurrent, unlockAll);

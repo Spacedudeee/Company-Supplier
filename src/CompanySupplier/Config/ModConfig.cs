@@ -124,6 +124,12 @@ namespace CompanySupplier.Config
         public const string PollutionVehicles   = "pollution.vehicles";
         public const string PollutionShips      = "pollution.ships";
         public const string PollutionTrains     = "pollution.trains";
+        public const string ShipsNoFuel         = "ship.noFuel";
+        public const string ProdMining          = "prod.mining";
+        public const string ProdFarm            = "prod.farm";
+        public const string ProdSolar           = "prod.solar";
+        public const string ProdForceRun        = "prod.forceRun";
+        public const string ProdUnlimitedWater  = "prod.unlimitedWater";
 
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";

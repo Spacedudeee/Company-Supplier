@@ -8,6 +8,7 @@ using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -79,7 +80,7 @@ namespace CompanySupplier.UI.Tabs
             Log.Info($"[{CompanySupplier.ModName}] GelaendeTab: Materialliste nachgeladen ({_materials.Count}).");
         }
 
-        public string Name => "Gelände";
+        public string Name => L.Tab_Gelaende;
 
         // "Mining"-Toolbar-Icon (Gelaende). Verifizierter Const-Pfad aus Mafi.Unity.Assets
         // (Toolbar.Mining_svg). String-Pfad ist in 0.8.5.0 die robuste Variante (kein IconStyle
@@ -111,17 +112,17 @@ namespace CompanySupplier.UI.Tabs
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Material"),
+                CheatWidgets.SectionTitle(L.Gel_Material),
                 BuildMaterialDropdown(),        // T1
 
-                CheatWidgets.SectionTitle("Optionen"),
+                CheatWidgets.SectionTitle(L.Gel_TitleOptions),
                 BuildPhysicsToggle(),           // T2
                 BuildIgnoreTowerToggle(),       // T3
 
-                CheatWidgets.SectionTitle("Markierungen sofort ausführen"),
+                CheatWidgets.SectionTitle(L.Gel_TitleMarkers),
                 BuildInstantMarkerButtons(),    // T4 + T5 + T6
 
-                CheatWidgets.SectionTitle("Reserven & Bäume"),
+                CheatWidgets.SectionTitle(L.Gel_TitleReserves),
                 BuildReserveButtons(),          // T7 + T8
                 BuildTreeButtons()              // T9 + T10
             };
@@ -143,7 +144,7 @@ namespace CompanySupplier.UI.Tabs
                 customBtnHolder: null,
                 doNotUpdateBtnView: false);
             _materialDropdown = dropdown;
-            dropdown.Label(new LocStrFormatted("Material"));
+            dropdown.Label(new LocStrFormatted(L.Gel_Material));
             // Suche matcht sowohl den angezeigten dt. Namen als auch die (englische) Id.
             dropdown.SetSearchStringLookup((LooseProductProto proto) => CheatWidgets.ProtoDisplayName(proto) + " " + proto.Id.ToString());
             dropdown.SetOptions(_materials);
@@ -160,7 +161,7 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildPhysicsToggle()
         {
             _physicsToggle = CheatWidgets.NewToggleRow(
-                "Gelände-Physik deaktivieren (aktiv = AUS)",
+                L.Gel_Physics,
                 _physicsDisabled,
                 v =>
                 {
@@ -168,7 +169,7 @@ namespace CompanySupplier.UI.Tabs
                     _physicsDisabled = v;
                     CheatService.Instance?.Terrain?.SetTerrainPhysicsDisabled(v);
                 },
-                "Aktiv = keine Physik-Simulation bei Abbau/Verfüllen (scharfe Kanten).");
+                L.Gel_PhysicsTip);
             return _physicsToggle;
         }
 
@@ -178,10 +179,10 @@ namespace CompanySupplier.UI.Tabs
         {
             bool initial = CheatService.Instance?.Terrain?.IgnoreTowerDesignations ?? true;
             _towerToggle = CheatWidgets.NewToggleRow(
-                "Turm-Markierungen ignorieren",
+                L.Gel_IgnoreTower,
                 initial,
                 v => { if (!_suppress) CheatService.Instance?.Terrain?.SetIgnoreTowerDesignations(v); },
-                "Aktiv = von Minen-Türmen verwaltete Markierungen werden bei Sofort-Operationen übersprungen.");
+                L.Gel_IgnoreTowerTip);
             return _towerToggle;
         }
 
@@ -189,27 +190,27 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildInstantMarkerButtons()
         {
             var mine = CheatWidgets.PrimaryButton(
-                "Sofort abbauen",
+                L.Gel_Mine,
                 () => CheatService.Instance?.Terrain?.InstantMine(),
-                "Schließt alle Abbau-Markierungen sofort ab (nutzt Physik-/Turm-Optionen).");
+                L.Gel_MineTip);
 
             var dump = CheatWidgets.PrimaryButton(
-                "Sofort verfüllen",
+                L.Gel_Dump,
                 () =>
                 {
                     if (_selectedMaterial != null)
                         CheatService.Instance?.Terrain?.InstantDump(_selectedMaterial);
                 },
-                "Füllt alle Verfüll-Markierungen sofort mit dem gewählten Material.");
+                L.Gel_DumpTip);
 
             var change = CheatWidgets.GeneralButton(
-                "Gelände umwandeln",
+                L.Gel_Change,
                 () =>
                 {
                     if (_selectedMaterial != null)
                         CheatService.Instance?.Terrain?.ChangeTerrain(_selectedMaterial);
                 },
-                "Wandelt die oberste Materialschicht der Markierungen in das gewählte Material um (z. B. Erde für Farmen).");
+                L.Gel_ChangeTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(mine, dump, change);
@@ -220,14 +221,14 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildReserveButtons()
         {
             var water = CheatWidgets.PrimaryButton(
-                "Grundwasser auffüllen",
+                L.Gel_FillWater,
                 () => CheatService.Instance?.Terrain?.FillGroundWater(),
-                "Füllt alle Grundwasser-Reserven bis zur Kapazität auf.");
+                L.Gel_FillWaterTip);
 
             var crude = CheatWidgets.PrimaryButton(
-                "Erdöl auffüllen",
+                L.Gel_FillCrude,
                 () => CheatService.Instance?.Terrain?.FillGroundCrude(),
-                "Füllt alle Erdöl-Reserven bis zur Kapazität auf.");
+                L.Gel_FillCrudeTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(water, crude);
@@ -238,14 +239,14 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildTreeButtons()
         {
             var plant = CheatWidgets.PrimaryButton(
-                "Bäume pflanzen",
+                L.Gel_PlantTrees,
                 () => CheatService.Instance?.Terrain?.AddTrees(),
-                "Pflanzt Bäume in den Verfüll-Markierungen.");
+                L.Gel_PlantTreesTip);
 
             var remove = CheatWidgets.DangerButton(
-                "Bäume entfernen",
+                L.Gel_RemoveTrees,
                 () => CheatService.Instance?.Terrain?.RemoveTrees(),
-                "Entfernt alle zur Entfernung markierten Bäume.");
+                L.Gel_RemoveTreesTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(plant, remove);

@@ -11,6 +11,7 @@ using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -95,7 +96,7 @@ namespace CompanySupplier.UI.Tabs
             finally { _suppress = false; }
         }
 
-        public string Name => "Fahrzeuge";
+        public string Name => L.Tab_Fahrzeuge;
 
         // "Vehicles"-Toolbar-Icon (Fahrzeuge). Verifizierter Const-Pfad aus Mafi.Unity.Assets
         // (Toolbar.Vehicles_svg). String-Pfad ist in 0.8.5.0 die robuste Variante (kein IconStyle
@@ -110,18 +111,18 @@ namespace CompanySupplier.UI.Tabs
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Treibstoff"),
+                CheatWidgets.SectionTitle(L.Fzg_TitleFuel),
                 BuildFuelToggle(),              // V1
 
-                CheatWidgets.SectionTitle("Fahrzeug-Limit"),
+                CheatWidgets.SectionTitle(L.Fzg_TitleLimit),
                 BuildVehicleLimitSection(),     // V2: aktuelles Limit + Zahlenfeld + Stepper
 
-                CheatWidgets.SectionTitle("LKW-Kapazität"),
+                CheatWidgets.SectionTitle(L.Fzg_TitleTruckCap),
                 BuildTruckCapacityButtons(),    // V3 (Buttons)
                 BuildMultiplierSummary(),       // V3 (aktueller Gesamt-Multiplikator in %)
                 BuildTruckCapacityList(),       // V3 (Live-Liste je LKW-Typ)
 
-                CheatWidgets.SectionTitle("Fahrzeug-Stats (pro Typ)"),
+                CheatWidgets.SectionTitle(L.Fzg_TitleStats),
                 BuildVehicleStatsSection()      // exakte Kapazitaet pro Fahrzeugtyp (Reflection-Override)
             };
 
@@ -138,10 +139,10 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildFuelToggle()
         {
             _fuelToggle = CheatWidgets.NewToggleRow(
-                "Treibstoff-Verbrauch aus (aktiv = AUS)",
+                L.Fzg_Fuel,
                 CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false,
                 v => { if (!_suppress) CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v); },
-                "Aktiv = Fahrzeuge verbrauchen keinen Treibstoff mehr.");
+                L.Fzg_FuelTip);
             return _fuelToggle;
         }
 
@@ -151,12 +152,12 @@ namespace CompanySupplier.UI.Tabs
             _limitLabel = new Label(new LocStrFormatted(LimitText()));
 
             var inputRow = CheatWidgets.NewIntInputRow(
-                "Limit setzen",
+                L.Fzg_LimitSet,
                 v =>
                 {
                     CheatService.Instance?.FleetVehicle?.SetVehicleLimit(v);
                     RefreshLimit();
-                    CheatMenuStatus.Show($"Fahrzeug-Limit = {v}");
+                    CheatMenuStatus.Show(L.Fzg_StatusLimit(v));
                 },
                 min: 0);
 
@@ -168,7 +169,7 @@ namespace CompanySupplier.UI.Tabs
         private static string LimitText()
         {
             int l = CheatService.Instance?.FleetVehicle?.GetVehicleLimit() ?? -1;
-            return l < 0 ? "Aktuelles Limit: —" : $"Aktuelles Limit: {l}";
+            return l < 0 ? L.Fzg_LimitCurrent("—") : L.Fzg_LimitCurrent(l);
         }
 
         private void RefreshLimit()
@@ -205,13 +206,13 @@ namespace CompanySupplier.UI.Tabs
                 () => ApplyTruckCapacityMultiplier(500));
 
             var reset = CheatWidgets.DangerButton(
-                "Zurücksetzen",
+                L.Common_Reset,
                 () =>
                 {
                     CheatService.Instance?.FleetVehicle?.ResetTruckCapacity();
                     RefreshCapacityLabels();
                 },
-                "Entfernt den LKW-Kapazitäts-Multiplikator (zurück auf Normal).");
+                L.Fzg_TruckResetTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(plus100, plus200, plus500, reset);
@@ -238,7 +239,7 @@ namespace CompanySupplier.UI.Tabs
         {
             Percent mult = CheatService.Instance?.FleetVehicle?.GetTruckCapacityMultiplier() ?? Percent.Hundred;
             int percentVal = mult.ToIntPercentRounded();
-            return $"Aktueller Multiplikator: {percentVal} %  (x{percentVal / 100.0:0.##})";
+            return L.Fzg_MultiplierSummary(percentVal, (percentVal / 100.0).ToString("0.##"));
         }
 
         // V3: LKW-Kacheln (grosses Icon + Kapazitaet, OHNE Namen — am Icon erkennbar) in einer Wrap-Reihe,
@@ -253,7 +254,7 @@ namespace CompanySupplier.UI.Tabs
             {
                 Log.Warning($"[{CompanySupplier.ModName}] FahrzeugeTab: ProtosDb nicht verfuegbar — LKW-Liste bleibt leer.");
                 var fallback = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
-                fallback.SetChildren(new Label(new LocStrFormatted("(LKW-Typen nicht verfügbar)")));
+                fallback.SetChildren(new Label(new LocStrFormatted(L.Fzg_TrucksUnavail)));
                 return fallback;
             }
 
@@ -279,7 +280,7 @@ namespace CompanySupplier.UI.Tabs
             }
 
             if (tiles.Count == 0)
-                tiles.Add(new Label(new LocStrFormatted("(keine LKW-Typen gefunden)")));
+                tiles.Add(new Label(new LocStrFormatted(L.Fzg_NoTrucks)));
 
             wrap.SetChildren(tiles.ToArray());
             return wrap;
@@ -324,7 +325,7 @@ namespace CompanySupplier.UI.Tabs
             var stats = CheatService.Instance?.VehicleStats;
             if (protos == null || stats == null)
             {
-                col.SetChildren(new Label(new LocStrFormatted("(Fahrzeug-Stats nicht verfügbar)")));
+                col.SetChildren(new Label(new LocStrFormatted(L.Fzg_StatsUnavail)));
                 return col;
             }
 
@@ -343,7 +344,7 @@ namespace CompanySupplier.UI.Tabs
                     new ButtonIconText(Button.None, (IProtoWithIcon)proto, CheatWidgets.ProtoDisplayLabel(proto));
 
             var dropdown = new Dropdown<DrivingEntityProto>(factory, null, null, false);
-            dropdown.Label(new LocStrFormatted("Fahrzeug"));
+            dropdown.Label(new LocStrFormatted(L.Fzg_Vehicle));
             dropdown.SetOptions(_statVehicles);
             dropdown.OnValueChanged((DrivingEntityProto proto, int idx) => { _statsSelected = proto; RefreshStatsInfo(); });
             dropdown.FlexGrow(1f);
@@ -352,38 +353,38 @@ namespace CompanySupplier.UI.Tabs
             _statsInfo = new Label(new LocStrFormatted(StatsInfoText()));
 
             var speedRow = CheatWidgets.NewFloatInputRow(
-                "Geschwindigkeit", v =>
+                L.Fzg_Speed, v =>
                 {
                     CheatService.Instance?.VehicleStats?.SetSpeed(_statsSelected, v);
                     RefreshStatsInfo();
                     if (_statsSelected != null)
-                        CheatMenuStatus.Show($"Geschwindigkeit {CheatWidgets.ProtoDisplayName(_statsSelected)} = {v:0.##}");
+                        CheatMenuStatus.Show(L.Fzg_StatusSpeedSet(CheatWidgets.ProtoDisplayName(_statsSelected), v.ToString("0.##")));
                 },
                 min: 0.1f);
 
             var capacityRow = CheatWidgets.NewIntInputRow(
-                "Ladekapazität", v =>
+                L.Fzg_LoadCap, v =>
                 {
                     CheatService.Instance?.VehicleStats?.SetCapacity(_statsSelected, v);
                     RefreshStatsInfo();
                     if (_statsSelected != null)
-                        CheatMenuStatus.Show($"Kapazität {CheatWidgets.ProtoDisplayName(_statsSelected)} = {v}");
+                        CheatMenuStatus.Show(L.Fzg_StatusCapSet(CheatWidgets.ProtoDisplayName(_statsSelected), v));
                 },
                 min: 1);
 
             var reset = CheatWidgets.DangerButton(
-                "Zurücksetzen",
+                L.Common_Reset,
                 () =>
                 {
                     CheatService.Instance?.VehicleStats?.ResetSpeed(_statsSelected);
                     CheatService.Instance?.VehicleStats?.ResetCapacity(_statsSelected);
                     RefreshStatsInfo();
-                    CheatMenuStatus.Show("Fahrzeug-Stats zurückgesetzt");
+                    CheatMenuStatus.Show(L.Fzg_StatusStatsReset);
                 },
-                "Setzt Geschwindigkeit + Kapazität des gewählten Fahrzeugtyps auf den Standard zurück.");
+                L.Fzg_StatsResetTip);
 
             col.SetChildren(dropdown, _statsInfo, speedRow, capacityRow, reset,
-                CheatWidgets.SectionTitle("Übersicht"), BuildStatsOverview());
+                CheatWidgets.SectionTitle(L.Fzg_TitleOverview), BuildStatsOverview());
             return col;
         }
 
@@ -397,17 +398,17 @@ namespace CompanySupplier.UI.Tabs
             double sp = stats.GetSpeed(_statsSelected);
             double spDef = stats.GetDefaultSpeed(_statsSelected);
             string speedPart = Math.Abs(sp - spDef) < 0.005
-                ? $"Speed: {sp:0.##}"
-                : $"Speed: {sp:0.##} (Standard: {spDef:0.##})";
+                ? L.Fzg_StatSpeed(sp.ToString("0.##"))
+                : L.Fzg_StatSpeedDefault(sp.ToString("0.##"), spDef.ToString("0.##"));
 
             string capPart;
             if (stats.HasCapacity(_statsSelected))
             {
                 int cap = stats.GetCapacity(_statsSelected);
                 int capDef = stats.GetDefaultCapacity(_statsSelected);
-                capPart = cap == capDef ? $"Kapazität: {cap}" : $"Kapazität: {cap} (Standard: {capDef})";
+                capPart = cap == capDef ? L.Fzg_StatCap(cap) : L.Fzg_StatCapDefault(cap, capDef);
             }
-            else capPart = "Kapazität: —";
+            else capPart = L.Fzg_StatCapNone;
 
             return $"{name} — {speedPart} | {capPart}";
         }
@@ -445,7 +446,7 @@ namespace CompanySupplier.UI.Tabs
         private static string OverviewCapText(DrivingEntityProto p)
         {
             var stats = CheatService.Instance?.VehicleStats;
-            return (stats != null && stats.HasCapacity(p)) ? $"Kap {stats.GetCapacity(p)}" : "Kap —";
+            return (stats != null && stats.HasCapacity(p)) ? L.Fzg_OverviewCap(stats.GetCapacity(p)) : L.Fzg_OverviewCapNone;
         }
 
         // "v 2,5" (Tiles/Sek, eine Nachkommastelle).
@@ -481,7 +482,7 @@ namespace CompanySupplier.UI.Tabs
             if (_trainWagons.Count == 0) return; // keine Zuege/DLC -> Abschnitt komplett weglassen
 
             _trainSelected = _trainWagons[0];
-            children.Add(CheatWidgets.SectionTitle("Zug-Waggon-Kapazität"));
+            children.Add(CheatWidgets.SectionTitle(L.Fzg_TitleTrain));
             children.Add(BuildTrainStatsSection());
         }
 
@@ -494,7 +495,7 @@ namespace CompanySupplier.UI.Tabs
                     new ButtonIconText(Button.None, (IProtoWithIcon)wagon, CheatWidgets.ProtoDisplayLabel(wagon));
 
             var dropdown = new Dropdown<CargoWagonProto>(factory, null, null, false);
-            dropdown.Label(new LocStrFormatted("Waggon"));
+            dropdown.Label(new LocStrFormatted(L.Fzg_Wagon));
             dropdown.SetOptions(_trainWagons);
             dropdown.OnValueChanged((CargoWagonProto w, int idx) => { _trainSelected = w; RefreshTrainInfo(); });
             dropdown.FlexGrow(1f);
@@ -503,24 +504,24 @@ namespace CompanySupplier.UI.Tabs
             _trainInfo = new Label(new LocStrFormatted(TrainInfoText()));
 
             var capacityRow = CheatWidgets.NewIntInputRow(
-                "Kapazität", v =>
+                L.Fzg_Capacity, v =>
                 {
                     CheatService.Instance?.Train?.SetCapacity(_trainSelected, v);
                     RefreshTrainInfo();
                     if (_trainSelected != null)
-                        CheatMenuStatus.Show($"Waggon-Kapazität {CheatWidgets.ProtoDisplayName(_trainSelected)} = {v}");
+                        CheatMenuStatus.Show(L.Fzg_StatusWagonCapSet(CheatWidgets.ProtoDisplayName(_trainSelected), v));
                 },
                 min: 1);
 
             var reset = CheatWidgets.DangerButton(
-                "Zurücksetzen",
+                L.Common_Reset,
                 () =>
                 {
                     CheatService.Instance?.Train?.ResetCapacity(_trainSelected);
                     RefreshTrainInfo();
-                    CheatMenuStatus.Show("Waggon-Kapazität zurückgesetzt");
+                    CheatMenuStatus.Show(L.Fzg_StatusWagonReset);
                 },
-                "Setzt die Kapazität des gewählten Waggon-Typs auf den Standard zurück.");
+                L.Fzg_TrainResetTip);
 
             col.SetChildren(dropdown, _trainInfo, capacityRow, reset);
             return col;
@@ -533,7 +534,7 @@ namespace CompanySupplier.UI.Tabs
             int cur = train.GetCapacity(_trainSelected);
             int def = train.GetDefaultCapacity(_trainSelected);
             string name = CheatWidgets.ProtoDisplayName(_trainSelected);
-            return cur == def ? $"{name} — Kapazität: {cur}" : $"{name} — Kapazität: {cur} (Standard: {def})";
+            return cur == def ? L.Fzg_TrainInfo(name, cur) : L.Fzg_TrainInfoDefault(name, cur, def);
         }
 
         private void RefreshTrainInfo()

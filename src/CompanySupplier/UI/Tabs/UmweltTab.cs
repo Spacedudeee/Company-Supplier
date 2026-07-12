@@ -4,6 +4,7 @@ using Mafi;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -49,7 +50,7 @@ namespace CompanySupplier.UI.Tabs
             finally { _suppress = false; }
         }
 
-        public string Name => "Umwelt";
+        public string Name => L.Tab_Umwelt;
 
         // Waste-Toolbar-Icon (Abfall/Verschmutzung) — passt zum Umwelt-/Verschmutzungs-Tab.
         // Verifizierter Pfad aus Mafi.Base.IconsPaths.ToolbarWaste.
@@ -63,26 +64,26 @@ namespace CompanySupplier.UI.Tabs
         {
             var column = new Column((Px)CheatWidgets.Gap).AlignItemsStretch().Padding((Px)15);
 
-            _air = BuildToggle("Luftverschmutzung aus", () => Svc?.Pollution?.AirDisabled ?? false,
-                v => Svc?.Pollution?.SetAirDisabled(v), "Fabriken/Generatoren stoßen keine Luftverschmutzung mehr aus.");
-            _water = BuildToggle("Wasserverschmutzung aus", () => Svc?.Pollution?.WaterDisabled ?? false,
-                v => Svc?.Pollution?.SetWaterDisabled(v), "Keine Wasserverschmutzung mehr.");
-            _landfill = BuildToggle("Deponie-Verschmutzung aus", () => Svc?.Pollution?.LandfillDisabled ?? false,
-                v => Svc?.Pollution?.SetLandfillDisabled(v), "Deponien verschmutzen die Umgebung nicht mehr.");
-            _vehicles = BuildToggle("Fahrzeug-Abgase aus", () => Svc?.Pollution?.VehiclesDisabled ?? false,
-                v => Svc?.Pollution?.SetVehiclesDisabled(v), "Fahrzeuge stoßen keine Abgase mehr aus.");
-            _ships = BuildToggle("Schiffs-Abgase aus", () => Svc?.Pollution?.ShipsDisabled ?? false,
-                v => Svc?.Pollution?.SetShipsDisabled(v), "Schiffe stoßen keine Abgase mehr aus.");
-            _trains = BuildToggle("Zug-Abgase aus", () => Svc?.Pollution?.TrainsDisabled ?? false,
-                v => Svc?.Pollution?.SetTrainsDisabled(v), "Züge stoßen keine Abgase mehr aus.");
+            _air = BuildToggle(L.Umw_Air, () => Svc?.Pollution?.AirDisabled ?? false,
+                v => Svc?.Pollution?.SetAirDisabled(v), L.Umw_AirTip);
+            _water = BuildToggle(L.Umw_Water, () => Svc?.Pollution?.WaterDisabled ?? false,
+                v => Svc?.Pollution?.SetWaterDisabled(v), L.Umw_WaterTip);
+            _landfill = BuildToggle(L.Umw_Landfill, () => Svc?.Pollution?.LandfillDisabled ?? false,
+                v => Svc?.Pollution?.SetLandfillDisabled(v), L.Umw_LandfillTip);
+            _vehicles = BuildToggle(L.Umw_Vehicles, () => Svc?.Pollution?.VehiclesDisabled ?? false,
+                v => Svc?.Pollution?.SetVehiclesDisabled(v), L.Umw_VehiclesTip);
+            _ships = BuildToggle(L.Umw_Ships, () => Svc?.Pollution?.ShipsDisabled ?? false,
+                v => Svc?.Pollution?.SetShipsDisabled(v), L.Umw_ShipsTip);
+            _trains = BuildToggle(L.Umw_Trains, () => Svc?.Pollution?.TrainsDisabled ?? false,
+                v => Svc?.Pollution?.SetTrainsDisabled(v), L.Umw_TrainsTip);
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Verschmutzung"),
+                CheatWidgets.SectionTitle(L.Umw_TitlePollution),
                 BuildMasterToggle(),
 
-                CheatWidgets.SectionTitle("Einzelne Quellen"),
-                _air, _water, _landfill, _vehicles, _ships, _trains
+                CheatWidgets.SectionTitle(L.Umw_TitleSources),
+                CheatWidgets.ToggleGrid(_air, _water, _landfill, _vehicles, _ships, _trains)
             };
 
             column.SetChildren(children.ToArray());
@@ -92,7 +93,7 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildMasterToggle()
         {
             _master = CheatWidgets.NewToggleRow(
-                "Keine Verschmutzung (alles aus)",
+                L.Umw_Master,
                 false,
                 v =>
                 {
@@ -100,9 +101,9 @@ namespace CompanySupplier.UI.Tabs
                     Svc?.Pollution?.SetAllDisabled(v);
                     // Alle Toggles (inkl. Master selbst) aus dem Backend nachziehen — suppress-geschuetzt.
                     CheatUiSync.SyncAll();
-                    CheatMenuStatus.Show(v ? "Verschmutzung AUS" : "Verschmutzung normal");
+                    CheatMenuStatus.Show(v ? L.Umw_StatusOff : L.Umw_StatusNormal);
                 },
-                "Schaltet alle sechs Verschmutzungsquellen auf einmal ab. Bestehende Verschmutzung baut sich danach selbst ab.");
+                L.Umw_MasterTip);
             return _master;
         }
 

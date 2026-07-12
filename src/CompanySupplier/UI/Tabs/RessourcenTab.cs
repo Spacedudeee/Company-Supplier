@@ -9,6 +9,7 @@ using Mafi.Localization;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -37,6 +38,9 @@ namespace CompanySupplier.UI.Tabs
         private ProductProto _selectedProduct;
         private int _quantity = QtyDefault;
         private Slider _qtySlider;
+        // Zeigt die eingestellte Menge als konkrete Zahl ("Menge: 250 Stück") — der Slider selbst
+        // zeigt nur seine Position in Prozent, was die tatsaechliche Stueckzahl verdeckte.
+        private Label _qtyLabel;
         // R5 "Lager-Gottmodus" hat keine Backend-Status-Property -> lokal gehalten.
         private bool _storageGodMode;
         // R5 Zwei-Klick-Bestaetigung: erster Klick schaltet "scharf", zweiter loest aus.
@@ -109,7 +113,7 @@ namespace CompanySupplier.UI.Tabs
             Log.Info($"[{CompanySupplier.ModName}] RessourcenTab: Produktliste nachgeladen ({_products.Count}).");
         }
 
-        public string Name => "Ressourcen";
+        public string Name => L.Tab_Ressourcen;
 
         // Spiel-Asset-Pfad fuer das Lager-/Storages-Toolbar-Icon (Dateiname = EntityProto-Id).
         // String-Pfad ist in 0.8.5.0 die robuste Variante (kein IconStyle mehr); fehlt das Asset,
@@ -139,11 +143,11 @@ namespace CompanySupplier.UI.Tabs
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Ressourcen ins Lager geben"),
+                CheatWidgets.SectionTitle(L.Res_TitleGive),
                 BuildProductDropdown(),     // R1
                 BuildQuantityRow(),          // R2
                 BuildActionButtons(),        // R3 + R4
-                CheatWidgets.SectionTitle("Lager-Werkzeug"),
+                CheatWidgets.SectionTitle(L.Res_TitleTool),
                 BuildGodModeToggle(),        // R5: ALLE Lager auf einmal
                 BuildFillWandToggle(),       // R6: einzelnes Lager fuellen (Welt-Klick)
                 BuildEmptyWandToggle()       // R7: einzelnes Lager leeren (Welt-Klick)
@@ -165,7 +169,7 @@ namespace CompanySupplier.UI.Tabs
                 customButton: null,
                 customBtnHolder: null,
                 doNotUpdateBtnView: false);
-            dropdown.Label(new LocStrFormatted("Produkt"));
+            dropdown.Label(new LocStrFormatted(L.Res_Product));
             // R3-Wunsch: Suchfeld oben im aufgeklappten Dropdown -> Produkte schnell finden.
             // Suche matcht sowohl den angezeigten dt. Namen als auch die (englische) Id -> beide Eingaben treffen.
             dropdown.SetSearchStringLookup((ProductProto proto) => CheatWidgets.ProtoDisplayName(proto) + " " + proto.Id.ToString());
@@ -183,11 +187,14 @@ namespace CompanySupplier.UI.Tabs
         // R2: Mengen-Slider (volle Breite, zeigt die absolute Menge live via ValueFormatter) + Stepper.
         private UiComponent BuildQuantityRow()
         {
+            // Konkrete Mengenanzeige ueber dem Regler (der Regler zeigt nur %).
+            _qtyLabel = new Label(new LocStrFormatted(L.Res_QuantityValue(_quantity)));
+
             _qtySlider = new Slider()
                 .Range(QtyMin, QtyMax)
                 .Value(_quantity, notify: false)
-                .Label(new LocStrFormatted("Menge"))
-                .ValueFormatter(CheatWidgets.UnitFormatter(QtyMin, QtyMax, "Stück"));
+                .Label(LocStrFormatted.Empty)  // Beschriftung liefert jetzt _qtyLabel ("Menge: N Stück")
+                .ValueFormatter(CheatWidgets.UnitFormatter(QtyMin, QtyMax, L.Unit_Pieces));
             _qtySlider.OnValueChanged((OnSliderValueChanged)((oldValue, newValue) =>
                 SetQuantity((int)Math.Round(newValue), updateSlider: false)));
             _qtySlider.FlexGrow(1f);
@@ -201,41 +208,43 @@ namespace CompanySupplier.UI.Tabs
             });
 
             var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
-            col.SetChildren(_qtySlider, stepper);
+            col.SetChildren(_qtyLabel, _qtySlider, stepper);
             return col;
         }
 
-        /// <summary>Setzt die Menge (geklemmt 10..10000); der Slider zeigt sie via ValueFormatter live.</summary>
+        /// <summary>Setzt die Menge (geklemmt 10..10000); aktualisiert Slider-Position und die konkrete
+        /// Mengenanzeige (_qtyLabel).</summary>
         private void SetQuantity(int value, bool updateSlider = true)
         {
             value = Math.Max(QtyMin, Math.Min(QtyMax, value));
             _quantity = value;
             if (updateSlider) _qtySlider?.Value(value, notify: false);
+            if (_qtyLabel is IComponentWithText t) t.SetValue(new LocStrFormatted(L.Res_QuantityValue(value)));
         }
 
         // R3 + R4: zwei Buttons nebeneinander.
         private UiComponent BuildActionButtons()
         {
             var addOne = CheatWidgets.PrimaryButton(
-                "Produkt hinzufügen",
+                L.Res_AddProduct,
                 () =>
                 {
                     if (_selectedProduct != null)
                     {
                         CheatService.Instance?.GiveResource(_selectedProduct, _quantity);
-                        CheatMenuStatus.Show($"{_quantity}x {CheatWidgets.ProtoDisplayName(_selectedProduct)} hinzugefügt");
+                        CheatMenuStatus.Show(L.Res_StatusAdded(_quantity, CheatWidgets.ProtoDisplayName(_selectedProduct)));
                     }
                 },
-                "Legt die eingestellte Menge des gewählten Produkts ins zentrale Lager.");
+                L.Res_AddProductTip);
 
             var addAll = CheatWidgets.GeneralButton(
-                "ALLE Produkte hinzufügen",
+                L.Res_AddAll,
                 () =>
                 {
                     CheatService.Instance?.GiveAllResources(_quantity);
-                    CheatMenuStatus.Show($"{_quantity}x von ALLEN Produkten hinzugefügt");
+                    CheatMenuStatus.Show(L.Res_StatusAddedAll(_quantity));
                 },
-                "Legt die eingestellte Menge von JEDEM spawnbaren Produkt ins Lager.");
+                L.Res_AddAllTip);
 
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(addOne, addAll);
@@ -254,7 +263,7 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildGodModeToggle()
         {
             _godModeToggle = CheatWidgets.NewToggleRow(
-                "ALLE Lager füllen (Vorsicht!)",
+                L.Res_FillAll,
                 _storageGodMode,
                 v =>
                 {
@@ -265,7 +274,7 @@ namespace CompanySupplier.UI.Tabs
                         if (!_godModeArmed)
                         {
                             _godModeArmed = true;
-                            CheatMenuStatus.Show("Sicher? Nochmal klicken zum Bestätigen — füllt ALLE Lager.");
+                            CheatMenuStatus.Show(L.Res_StatusConfirm);
                             // Toggle wieder auf AUS — suppress-geschuetzt gegen Callback-Re-Entry.
                             SetToggleSuppressed(_godModeToggle, false);
                             return;
@@ -275,7 +284,7 @@ namespace CompanySupplier.UI.Tabs
                         _godModeArmed = false;
                         _storageGodMode = true;
                         CheatService.Instance?.Building?.SetAllStoragesGodMode(Storage.StorageCheatMode.KeepFull);
-                        CheatMenuStatus.Show("ALLE Lager auf Gottmodus gesetzt (sofort komplett gefüllt)");
+                        CheatMenuStatus.Show(L.Res_StatusGodOn);
                     }
                     else
                     {
@@ -283,13 +292,10 @@ namespace CompanySupplier.UI.Tabs
                         _godModeArmed = false;
                         _storageGodMode = false;
                         CheatService.Instance?.Building?.SetAllStoragesGodMode(Storage.StorageCheatMode.None);
-                        CheatMenuStatus.Show("Gottmodus für alle Lager AUS (Lagerinhalt bleibt)");
+                        CheatMenuStatus.Show(L.Res_StatusGodOff);
                     }
                 },
-                "VORSICHT: Setzt ALLE Lager im Spiel sofort auf 'immer voll' — jedes Lager wird komplett mit "
-                + "seinem Produkt gefüllt und bleibt voll. Nicht sauber rückgängig (Originalinhalt überschrieben). "
-                + "Zur Sicherheit zweistufig: erst klicken zum Scharfschalten, dann nochmal zum Auslösen. "
-                + "Für einzelne Lager stattdessen den 'Lager-Zauberstab' (anklicken) nutzen.");
+                L.Res_FillAllTip);
             return _godModeToggle;
         }
 
@@ -298,11 +304,10 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildFillWandToggle()
         {
             _fillWandToggle = CheatWidgets.NewToggleRow(
-                "Lager füllen (anklicken)",
+                L.Res_FillWand,
                 false,
                 v => OnWandToggleChanged(Storage.StorageCheatMode.KeepFull, v),
-                "Aktiv: ein einzelnes Lager im Spiel anklicken füllt es dauerhaft (KeepFull, klick = an/aus). "
-                + "Nur EIN Lager-Werkzeug gleichzeitig — schaltet 'Lager leeren' automatisch ab.");
+                L.Res_FillWandTip);
             return _fillWandToggle;
         }
 
@@ -312,12 +317,10 @@ namespace CompanySupplier.UI.Tabs
         private UiComponent BuildEmptyWandToggle()
         {
             _emptyWandToggle = CheatWidgets.NewToggleRow(
-                "Lager leeren (anklicken)",
+                L.Res_EmptyWand,
                 false,
                 v => OnWandToggleChanged(Storage.StorageCheatMode.KeepEmpty, v),
-                "Aktiv: ein einzelnes Lager im Spiel anklicken leert es EINMALIG (Inhalt raus) — z. B. für "
-                + "Atommüll. Das Lager läuft danach normal weiter (wird NICHT dauerhaft leer gehalten). "
-                + "Nur EIN Lager-Werkzeug gleichzeitig — schaltet 'Lager füllen' automatisch ab.");
+                L.Res_EmptyWandTip);
             return _emptyWandToggle;
         }
 
@@ -330,8 +333,10 @@ namespace CompanySupplier.UI.Tabs
         private void OnWandToggleChanged(Storage.StorageCheatMode mode, bool on)
         {
             if (_suppress) return;
-            string label = mode == Storage.StorageCheatMode.KeepEmpty ? "leeren" : "füllen";
-            var otherToggle = mode == Storage.StorageCheatMode.KeepEmpty ? _fillWandToggle : _emptyWandToggle;
+            // Ganze (lokalisierte) Saetze pro Modus statt ein interpoliertes Wort — sonst braeche die
+            // Grammatik in anderen Sprachen ("Lager {leeren} AN" laesst sich nicht 1:1 uebersetzen).
+            bool isEmpty = mode == Storage.StorageCheatMode.KeepEmpty;
+            var otherToggle = isEmpty ? _fillWandToggle : _emptyWandToggle;
 
             if (on)
             {
@@ -342,13 +347,13 @@ namespace CompanySupplier.UI.Tabs
                     // Den anderen Toggle optisch abwaehlen — suppress-geschuetzt, damit ein evtl.
                     // gefeuerter Callback keinen Backend-Aufruf ausloest.
                     SetToggleSuppressed(otherToggle, false);
-                    CheatMenuStatus.Show($"Lager {label} AN — ein Lager im Spiel anklicken");
+                    CheatMenuStatus.Show(isEmpty ? L.Res_StatusEmptyWandOn : L.Res_StatusFillWandOn);
                 }
                 else
                 {
                     // DI-Teil fehlt: Toggle wieder zuruecksetzen, Zustand unveraendert lassen.
-                    SetToggleSuppressed(mode == Storage.StorageCheatMode.KeepEmpty ? _emptyWandToggle : _fillWandToggle, false);
-                    CheatMenuStatus.Show($"Lager-Werkzeug ({label}) nicht verfügbar");
+                    SetToggleSuppressed(isEmpty ? _emptyWandToggle : _fillWandToggle, false);
+                    CheatMenuStatus.Show(isEmpty ? L.Res_StatusEmptyWandUnavail : L.Res_StatusFillWandUnavail);
                 }
             }
             else
@@ -359,7 +364,7 @@ namespace CompanySupplier.UI.Tabs
                 {
                     CheatService.Instance?.SetStorageWandActive(false, mode);
                     _activeWandMode = null;
-                    CheatMenuStatus.Show($"Lager {label} AUS");
+                    CheatMenuStatus.Show(isEmpty ? L.Res_StatusEmptyWandOff : L.Res_StatusFillWandOff);
                 }
             }
         }

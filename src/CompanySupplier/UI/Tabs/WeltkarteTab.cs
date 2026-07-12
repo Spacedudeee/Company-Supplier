@@ -4,6 +4,7 @@ using Mafi;
 using Mafi.Unity.UiToolkit.Component;
 using Mafi.Unity.UiToolkit.Library;
 using CompanySupplier.UI;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI.Tabs
 {
@@ -41,7 +42,7 @@ namespace CompanySupplier.UI.Tabs
             finally { _suppress = false; }
         }
 
-        public string Name => "Weltkarte";
+        public string Name => L.Tab_Weltkarte;
 
         // WorldMap-Toolbar-Icon — die buchstaebliche Weltkarte (rendert auch bei Wetter als Fallback).
         public string IconPath => "Assets/Unity/UserInterface/Toolbar/WorldMap.svg";
@@ -56,44 +57,44 @@ namespace CompanySupplier.UI.Tabs
 
             // Toggles erst in ihre Felder bauen (Collection-Initializer erlauben keine Zuweisung).
             _unlimitedMines = CheatWidgets.NewToggleRow(
-                "Unbegrenzte Welt-Minen",
+                L.Wlt_UnlimitedMines,
                 Svc?.WorldMap?.UnlimitedMines ?? false,
                 v => { if (!_suppress) Svc?.WorldMap?.SetUnlimitedMines(v); },
-                "Welt-Minen-Vorkommen erschöpfen nicht mehr.");
+                L.Wlt_UnlimitedMinesTip);
             _minesNoUnity = CheatWidgets.NewToggleRow(
-                "Welt-Minen ohne Unity betreiben",
+                L.Wlt_MinesNoUnity,
                 Svc?.WorldMap?.MinesNoUnity ?? false,
                 v => { if (!_suppress) Svc?.WorldMap?.SetMinesNoUnity(v); },
-                "Welt-Minen laufen, ohne Unity zu verbrauchen.");
+                L.Wlt_MinesNoUnityTip);
             _minesEffMax = CheatWidgets.NewToggleRow(
-                "Welt-Minen-Effizienz max",
+                L.Wlt_MinesEffMax,
                 Svc?.WorldMap?.MinesEfficiencyMax ?? false,
                 v => { if (!_suppress) Svc?.WorldMap?.SetMinesEfficiencyMax(v); },
-                "Erhöht die Förderleistung der Welt-Minen deutlich.");
+                L.Wlt_MinesEffMaxTip);
             _tradeBoost = CheatWidgets.NewToggleRow(
-                "Handel boosten",
+                L.Wlt_TradeBoost,
                 Svc?.WorldMap?.TradeBoosted ?? false,
                 v => { if (!_suppress) Svc?.WorldMap?.SetTradeBoost(v); },
-                "Mehr Handelsvolumen und Kontrakt-Gewinn; Kontrakte kosten keine Unity mehr.");
+                L.Wlt_TradeBoostTip);
 
             var children = new List<UiComponent>
             {
-                CheatWidgets.SectionTitle("Karte"),
+                CheatWidgets.SectionTitle(L.Wlt_TitleMap),
                 CheatWidgets.PrimaryButton(
-                    "Ganze Karte aufdecken",
+                    L.Wlt_RevealMap,
                     () =>
                     {
                         Svc?.WorldMap?.RevealMap();
-                        CheatMenuStatus.Show("Weltkarte komplett aufgedeckt");
+                        CheatMenuStatus.Show(L.Wlt_StatusRevealed);
                     },
-                    "Deckt die gesamte Weltkarte auf und löst alle Welt-Entitäten auf."),
+                    L.Wlt_RevealMapTip),
 
-                CheatWidgets.SectionTitle("Welt-Minen"),
+                CheatWidgets.SectionTitle(L.Wlt_TitleMines),
                 _unlimitedMines,
                 _minesNoUnity,
                 _minesEffMax,
 
-                CheatWidgets.SectionTitle("Handel"),
+                CheatWidgets.SectionTitle(L.Wlt_TitleTrade),
                 _tradeBoost
             };
 

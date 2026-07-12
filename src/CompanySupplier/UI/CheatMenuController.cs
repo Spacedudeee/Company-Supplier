@@ -4,6 +4,7 @@ using Mafi.Unity;
 using Mafi.Unity.InputControl;
 using Mafi.Unity.UiToolkit.Library;
 using UnityEngine;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.UI
 {
@@ -65,7 +66,7 @@ namespace CompanySupplier.UI
                 if (svc?.Config?.AutoRestore == true && svc.Config.Toggles != null && svc.Config.Toggles.Count > 0)
                 {
                     svc.ApplyState(svc.Config.Toggles);
-                    CheatMenuStatus.Show("Gespeicherter Cheat-Zustand wiederhergestellt");
+                    CheatMenuStatus.Show(L.Ctrl_StatusAutoRestored);
                 }
             }
             catch (Exception ex)

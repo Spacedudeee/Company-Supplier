@@ -5,6 +5,7 @@ using Mafi.Unity;
 using Mafi.Unity.InputControl;
 using UnityEngine;
 using CompanySupplier.Cheats;
+using CompanySupplier.Localization;
 
 namespace CompanySupplier.Tools
 {
@@ -112,7 +113,7 @@ namespace CompanySupplier.Tools
                         // "Leeren"-Werkzeug: Lager EINMALIG leeren (Inhalt raus), KEIN Dauer-Modus -> das Lager
                         // laeuft danach normal weiter (z. B. Atommuell entsorgen, ohne es dauerhaft leer zu halten).
                         _tool.ClearStorage(storage);
-                        UI.CheatMenuStatus.Show($"Lager {storage.Id}: geleert");
+                        UI.CheatMenuStatus.Show(L.Wand_StorageEmptied(storage.Id));
                     }
                     else
                     {
@@ -120,8 +121,8 @@ namespace CompanySupplier.Tools
                         // liefern). ToggleMode liefert den TATSAECHLICH aktiven Modus (unveraendert bei Fehler).
                         var mode = _tool.ToggleMode(storage, TargetMode);
                         UI.CheatMenuStatus.Show(mode == Storage.StorageCheatMode.None
-                            ? $"Lager {storage.Id}: normal (Cheat AUS)"
-                            : $"Lager {storage.Id}: Gott-Modus AN (liefert unendlich)");
+                            ? L.Wand_StorageNormal(storage.Id)
+                            : L.Wand_StorageGodOn(storage.Id));
                     }
                     return true;
                 }
