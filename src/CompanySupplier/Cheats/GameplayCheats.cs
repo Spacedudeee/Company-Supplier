@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Mafi;
 using Mafi.Core;                       // IdsCore.PropertyIds, PropertyId<T>
 using Mafi.Core.PropertiesDb;          // IPropertiesDb, IProperty<T>, PropertyModifiers, PropertyModifier<T>
+using Mafi.Core.Prototypes;            // ProtosDb (Sonderfall Zug-Leistung: direkter Proto-Edit)
+using Mafi.Core.Trains;                // LocomotiveProto (EnginePowerKw)
 
 namespace CompanySupplier.Cheats
 {
@@ -19,6 +23,12 @@ namespace CompanySupplier.Cheats
     ///  - Wohnkapazitaet x10              : HousingCapacityMultiplier   (+900%).
     ///
     /// Robustheit: PropertiesDb via TryResolve; jeder Zugriff null-guarded + try/catch + Log.Warning.
+    ///
+    /// Ausnahme "Zug-Leistung x10": der PropertyId <c>TrainPowerMultiplier</c> ist in 0.8.5.0 zwar in
+    /// <c>IdsCore.PropertyIds</c> deklariert, aber NICHT in der Laufzeit-PropertiesDb registriert
+    /// (<c>GetProperty</c> wirft "Key not found") -> stattdessen direkter Proto-Edit auf
+    /// <c>LocomotiveProto.EnginePowerKw</c> (ProtosDb + Reflection + Snapshot/Reset), Muster wie
+    /// <see cref="TerrainCheats.SetUnlimitedFertility"/>.
     /// </summary>
     public sealed class GameplayCheats
     {
@@ -31,7 +41,6 @@ namespace CompanySupplier.Cheats
         private const string OwnerMaintCons   = "CompanySupplier.Gameplay.MaintConsume";
         private const string OwnerFarmWater   = "CompanySupplier.Gameplay.FarmWater";
         private const string OwnerUnityProd   = "CompanySupplier.Gameplay.UnityProd";
-        private const string OwnerTrainPower  = "CompanySupplier.Gameplay.TrainPower";
         private const string OwnerTrainSlope  = "CompanySupplier.Gameplay.TrainSlope";
         private const string OwnerLogiPower   = "CompanySupplier.Gameplay.LogisticsPower";
         private const string OwnerRecycling   = "CompanySupplier.Gameplay.Recycling";
@@ -46,11 +55,16 @@ namespace CompanySupplier.Cheats
 
         private readonly DependencyResolver _resolver;
         private IPropertiesDb _db;
+        private ProtosDb _protos;
+
+        // Original-Motorleistung je LocomotiveProto-Id (gesnapshottet VOR dem Zug-Leistung-Override) -> Reset.
+        private readonly Dictionary<string, MechPower> _origLocoPower = new Dictionary<string, MechPower>();
 
         public GameplayCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
             _resolver.TryResolve<IPropertiesDb>(out _db);
+            _resolver.TryResolve<ProtosDb>(out _protos);
         }
 
         // ---- oeffentliche Hebel -------------------------------------------------------------------
@@ -84,8 +98,9 @@ namespace CompanySupplier.Cheats
         public bool UnityProductionBoost     => HasPercent(IdsCore.PropertyIds.UnityProductionMultiplier, OwnerUnityProd);
         public void SetUnityProductionBoost(bool v) => SetPercent(IdsCore.PropertyIds.UnityProductionMultiplier, OwnerUnityProd, 900, v, "Unity-Produktion x10");
 
-        public bool TrainPowerBoost          => HasPercent(IdsCore.PropertyIds.TrainPowerMultiplier, OwnerTrainPower);
-        public void SetTrainPowerBoost(bool v) => SetPercent(IdsCore.PropertyIds.TrainPowerMultiplier, OwnerTrainPower, 900, v, "Zug-Leistung x10");
+        // Zug-Leistung x10: Sonderfall (dead PropertyId in 0.8.5.0) -> direkter Proto-Edit, s. Klassen-Doku.
+        public bool TrainPowerBoost          => _origLocoPower.Count > 0;
+        public void SetTrainPowerBoost(bool v) => SetLocomotivePowerBoost(v);
 
         public bool TrainsIgnoreSlopes       => HasPercent(IdsCore.PropertyIds.TrainSlopeDifficultyMultiplier, OwnerTrainSlope);
         public void SetTrainsIgnoreSlopes(bool v) => SetPercent(IdsCore.PropertyIds.TrainSlopeDifficultyMultiplier, OwnerTrainSlope, -100, v, "Zuege: Steigungen ignorieren");
@@ -122,6 +137,39 @@ namespace CompanySupplier.Cheats
         // Maschinen verlieren bei Defekt kein Tempo: das bool-Property SlowDownIfBroken auf false zwingen.
         public bool NoSlowdownWhenBroken     => HasBool(IdsCore.PropertyIds.SlowDownIfBroken, OwnerNoBreakSlow);
         public void SetNoSlowdownWhenBroken(bool v) => SetBool(IdsCore.PropertyIds.SlowDownIfBroken, OwnerNoBreakSlow, false, v, "Kein Tempoverlust bei Defekt");
+
+        // ---- Sonderfall Zug-Leistung (Proto-Edit statt PropertyId, s. Klassen-Doku) ---------------
+
+        /// <summary>Zug-Leistung x10: skaliert je <see cref="LocomotiveProto"/> das (readonly) Feld
+        /// <c>EnginePowerKw</c> per Reflection auf das Zehnfache -> hoehere Zugkraft (fliesst ueber
+        /// <c>ComputeTractiveEffort</c> ein). Snapshot beim ersten Edit -> Reset stellt das Original wieder her.
+        /// Protos werden je Sitzung neu gebaut (nicht im Save), daher In-Memory-Snapshot.</summary>
+        private void SetLocomotivePowerBoost(bool on)
+        {
+            if (_protos == null) return;
+            try
+            {
+                foreach (var loco in _protos.Filter<LocomotiveProto>(_ => true))
+                {
+                    FieldInfo fi = loco.GetType().GetField("EnginePowerKw",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (fi == null) continue;
+                    string id = loco.Id.ToString();
+                    if (on)
+                    {
+                        if (!_origLocoPower.ContainsKey(id)) _origLocoPower[id] = (MechPower)fi.GetValue(loco);
+                        fi.SetValue(loco, _origLocoPower[id] * 10);   // x10 Motorleistung
+                    }
+                    else if (_origLocoPower.TryGetValue(id, out MechPower orig))
+                    {
+                        fi.SetValue(loco, orig);
+                    }
+                }
+                if (!on) _origLocoPower.Clear();
+                Log.Info($"[{CompanySupplier.ModName}] Zug-Leistung x10 = {on}.");
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] SetLocomotivePowerBoost: {ex.Message}"); }
+        }
 
         // ---- generische Helfer (ein IProperty<T>-Cache pro Aufruf; robust) ------------------------
 
