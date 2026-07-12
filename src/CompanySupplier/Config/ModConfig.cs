@@ -163,6 +163,13 @@ namespace CompanySupplier.Config
         public const string ProdNoOilDrain      = "prod.noOilDrain";
         public const string PipeSlopes          = "pipe.slopes";
 
+        public const string TrainsNoFuel        = "gameplay.trainsNoFuel";
+        public const string FreeBuild           = "gameplay.freeBuild";
+        public const string MachineLowPower     = "gameplay.machineLowPower";
+        public const string MachineLowComputing = "gameplay.machineLowComputing";
+        public const string NoConsumption       = "gameplay.noConsumption";
+        public const string HousingCapacity     = "gameplay.housingCapacity";
+
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";
         public const string WorldMinesEffMax    = "world.minesEffMax";

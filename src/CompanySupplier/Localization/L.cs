@@ -145,6 +145,14 @@ namespace CompanySupplier.Localization
         public static string Gen_WorldgenUnlockTip => Loc.T("Fixes the worldgen bug: unlocks sugar cane/poppy/corn seeds and radar 2.", "Behebt den WorldGen-Bug: schaltet Zuckerrohr-/Mohn-/Mais-Saatgut und Radar 2 frei.", "Corrige le bug worldgen : débloque les graines de canne à sucre/pavot/maïs et le radar 2.", "Corrige el error de worldgen: desbloquea semillas de caña de azúcar/amapola/maíz y radar 2.");
         public static string Gen_StatusPopulationSet(object a0) => string.Format(Loc.T("Population set to {0}", "Bevölkerung auf {0} gesetzt", "Population définie sur {0}", "Población establecida en {0}"), a0);
         public static string Gen_StatusWorldgen => Loc.T("WorldGen fixes applied", "WorldGen-Fixes angewendet", "Correctifs WorldGen appliqués", "Correcciones de WorldGen aplicadas");
+        public static string Gen_FreeBuild => Loc.T("Free build (no material cost)", "Gratis-Bau (keine Materialkosten)", "Construction gratuite (sans matériaux)", "Construcción gratis (sin materiales)");
+        public static string Gen_FreeBuildTip => Loc.T("Buildings and upgrades no longer cost any products (complements instant build).", "Gebäude und Upgrades kosten keine Produkte mehr (ergänzt Sofortbau).", "Les bâtiments et améliorations ne coûtent plus de produits (complète la construction instantanée).", "Los edificios y mejoras ya no cuestan productos (complementa la construcción instantánea).");
+        public static string Gen_NoConsumption => Loc.T("Settlements need no goods", "Siedlungen brauchen keine Güter", "Les colonies n'ont besoin d'aucun bien", "Los asentamientos no necesitan bienes");
+        public static string Gen_NoConsumptionTip => Loc.T("Settlements no longer consume food/consumer goods.", "Siedlungen verbrauchen keine Lebensmittel/Konsumgüter mehr.", "Les colonies ne consomment plus de nourriture/biens de consommation.", "Los asentamientos ya no consumen alimentos/bienes de consumo.");
+        public static string Gen_HousingCapacity => Loc.T("Housing capacity ×10", "Wohnkapazität ×10", "Capacité de logement ×10", "Capacidad de vivienda ×10");
+        public static string Gen_HousingCapacityTip => Loc.T("Multiplies every housing building's capacity by ten.", "Verzehnfacht die Wohnkapazität aller Wohngebäude.", "Multiplie par dix la capacité de tous les logements.", "Multiplica por diez la capacidad de todas las viviendas.");
+        public static string Gen_FreeWorkers => Loc.T("Free workers", "Freie Arbeiter", "Ouvriers libres", "Trabajadores libres");
+        public static string Gen_StatusWorkers(object a0) => string.Format(Loc.T("{0} free workers", "{0} freie Arbeiter", "{0} ouvriers libres", "{0} trabajadores libres"), a0);
 
         // ---- Erz ----
         public static string Erz_TitlePower => Loc.T("Free power (KW) per tick", "Gratis-Strom (KW) pro Tick", "Électricité gratuite (KW) par tick", "Electricidad gratis (KW) por tick");
@@ -193,6 +201,8 @@ namespace CompanySupplier.Localization
         public static string Fzg_StatusStatsReset => Loc.T("Vehicle stats reset", "Fahrzeug-Stats zurückgesetzt", "Stats de véhicule réinitialisées", "Estadísticas de vehículo restablecidas");
         public static string Fzg_StatusWagonCapSet(object a0, object a1) => string.Format(Loc.T("Wagon capacity {0} = {1}", "Waggon-Kapazität {0} = {1}", "Capacité du wagon {0} = {1}", "Capacidad de vagón {0} = {1}"), a0, a1);
         public static string Fzg_StatusWagonReset => Loc.T("Wagon capacity reset", "Waggon-Kapazität zurückgesetzt", "Capacité du wagon réinitialisée", "Capacidad de vagón restablecida");
+        public static string Fzg_TrainsNoFuel => Loc.T("Trains: no fuel", "Züge: kein Treibstoff", "Trains : pas de carburant", "Trenes: sin combustible");
+        public static string Fzg_TrainsNoFuelTip => Loc.T("Trains consume no fuel (diesel).", "Züge verbrauchen keinen Treibstoff (Diesel).", "Les trains ne consomment pas de carburant (diesel).", "Los trenes no consumen combustible (diésel).");
 
         // ---- Gel ----
         public static string Gel_Material => Loc.T("Material", "Material", "Matériau", "Material");
@@ -315,6 +325,10 @@ namespace CompanySupplier.Localization
         public static string Prod_TitlePipes => Loc.T("Pipes (Harmony)", "Rohre (Harmony)", "Tuyaux (Harmony)", "Tuberías (Harmony)");
         public static string Prod_PipeSlopes => Loc.T("Build pipes along slopes", "Rohre entlang Hängen bauen", "Construire des tuyaux le long des pentes", "Construir tuberías en pendientes");
         public static string Prod_PipeSlopesTip => Loc.T("Pipe/transport start & end tiles may sit on a slope (need not be flat).", "Start-/Zielkachel von Rohren/Transporten darf auf einem Hang liegen (muss nicht eben sein).", "Les cases de début/fin des tuyaux/transports peuvent être sur une pente (pas besoin d'être plates).", "Las casillas de inicio/fin de tuberías/transportes pueden estar en una pendiente (no necesitan ser planas).");
+        public static string Prod_MachineLowPower => Loc.T("Full speed on low power", "Volle Leistung bei Strommangel", "Pleine vitesse en cas de manque d'énergie", "Máxima velocidad con poca energía");
+        public static string Prod_MachineLowPowerTip => Loc.T("Machines keep running at full speed during a power shortage.", "Maschinen laufen bei Stromknappheit weiter mit voller Geschwindigkeit.", "Les machines continuent à pleine vitesse en cas de pénurie d'énergie.", "Las máquinas siguen a máxima velocidad durante la escasez de energía.");
+        public static string Prod_MachineLowComputing => Loc.T("Full speed on low computing", "Volle Leistung bei Computing-Mangel", "Pleine vitesse en cas de manque de calcul", "Máxima velocidad con poco cómputo");
+        public static string Prod_MachineLowComputingTip => Loc.T("Machines keep running at full speed when computing is insufficient.", "Maschinen laufen bei Rechenleistungs-Mangel weiter mit voller Geschwindigkeit.", "Les machines continuent à pleine vitesse en cas de manque de calcul.", "Las máquinas siguen a máxima velocidad cuando falta cómputo.");
 
         // ---- Wet ----
         public static string Wet_TitleFix => Loc.T("Lock Weather Permanently", "Wetter dauerhaft fixieren", "Fixer la météo en permanence", "Fijar el clima de forma permanente");

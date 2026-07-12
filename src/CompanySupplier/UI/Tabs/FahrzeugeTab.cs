@@ -64,6 +64,7 @@ namespace CompanySupplier.UI.Tabs
 
         // V1-Toggle als Feld + Suppress-Flag fuer den zentralen UI-Sync (CheatUiSync).
         private Toggle _fuelToggle;
+        private Toggle _trainsNoFuelToggle;
         private bool _suppress;
 
         public FahrzeugeTab()
@@ -88,6 +89,7 @@ namespace CompanySupplier.UI.Tabs
             try
             {
                 _fuelToggle?.Value(CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false);
+                _trainsNoFuelToggle?.Value(CheatService.Instance?.Gameplay?.TrainsNoFuel ?? false);
                 RefreshLimit();
                 RefreshCapacityLabels();
                 RefreshStatsInfo();
@@ -113,6 +115,7 @@ namespace CompanySupplier.UI.Tabs
             {
                 CheatWidgets.SectionTitle(L.Fzg_TitleFuel),
                 BuildFuelToggle(),              // V1
+                BuildTrainsNoFuelToggle(),      // V1: Zuege kein Treibstoff
 
                 CheatWidgets.SectionTitle(L.Fzg_TitleLimit),
                 BuildVehicleLimitSection(),     // V2: aktuelles Limit + Zahlenfeld + Stepper
@@ -144,6 +147,17 @@ namespace CompanySupplier.UI.Tabs
                 v => { if (!_suppress) CheatService.Instance?.FleetVehicle?.SetFuelConsumptionDisabled(v); },
                 L.Fzg_FuelTip);
             return _fuelToggle;
+        }
+
+        // V1: Zuege verbrauchen keinen Treibstoff (Diesel). Gespiegelt vom zentralen Sync (SyncFromState).
+        private UiComponent BuildTrainsNoFuelToggle()
+        {
+            _trainsNoFuelToggle = CheatWidgets.NewToggleRow(
+                L.Fzg_TrainsNoFuel,
+                CheatService.Instance?.Gameplay?.TrainsNoFuel ?? false,
+                v => { if (!_suppress) CheatService.Instance?.Gameplay?.SetTrainsNoFuel(v); },
+                L.Fzg_TrainsNoFuelTip);
+            return _trainsNoFuelToggle;
         }
 
         // V2: aktuelles Limit (Label) + absolutes Zahlenfeld + ±Stepper. Alle drei aktualisieren das Label.

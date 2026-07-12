@@ -28,6 +28,7 @@ namespace CompanySupplier.Cheats
         private SettlementsManager _settlements;   // Mafi.Core.Buildings.Settlements — AddPops/RemovePopsAsMuchAs
         private UpointsManager _upoints;           // Mafi.Core.Population — GenerateUnity
         private PopsHealthManager _popsHealth;     // Mafi.Core.Population — DisableDiseases / CurrentDisease
+        private WorkersManager _workers;           // Mafi.Core.Population — Cheat_addWorkers (freie Arbeiter)
         private ICalendar _calendar;               // Mafi.Core.Simulation — NewDay-Event
 
         /// <summary>true = neu auftretende Seuchen werden taeglich automatisch beendet.</summary>
@@ -51,6 +52,7 @@ namespace CompanySupplier.Cheats
             _resolver.TryResolve<SettlementsManager>(out _settlements);
             _resolver.TryResolve<UpointsManager>(out _upoints);
             _resolver.TryResolve<PopsHealthManager>(out _popsHealth);
+            _resolver.TryResolve<WorkersManager>(out _workers);
             _resolver.TryResolve<ICalendar>(out _calendar);
 
             // Taeglicher Hook: beendet aktive Seuchen bzw. haelt die Zufriedenheit oben, solange aktiv.
@@ -111,6 +113,29 @@ namespace CompanySupplier.Cheats
         public int GetTotalPopulation()
         {
             try { return _settlements?.GetTotalPopulation() ?? -1; }
+            catch { return -1; }
+        }
+
+        /// <summary>Fuegt <paramref name="count"/> freie Arbeiter direkt in den Arbeitskraeftepool ein — ohne
+        /// Wohnraum/Bevoelkerung. Nutzt die public Cheat-API <c>WorkersManager.Cheat_addWorkers</c> (0.8.5.0).</summary>
+        public void AddWorkers(int count)
+        {
+            if (_workers == null || count == 0) return;
+            try
+            {
+                _workers.Cheat_addWorkers(count);
+                Log.Info($"[{CompanySupplier.ModName}] {(count > 0 ? "+" : "")}{count} freie Arbeiter.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] AddWorkers({count}): {ex.Message}");
+            }
+        }
+
+        /// <summary>Aktuell freie Arbeiter (fuer die UI-Anzeige), oder -1 wenn der Manager fehlt.</summary>
+        public int GetFreeWorkers()
+        {
+            try { return _workers?.AmountOfFreeWorkers ?? -1; }
             catch { return -1; }
         }
 

@@ -29,6 +29,9 @@ namespace CompanySupplier.UI.Tabs
         // Weitere Zustands-Toggles dieses Tabs — Referenzen fuer den zentralen UI-Sync (CheatUiSync).
         private Toggle _master, _uncapped, _sourceSink, _godWand, _diseases, _happiness, _keepUnity;
 
+        // Gameplay-Hebel-Toggles (Gratis-Bau, Siedlungsverbrauch, Wohnkapazitaet) — ebenfalls per CheatUiSync nachgezogen.
+        private Toggle _freeBuild, _noConsumption, _housingCapacity;
+
         // Forschungs-Toggles (Voraussetzungen ignorieren) — ebenfalls per CheatUiSync nachgezogen.
         private Toggle _researchIgnoreItems, _researchIgnoreParents;
 
@@ -76,6 +79,10 @@ namespace CompanySupplier.UI.Tabs
 
                 _researchIgnoreItems?.Value(Svc?.Research?.IgnoreItemRequirements ?? false);
                 _researchIgnoreParents?.Value(Svc?.Research?.IgnoreParentRequirements ?? false);
+
+                _freeBuild?.Value(Svc?.Gameplay?.FreeBuild ?? false);
+                _noConsumption?.Value(Svc?.Gameplay?.NoSettlementConsumption ?? false);
+                _housingCapacity?.Value(Svc?.Gameplay?.HousingCapacityBoost ?? false);
             }
             finally { _suppress = false; }
         }
@@ -119,6 +126,17 @@ namespace CompanySupplier.UI.Tabs
                 v => Svc?.SetMaintenanceDisabled(v),
                 L.Gen_NoMaintenanceTip);
 
+            // Gameplay-Hebel: Gratis-Bau (bei "Bau & Betrieb"), Siedlungsverbrauch + Wohnkapazitaet (bei Bevoelkerung).
+            _freeBuild = BuildIgnoreToggle(L.Gen_FreeBuild, () => Svc?.Gameplay?.FreeBuild ?? false,
+                v => Svc?.Gameplay?.SetFreeBuild(v),
+                L.Gen_FreeBuildTip);
+            _noConsumption = BuildIgnoreToggle(L.Gen_NoConsumption, () => Svc?.Gameplay?.NoSettlementConsumption ?? false,
+                v => Svc?.Gameplay?.SetNoSettlementConsumption(v),
+                L.Gen_NoConsumptionTip);
+            _housingCapacity = BuildIgnoreToggle(L.Gen_HousingCapacity, () => Svc?.Gameplay?.HousingCapacityBoost ?? false,
+                v => Svc?.Gameplay?.SetHousingCapacityBoost(v),
+                L.Gen_HousingCapacityTip);
+
             var children = new List<UiComponent>
             {
                 CheatWidgets.SectionTitle(L.Gen_TitleCreative),
@@ -128,7 +146,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(_noPower, _noWorkers, _noComputing, _noUnity, _noFood),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleBuildOps),
-                CheatWidgets.ToggleGrid(_instaBuild, _noFuel, _noMaintenance),
+                CheatWidgets.ToggleGrid(_instaBuild, _freeBuild, _noFuel, _noMaintenance),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleSpeed),
                 BuildSpeedButtons(),
@@ -141,9 +159,11 @@ namespace CompanySupplier.UI.Tabs
                 BuildGodWandToggle(),
 
                 CheatWidgets.SectionTitle(L.Gen_TitlePopulation),
-                CheatWidgets.ToggleGrid(BuildDiseasesToggle(), BuildHappinessToggle(), BuildKeepUnityToggle()),
+                CheatWidgets.ToggleGrid(BuildDiseasesToggle(), BuildHappinessToggle(), BuildKeepUnityToggle(),
+                    _noConsumption, _housingCapacity),
                 CheatWidgets.SectionTitle(L.Gen_TitleAddPopulation),
                 BuildPopulationStepper(),
+                BuildFreeWorkersControl(),
                 BuildPopulationSetRow(),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleResearch),
@@ -317,6 +337,20 @@ namespace CompanySupplier.UI.Tabs
                 { 50, d => CheatService.Instance?.Population?.AddPopulation(d) },
             };
             return CheatWidgets.NewIncrementButtonGroup(steps);
+        }
+
+        // Freie Arbeiter ±100/±1000 -> Population.AddWorkers(int); negative Werte entfernen Arbeiter.
+        private UiComponent BuildFreeWorkersControl()
+        {
+            var caption = new Label(new LocStrFormatted(L.Gen_FreeWorkers));
+            var steps = new Dictionary<int, Action<int>>
+            {
+                { 100,  n => { CheatService.Instance?.Population?.AddWorkers(n); CheatMenuStatus.Show(L.Gen_StatusWorkers(CheatService.Instance?.Population?.GetFreeWorkers() ?? 0)); } },
+                { 1000, n => { CheatService.Instance?.Population?.AddWorkers(n); CheatMenuStatus.Show(L.Gen_StatusWorkers(CheatService.Instance?.Population?.GetFreeWorkers() ?? 0)); } },
+            };
+            var column = new Column((Px)CheatWidgets.Gap);
+            column.SetChildren(caption, CheatWidgets.NewIncrementButtonGroup(steps));
+            return column;
         }
 
         // Bevölkerung absolut auf einen eingegebenen Wert setzen.

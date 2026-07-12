@@ -70,6 +70,7 @@ namespace CompanySupplier
         public Cheats.BoostCheats        Boost        { get; private set; }
         public Cheats.StorageThroughputCheats StorageThroughput { get; private set; }
         public Cheats.StorageLabelCheats      StorageLabels     { get; private set; }
+        public Cheats.GameplayCheats          Gameplay          { get; private set; }
 
         private CheatService(DependencyResolver resolver) => _resolver = resolver;
 
@@ -111,6 +112,7 @@ namespace CompanySupplier
             Boost        = TryCreate(() => new Cheats.BoostCheats(_resolver),        nameof(Cheats.BoostCheats));
             StorageThroughput = TryCreate(() => new Cheats.StorageThroughputCheats(_resolver), nameof(Cheats.StorageThroughputCheats));
             StorageLabels     = TryCreate(() => new Cheats.StorageLabelCheats(_resolver),      nameof(Cheats.StorageLabelCheats));
+            Gameplay          = TryCreate(() => new Cheats.GameplayCheats(_resolver),          nameof(Cheats.GameplayCheats));
             // StorageToolCheats ist jetzt [GlobalDependency] (der StorageWandController bekommt es per DI
             // injiziert) -> hier DIESELBE DI-Instanz holen statt einer zweiten via new.
             StorageTool  = Resolve<Cheats.StorageToolCheats>(nameof(Cheats.StorageToolCheats));
@@ -375,6 +377,14 @@ namespace CompanySupplier
 
                 // Pipe-Cheat (Harmony): statischer Schalter, den der InitPathFinding-Patch pro Aufruf liest.
                 new ToggleEntry { Key = ConfigKeys.PipeSlopes,         Apply = v => HarmonyIntegration.PipeCheats.BuildAlongSlopes = v, Read = () => HarmonyIntegration.PipeCheats.BuildAlongSlopes },
+
+                // Gameplay-Hebel (globale PropertyId-Toggles).
+                new ToggleEntry { Key = ConfigKeys.TrainsNoFuel,       Apply = v => Gameplay?.SetTrainsNoFuel(v),      Read = () => Gameplay?.TrainsNoFuel ?? false },
+                new ToggleEntry { Key = ConfigKeys.FreeBuild,          Apply = v => Gameplay?.SetFreeBuild(v),         Read = () => Gameplay?.FreeBuild ?? false },
+                new ToggleEntry { Key = ConfigKeys.MachineLowPower,    Apply = v => Gameplay?.SetMachineFullOnLowPower(v),     Read = () => Gameplay?.MachineFullOnLowPower ?? false },
+                new ToggleEntry { Key = ConfigKeys.MachineLowComputing,Apply = v => Gameplay?.SetMachineFullOnLowComputing(v), Read = () => Gameplay?.MachineFullOnLowComputing ?? false },
+                new ToggleEntry { Key = ConfigKeys.NoConsumption,      Apply = v => Gameplay?.SetNoSettlementConsumption(v),   Read = () => Gameplay?.NoSettlementConsumption ?? false },
+                new ToggleEntry { Key = ConfigKeys.HousingCapacity,    Apply = v => Gameplay?.SetHousingCapacityBoost(v),     Read = () => Gameplay?.HousingCapacityBoost ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
 

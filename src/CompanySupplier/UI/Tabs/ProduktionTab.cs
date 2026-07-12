@@ -20,7 +20,7 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
-        private Toggle _mining, _farm, _solar, _forceRun, _water, _noOilDrain, _pipeSlopes;
+        private Toggle _mining, _farm, _solar, _forceRun, _machineLowPower, _machineLowComputing, _water, _noOilDrain, _pipeSlopes;
         private bool _suppress;
 
         public ProduktionTab()
@@ -39,6 +39,8 @@ namespace CompanySupplier.UI.Tabs
                 _farm?.Value(Svc?.Boost?.FarmBoost ?? false);
                 _solar?.Value(Svc?.Boost?.SolarBoost ?? false);
                 _forceRun?.Value(Svc?.Boost?.ForceRunMachines ?? false);
+                _machineLowPower?.Value(Svc?.Gameplay?.MachineFullOnLowPower ?? false);
+                _machineLowComputing?.Value(Svc?.Gameplay?.MachineFullOnLowComputing ?? false);
                 _water?.Value(Svc?.Boost?.UnlimitedWater ?? false);
                 _noOilDrain?.Value(Svc?.Boost?.NoOilDrain ?? false);
                 _pipeSlopes?.Value(HarmonyIntegration.PipeCheats.BuildAlongSlopes);
@@ -63,6 +65,8 @@ namespace CompanySupplier.UI.Tabs
             _farm     = BuildToggle(L.Prod_Farm,            () => Svc?.Boost?.FarmBoost ?? false,         v => Svc?.Boost?.SetFarmBoost(v),        L.Prod_FarmTip);
             _solar    = BuildToggle(L.Prod_Solar,           () => Svc?.Boost?.SolarBoost ?? false,        v => Svc?.Boost?.SetSolarBoost(v),       L.Prod_SolarTip);
             _forceRun = BuildToggle(L.Prod_ForceRun,        () => Svc?.Boost?.ForceRunMachines ?? false,  v => Svc?.Boost?.SetForceRunMachines(v), L.Prod_ForceRunTip);
+            _machineLowPower     = BuildToggle(L.Prod_MachineLowPower,     () => Svc?.Gameplay?.MachineFullOnLowPower ?? false,     v => Svc?.Gameplay?.SetMachineFullOnLowPower(v),     L.Prod_MachineLowPowerTip);
+            _machineLowComputing = BuildToggle(L.Prod_MachineLowComputing, () => Svc?.Gameplay?.MachineFullOnLowComputing ?? false, v => Svc?.Gameplay?.SetMachineFullOnLowComputing(v), L.Prod_MachineLowComputingTip);
             _water    = BuildToggle(L.Prod_UnlimitedWater,  () => Svc?.Boost?.UnlimitedWater ?? false,    v => Svc?.Boost?.SetUnlimitedWater(v),   L.Prod_UnlimitedWaterTip);
             _noOilDrain = BuildToggle(L.Prod_NoOilDrain,    () => Svc?.Boost?.NoOilDrain ?? false,        v => Svc?.Boost?.SetNoOilDrain(v),       L.Prod_NoOilDrainTip);
             // Pipe-Cheat (Harmony): statischer Schalter, den der InitPathFinding-Patch liest.
@@ -74,7 +78,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(_mining, _farm, _solar),
 
                 CheatWidgets.SectionTitle(L.Prod_TitleMachines),
-                _forceRun,
+                CheatWidgets.ToggleGrid(_forceRun, _machineLowPower, _machineLowComputing),
 
                 CheatWidgets.SectionTitle(L.Prod_TitleReserves),
                 CheatWidgets.ToggleGrid(_water, _noOilDrain),
