@@ -7,6 +7,7 @@ using Mafi.Core;                                   // IdsCore.PropertyIds
 using Mafi.Core.Prototypes;                        // ProtosDb, IProtoWithIcon
 using Mafi.Core.PropertiesDb;                      // IPropertiesDb, IProperty<T>, PropertyModifiers, PropertyModifier<T>
 using Mafi.Core.Buildings.Cargo.Ships;             // CargoShipProto
+using Mafi.Core.Buildings.Shipyard;                // ShipyardProto (Werft-Lager-Kapazitaet)
 
 namespace CompanySupplier.Cheats
 {
@@ -157,6 +158,88 @@ namespace CompanySupplier.Cheats
         {
             string id = proto.Id.ToString();
             if (!_origCapMult.ContainsKey(id)) _origCapMult[id] = currentValue;
+        }
+
+        // ------------------------------------------------------------------------------------------
+        // Werft-Lager-Kapazitaet — ShipyardProto.CargoCapacity (Reflection, alle Tiers auf einmal)
+        // ------------------------------------------------------------------------------------------
+        //
+        // Anders als Frachtschiffe hat die Werft KEINEN Multiplikator, sondern ein absolutes Lager-Feld
+        // CargoCapacity (Quantity). Die Werft ist eine Gebaeude-Familie mit mehreren Tiers — wir skalieren
+        // ALLE Tiers zugleich um denselben Faktor (relativ zum jeweiligen Original) und snapshotten je Tier
+        // fuer den Reset. Die laufende Werft liest m_proto.CargoCapacity live -> wirkt sofort auch auf
+        // bestehende Werften. Original-Kapazitaet je ShipyardProto-Id:
+        private readonly Dictionary<string, int> _origShipyardCap = new Dictionary<string, int>();
+
+        /// <summary>Alle Werft-Typen (Tiers), oder leer wenn die ProtosDb fehlt.</summary>
+        public IReadOnlyList<ShipyardProto> GetShipyards()
+        {
+            if (_protos == null) return Array.Empty<ShipyardProto>();
+            try { return _protos.Filter<ShipyardProto>(p => true).ToList(); }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] GetShipyards: {ex.Message}");
+                return Array.Empty<ShipyardProto>();
+            }
+        }
+
+        /// <summary>True, wenn irgendein Werft-Tier aktuell einen Kapazitaets-Override hat (fuer die UI).</summary>
+        public bool HasShipyardCapacityOverride => _origShipyardCap.Count > 0;
+
+        /// <summary>Repraesentative aktuelle Lager-Kapazitaet (erster Werft-Tier) fuer die UI-Anzeige, oder -1.</summary>
+        public int GetFirstShipyardCapacity()
+        {
+            var list = GetShipyards();
+            if (list.Count == 0) return -1;
+            try { return list[0].CargoCapacity.Value; }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] GetFirstShipyardCapacity: {ex.Message}"); return -1; }
+        }
+
+        /// <summary>Skaliert die Lager-Kapazitaet ALLER Werft-Tiers auf das <paramref name="factor"/>-fache des
+        /// jeweiligen Originals. Snapshottet je Tier den Originalwert (capture-on-first-edit) fuer den Reset.</summary>
+        public void SetShipyardCapacityFactor(int factor)
+        {
+            if (factor < 1) return;
+            int count = 0;
+            foreach (var proto in GetShipyards())
+            {
+                try
+                {
+                    string id = proto.Id.ToString();
+                    if (!_origShipyardCap.ContainsKey(id)) _origShipyardCap[id] = proto.CargoCapacity.Value;
+                    int target = Math.Max(1, _origShipyardCap[id] * factor);
+                    WriteShipyardCapacity(proto, target);
+                    count++;
+                }
+                catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] SetShipyardCapacityFactor({proto?.Id}): {ex.Message}"); }
+            }
+            Log.Info($"[{CompanySupplier.ModName}] Werft-Lager-Kapazitaet x{factor} auf {count} Tier(s) gesetzt.");
+        }
+
+        /// <summary>Setzt die Lager-Kapazitaet aller Werft-Tiers auf die gesnapshotteten Originalwerte zurueck.</summary>
+        public void ResetShipyardCapacity()
+        {
+            foreach (var proto in GetShipyards())
+            {
+                string id = proto.Id.ToString();
+                if (!_origShipyardCap.TryGetValue(id, out int orig)) continue;
+                try { WriteShipyardCapacity(proto, orig); }
+                catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] ResetShipyardCapacity({proto?.Id}): {ex.Message}"); }
+            }
+            _origShipyardCap.Clear();
+            Log.Info($"[{CompanySupplier.ModName}] Werft-Lager-Kapazitaet zurueckgesetzt.");
+        }
+
+        // Schreibt das (readonly) Proto-Feld ShipyardProto.CargoCapacity per Reflection (wie CapacityMultiplier).
+        private static void WriteShipyardCapacity(ShipyardProto proto, int value)
+        {
+            FieldInfo fi = proto.GetType().GetField("CargoCapacity", InstAll);
+            if (fi == null)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Feld 'CargoCapacity' auf {proto.GetType().Name} nicht gefunden (API-Drift?).");
+                return;
+            }
+            fi.SetValue(proto, new Quantity(value));
         }
 
         // Schreibt das (readonly) Proto-Feld CargoShipProto.CapacityMultiplier per Reflection.

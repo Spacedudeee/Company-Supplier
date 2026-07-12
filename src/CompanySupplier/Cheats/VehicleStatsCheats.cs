@@ -6,6 +6,7 @@ using Mafi.Core;
 using Mafi.Core.Vehicles;
 using Mafi.Core.Vehicles.Trucks;
 using Mafi.Core.Vehicles.Excavators;
+using Mafi.Core.Vehicles.TreePlanters;             // TreePlanterProto (Baum-Pflanzer-Kapazitaet)
 using Mafi.Core.Entities.Dynamic;
 
 namespace CompanySupplier.Cheats
@@ -44,9 +45,10 @@ namespace CompanySupplier.Cheats
             _resolver.TryResolve<IVehiclesManager>(out _vehiclesManager);
         }
 
-        /// <summary>Hat dieser Fahrzeugtyp ueberhaupt eine Ladekapazitaet? (LKW/Bagger ja, Rakete nein.)</summary>
+        /// <summary>Hat dieser Fahrzeugtyp ueberhaupt eine Ladekapazitaet? (LKW/Bagger/Baum-Pflanzer ja, Rakete
+        /// bzw. Baum-Ernter nein — der Ernter belaedt LKW und hat kein eigenes Frachtfeld.)</summary>
         public bool HasCapacity(DrivingEntityProto proto)
-            => proto is TruckProto || proto is ExcavatorProto;
+            => proto is TruckProto || proto is ExcavatorProto || proto is TreePlanterProto;
 
         /// <summary>Aktuelle (effektive) Ladekapazitaet des Typs, oder -1 wenn der Typ keine hat.</summary>
         public int GetCapacity(DrivingEntityProto proto)
@@ -55,6 +57,7 @@ namespace CompanySupplier.Cheats
             {
                 if (proto is TruckProto t) return t.CapacityBase.Value;
                 if (proto is ExcavatorProto e) return e.Capacity.Value;
+                if (proto is TreePlanterProto p) return p.Capacity.Value;
             }
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] GetCapacity({proto?.Id}): {ex.Message}"); }
             return -1;

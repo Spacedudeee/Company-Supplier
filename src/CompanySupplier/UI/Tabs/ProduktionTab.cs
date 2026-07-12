@@ -20,7 +20,7 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
-        private Toggle _mining, _farm, _solar, _forceRun, _water;
+        private Toggle _mining, _farm, _solar, _forceRun, _water, _noOilDrain;
         private bool _suppress;
 
         public ProduktionTab()
@@ -40,6 +40,7 @@ namespace CompanySupplier.UI.Tabs
                 _solar?.Value(Svc?.Boost?.SolarBoost ?? false);
                 _forceRun?.Value(Svc?.Boost?.ForceRunMachines ?? false);
                 _water?.Value(Svc?.Boost?.UnlimitedWater ?? false);
+                _noOilDrain?.Value(Svc?.Boost?.NoOilDrain ?? false);
             }
             finally { _suppress = false; }
         }
@@ -62,6 +63,7 @@ namespace CompanySupplier.UI.Tabs
             _solar    = BuildToggle(L.Prod_Solar,           () => Svc?.Boost?.SolarBoost ?? false,        v => Svc?.Boost?.SetSolarBoost(v),       L.Prod_SolarTip);
             _forceRun = BuildToggle(L.Prod_ForceRun,        () => Svc?.Boost?.ForceRunMachines ?? false,  v => Svc?.Boost?.SetForceRunMachines(v), L.Prod_ForceRunTip);
             _water    = BuildToggle(L.Prod_UnlimitedWater,  () => Svc?.Boost?.UnlimitedWater ?? false,    v => Svc?.Boost?.SetUnlimitedWater(v),   L.Prod_UnlimitedWaterTip);
+            _noOilDrain = BuildToggle(L.Prod_NoOilDrain,    () => Svc?.Boost?.NoOilDrain ?? false,        v => Svc?.Boost?.SetNoOilDrain(v),       L.Prod_NoOilDrainTip);
 
             var children = new List<UiComponent>
             {
@@ -72,7 +74,7 @@ namespace CompanySupplier.UI.Tabs
                 _forceRun,
 
                 CheatWidgets.SectionTitle(L.Prod_TitleReserves),
-                _water
+                CheatWidgets.ToggleGrid(_water, _noOilDrain)
             };
 
             column.SetChildren(children.ToArray());

@@ -3,6 +3,7 @@ using Mafi;
 using Mafi.Collections;
 using Mafi.Core;                       // IdsCore.PropertyIds, ProductQuantity (struct liegt in Mafi.Core)
 using Mafi.Core.Buildings.Shipyard;
+using Mafi.Core.Economy;               // IAssetTransactionManager, CreateReason (Fracht ins Basis-Lager)
 using Mafi.Core.Input;
 using Mafi.Core.Products;
 using Mafi.Core.PropertiesDb;
@@ -31,6 +32,7 @@ namespace CompanySupplier.Cheats
         private TravelingFleetManager _fleetManager;      // Zugriff auf das Welt-Schiff (BattleShip) + Dock
         private IVehiclesManager _vehiclesManager;        // Fahrzeug-Limit (public IncreaseVehicleLimit)
         private IPropertiesDb _propertiesDb;              // globale Spiel-Properties (Treibstoff/LKW-Kapazitaet)
+        private IAssetTransactionManager _assets;         // Fracht ins globale Basis-Lager legen (StoreProduct)
 
         // Fallback fuer FuelConsumptionDisabled, falls die PropertiesDb nicht lesbar ist.
         private bool _fuelDisabledCached;
@@ -63,6 +65,17 @@ namespace CompanySupplier.Cheats
             _resolver.TryResolve<TravelingFleetManager>(out _fleetManager);
             _resolver.TryResolve<IVehiclesManager>(out _vehiclesManager);
             _resolver.TryResolve<IPropertiesDb>(out _propertiesDb);
+            _resolver.TryResolve<IAssetTransactionManager>(out _assets);
+        }
+
+        /// <summary>Die dem Welt-Schiff zugewiesene Werft (Dock), oder null wenn kein Schiff/Dock existiert.
+        /// Gemeinsame Basis von <see cref="ForceUnloadShip"/>, <see cref="DestroyShipyardCargo"/> und
+        /// <see cref="DumpShipyardCargoToBase"/>.</summary>
+        private Shipyard GetAssignedDock()
+        {
+            if (_fleetManager == null || !_fleetManager.HasFleet) return null;
+            BattleShip ship = _fleetManager.TravelingFleet;
+            return ship?.AssignedDock.ValueOrNull;
         }
 
         // ----------------------------------------------------------------------------------------
@@ -154,6 +167,77 @@ namespace CompanySupplier.Cheats
             catch (Exception ex)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] RepairShip: {ex.Message}");
+            }
+        }
+
+        /// <summary>Zerstoert die gesamte im Werft-Lager liegende Fracht (Cheat++ „Destroy Shipyard Cargo").</summary>
+        /// <remarks>
+        /// 0.8.5.0: <c>Shipyard.PeekAllCargo(Lyst&lt;ProductQuantity&gt;)</c> listet die gelagerte Fracht;
+        /// <c>Shipyard.TryToDiscardCargo(ProductProto)</c> verwirft sie je Produkt (public, direkter Pfad —
+        /// dieselbe Mechanik wie der Vanilla-Werft-Inspector, nur ohne UI). <c>CanDiscardProduct</c> filtert
+        /// nicht-verwerfbare Produkte heraus.
+        /// </remarks>
+        public void DestroyShipyardCargo()
+        {
+            Shipyard dock = GetAssignedDock();
+            if (dock == null)
+            {
+                Log.Info($"[{CompanySupplier.ModName}] DestroyShipyardCargo: keine zugewiesene Werft.");
+                return;
+            }
+            try
+            {
+                var cache = new Lyst<ProductQuantity>();
+                dock.PeekAllCargo(cache);
+                int count = 0;
+                foreach (ProductQuantity pq in cache)
+                {
+                    if (pq.IsEmpty || !Shipyard.CanDiscardProduct(pq.Product)) continue;
+                    dock.TryToDiscardCargo(pq.Product);
+                    count++;
+                }
+                Log.Info($"[{CompanySupplier.ModName}] DestroyShipyardCargo: {count} Produkt(e) verworfen.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] DestroyShipyardCargo: {ex.Message}");
+            }
+        }
+
+        /// <summary>Legt die gesamte Werft-Lager-Fracht ins globale Basis-Lager (Wirtschaft) um (Cheat++
+        /// „Dump Cargo to Base Storage").</summary>
+        /// <remarks>
+        /// 0.8.5.0: Es gibt kein einzelnes „Basis-Lager"-Gebaeude — <c>IAssetTransactionManager.StoreProduct</c>
+        /// speist in die globale Produkt-Wirtschaft/verbundene Lager ein (derselbe Pfad wie unser Ressourcen-
+        /// Cheat). Jede Produkt-Menge wird per <c>StoreProduct(pq, Cheated)</c> in die Basis gelegt und danach
+        /// per <c>TryToDiscardCargo</c> aus der Werft entfernt (sonst dupliziert).
+        /// </remarks>
+        public void DumpShipyardCargoToBase()
+        {
+            Shipyard dock = GetAssignedDock();
+            if (dock == null || _assets == null)
+            {
+                Log.Info($"[{CompanySupplier.ModName}] DumpShipyardCargoToBase: keine Werft oder kein Asset-Manager.");
+                return;
+            }
+            try
+            {
+                var cache = new Lyst<ProductQuantity>();
+                dock.PeekAllCargo(cache);
+                int count = 0;
+                foreach (ProductQuantity pq in cache)
+                {
+                    if (pq.IsEmpty) continue;
+                    _assets.StoreProduct(pq, CreateReason.Cheated);          // in die Basis-Wirtschaft
+                    if (Shipyard.CanDiscardProduct(pq.Product))
+                        dock.TryToDiscardCargo(pq.Product);                  // aus der Werft entfernen
+                    count++;
+                }
+                Log.Info($"[{CompanySupplier.ModName}] DumpShipyardCargoToBase: {count} Produkt(e) umgelegt.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] DumpShipyardCargoToBase: {ex.Message}");
             }
         }
 

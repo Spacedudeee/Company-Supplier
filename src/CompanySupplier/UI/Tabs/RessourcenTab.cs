@@ -53,6 +53,10 @@ namespace CompanySupplier.UI.Tabs
         private Toggle _fillWandToggle;
         private Toggle _emptyWandToggle;
 
+        // Produkt-Favoriten (config-gestuetzt, keine Spiel-API): Schnellzugriff-Reihe wird bei jeder
+        // Aenderung neu befuellt, daher als Feld gehalten.
+        private Row _favoritesRow;
+
         // Unterdrueckt die onChanged-Backend-Aufrufe, waehrend Toggles programmatisch gesetzt werden
         // (Sync, Zwei-Klick-Zuruecksetzen, gegenseitiges Abwaehlen). Gleiches Muster wie AllgemeinTab —
         // so ist das Verhalten unabhaengig davon, ob Toggle.Value(bool) den Callback feuert.
@@ -85,6 +89,7 @@ namespace CompanySupplier.UI.Tabs
                 _godModeToggle?.Value(_storageGodMode);
 
                 RetryLoadProductsIfEmpty();
+                RebuildFavoritesRow();
             }
             finally { _suppress = false; }
         }
@@ -150,8 +155,13 @@ namespace CompanySupplier.UI.Tabs
             {
                 CheatWidgets.SectionTitle(L.Res_TitleGive),
                 BuildProductDropdown(),     // R1
+                CheatWidgets.PrimaryButton(L.Res_PinFavorite, TogglePinCurrent), // Favorit an-/abheften
                 BuildQuantityRow(),          // R2
                 BuildActionButtons(),        // R3 + R4
+                CheatWidgets.SectionTitle(L.Res_TitleFavorites),
+                BuildFavoritesRow(),         // Favoriten-Schnellzugriff
+                CheatWidgets.SectionTitle(L.Res_ThroughputTitle),
+                BuildThroughputRow(),        // Lager-Durchsatz ×N
                 CheatWidgets.SectionTitle(L.Res_TitleTool),
                 BuildGodModeToggle(),        // R5: ALLE Lager auf einmal
                 BuildFillWandToggle(),       // R6: einzelnes Lager fuellen (Welt-Klick)
@@ -254,6 +264,83 @@ namespace CompanySupplier.UI.Tabs
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(addOne, addAll);
             return row;
+        }
+
+        // (A) Favoriten: haengt das aktuell gewaehlte Produkt an/ab (config-gestuetzt, persistiert sofort)
+        // und baut die Schnellzugriff-Reihe neu.
+        private void TogglePinCurrent()
+        {
+            if (_selectedProduct == null) return;
+            var svc = CheatService.Instance;
+            if (svc == null) return;
+            string id = _selectedProduct.Id.ToString();
+            bool nowFav = svc.Config.ToggleFavorite(id);
+            svc.SaveConfig();
+            CheatMenuStatus.Show(nowFav
+                ? L.Res_StatusFavAdded(CheatWidgets.ProtoDisplayName(_selectedProduct))
+                : L.Res_StatusFavRemoved(CheatWidgets.ProtoDisplayName(_selectedProduct)));
+            RebuildFavoritesRow();
+        }
+
+        // (A) Schnellzugriff-Reihe fuer Favoriten (umbrechend). Wird ueber RebuildFavoritesRow befuellt.
+        private UiComponent BuildFavoritesRow()
+        {
+            _favoritesRow = new Row((Px)CheatWidgets.Gap);
+            _favoritesRow.Wrap(true);
+            RebuildFavoritesRow();
+            return _favoritesRow;
+        }
+
+        // (A) Baut die Favoriten-Buttons neu: pro gespeicherter Id das passende Produkt suchen (unbekannte
+        // Ids still ueberspringen) und einen gruenen Button rendern, der es in der aktuell gewaehlten Menge gibt.
+        private void RebuildFavoritesRow()
+        {
+            if (_favoritesRow == null) return;
+            var ids = CheatService.Instance?.Config?.FavoriteProductIds;
+            var buttons = new List<UiComponent>();
+            if (ids != null)
+            {
+                foreach (var id in ids)
+                {
+                    var proto = _products.FirstOrDefault(p => p.Id.ToString() == id);
+                    if (proto == null) continue;
+                    buttons.Add(CheatWidgets.PrimaryButton(
+                        CheatWidgets.ProtoDisplayName(proto),
+                        () =>
+                        {
+                            CheatService.Instance?.GiveResource(proto, _quantity);
+                            CheatMenuStatus.Show(L.Res_StatusAdded(_quantity, CheatWidgets.ProtoDisplayName(proto)));
+                        }));
+                }
+            }
+            _favoritesRow.SetChildren(buttons.ToArray());
+        }
+
+        // (B) Lager-Durchsatz: ×2/×5/×10 (gruen) + Zuruecksetzen (rot). Skaliert den Transfer-Durchsatz
+        // aller Lager-Typen ueber StorageThroughputCheats.
+        private UiComponent BuildThroughputRow()
+        {
+            var x2 = CheatWidgets.PrimaryButton("×2", () => ApplyThroughput(2));
+            var x5 = CheatWidgets.PrimaryButton("×5", () => ApplyThroughput(5));
+            var x10 = CheatWidgets.PrimaryButton("×10", () => ApplyThroughput(10));
+            var reset = CheatWidgets.DangerButton(
+                L.Common_Reset,
+                () =>
+                {
+                    CheatService.Instance?.StorageThroughput?.ResetThroughput();
+                    CheatMenuStatus.Show(L.Res_StatusThroughputReset);
+                },
+                L.Res_ThroughputTip);
+
+            var row = new Row((Px)CheatWidgets.Gap);
+            row.SetChildren(x2, x5, x10, reset);
+            return row;
+        }
+
+        private void ApplyThroughput(int factor)
+        {
+            CheatService.Instance?.StorageThroughput?.SetThroughputFactor(factor);
+            CheatMenuStatus.Show(L.Res_StatusThroughput(factor));
         }
 
         // R5: ALLE-Lager-Gottmodus-Toggle. ACHTUNG: setzt JEDES Lager auf KeepFull (sofort komplett gefuellt +

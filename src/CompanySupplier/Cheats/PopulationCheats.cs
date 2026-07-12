@@ -39,6 +39,12 @@ namespace CompanySupplier.Cheats
         /// <summary>true = die Unity-Punkte werden taeglich bis zur Kapazitaet aufgefuellt.</summary>
         public bool KeepUnityFull { get; private set; }
 
+        /// <summary>true = Siedlungs-Hausmuell (Landfill je Einwohner) wird taeglich auf 0 gehalten.</summary>
+        public bool NoMunicipalWaste { get; private set; }
+
+        /// <summary>true = Siedlungs-Biomuell wird taeglich vollstaendig reduziert (Reduktion = 100%).</summary>
+        public bool NoBiowaste { get; private set; }
+
         public PopulationCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -81,6 +87,31 @@ namespace CompanySupplier.Cheats
             {
                 Log.Warning($"[{CompanySupplier.ModName}] AddPopulation: {ex.Message}");
             }
+        }
+
+        /// <summary>Setzt die Gesamt-Bevoelkerung ABSOLUT auf <paramref name="target"/> (&gt;= 0). Das Spiel bietet
+        /// keinen Absolut-Setter, daher wird das Delta zum aktuellen Stand ueber den bestehenden Add/Remove-Pfad
+        /// angewandt. Nach unten kann der Wert das Siedlungs-Minimum nicht unterschreiten (RemovePopsAsMuchAs).</summary>
+        public void SetPopulation(int target)
+        {
+            if (_settlements == null) return;
+            if (target < 0) target = 0;
+            try
+            {
+                int current = _settlements.GetTotalPopulation();
+                AddPopulation(target - current);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] SetPopulation({target}): {ex.Message}");
+            }
+        }
+
+        /// <summary>Aktuelle Gesamt-Bevoelkerung (fuer die UI-Anzeige), oder -1 wenn der Manager fehlt.</summary>
+        public int GetTotalPopulation()
+        {
+            try { return _settlements?.GetTotalPopulation() ?? -1; }
+            catch { return -1; }
         }
 
         // ----------------------------------------------------------------------------------------
@@ -251,7 +282,60 @@ namespace CompanySupplier.Cheats
         }
 
         // ----------------------------------------------------------------------------------------
-        // Taeglicher Tick-Hook (NewDay): erfuellt die Dauer-Toggles A3 + A4
+        // Siedlungs-Abfall: Hausmuell (Landfill) + Biomuell dauerhaft unterdruecken
+        // ----------------------------------------------------------------------------------------
+
+        /// <summary>Schaltet "Kein Hausmuell" ein/aus. Setzt je Siedlung <c>BaseLandfillPerPopPerDay = 0</c>
+        /// (public Setter, 0.8.5.0). Wie A4 wird der Wert taeglich neu geschrieben, weil das Spiel ihn im
+        /// Tages-Tick neu berechnet; nach dem Ausschalten stellt die Spiel-Neuberechnung das Original wieder her.</summary>
+        public void SetNoMunicipalWaste(bool enabled)
+        {
+            NoMunicipalWaste = enabled;
+            if (enabled) ApplyNoMunicipalWaste();
+            Log.Info($"[{CompanySupplier.ModName}] Kein Hausmuell = {enabled}.");
+        }
+
+        /// <summary>Schaltet "Kein Biomuell" ein/aus. Setzt je Siedlung <c>BioWasteReductionMultiplier = 100%</c>
+        /// (voller Biomuell-Abbau). Taeglich neu angewandt (siehe <see cref="SetNoMunicipalWaste"/>).</summary>
+        public void SetNoBiowaste(bool enabled)
+        {
+            NoBiowaste = enabled;
+            if (enabled) ApplyNoBiowaste();
+            Log.Info($"[{CompanySupplier.ModName}] Kein Biomuell = {enabled}.");
+        }
+
+        private void ApplyNoMunicipalWaste()
+        {
+            if (_settlements == null) return;
+            try
+            {
+                foreach (var settlement in _settlements.Settlements)
+                {
+                    if (settlement == null) continue;
+                    // BaseLandfillPerPopPerDay hat einen non-public Setter (0.8.5.0) -> per Reflection setzen.
+                    SetNonPublicProperty(settlement, "BaseLandfillPerPopPerDay", PartialQuantity.Zero);
+                }
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] ApplyNoMunicipalWaste: {ex.Message}"); }
+        }
+
+        private void ApplyNoBiowaste()
+        {
+            if (_settlements == null) return;
+            try
+            {
+                foreach (var settlement in _settlements.Settlements)
+                {
+                    if (settlement == null) continue;
+                    // BioWasteReductionMultiplier ist ein readonly Feld (0.8.5.0); 100% = voller Abbau -> Reflection.
+                    SetInstanceField(settlement, "BioWasteReductionMultiplier", Percent.Hundred);
+                }
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] ApplyNoBiowaste: {ex.Message}"); }
+        }
+
+        // ----------------------------------------------------------------------------------------
+        // Taeglicher Tick-Hook (NewDay): erfuellt die Dauer-Toggles A3 + A4 + Abfall
         // ----------------------------------------------------------------------------------------
 
         private void OnNewDay()
@@ -259,6 +343,8 @@ namespace CompanySupplier.Cheats
             if (DiseasesDisabled) EndActiveDisease();
             if (MaxConsumptionHappiness) ApplyMaxHappiness();
             if (KeepUnityFull) TopUpUnity();
+            if (NoMunicipalWaste) ApplyNoMunicipalWaste();
+            if (NoBiowaste) ApplyNoBiowaste();
         }
 
         // ----------------------------------------------------------------------------------------
@@ -294,6 +380,21 @@ namespace CompanySupplier.Cheats
                 return;
             }
             setter.Invoke(target, new[] { value });
+        }
+
+        /// <summary>Setzt ein (auch readonly) Instanzfeld per Reflection — funktioniert auf .NET 4.8 auch fuer
+        /// readonly Klassenfelder.</summary>
+        private static void SetInstanceField(object target, string field, object value)
+        {
+            if (target == null) return;
+            var fi = target.GetType().GetField(field,
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (fi == null)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] Feld {field} nicht gefunden.");
+                return;
+            }
+            fi.SetValue(target, value);
         }
     }
 }

@@ -22,6 +22,7 @@ namespace CompanySupplier.UI.Tabs
 
         private Toggle _air, _water, _landfill, _vehicles, _ships, _trains;
         private Toggle _master;
+        private Toggle _noWaste, _noBiowaste;
         private bool _suppress;
 
         public UmweltTab()
@@ -46,6 +47,9 @@ namespace CompanySupplier.UI.Tabs
                 _air?.Value(air); _water?.Value(water); _landfill?.Value(landfill);
                 _vehicles?.Value(vehicles); _ships?.Value(ships); _trains?.Value(trains);
                 _master?.Value(air && water && landfill && vehicles && ships && trains);
+
+                _noWaste?.Value(Svc?.Population?.NoMunicipalWaste ?? false);
+                _noBiowaste?.Value(Svc?.Population?.NoBiowaste ?? false);
             }
             finally { _suppress = false; }
         }
@@ -77,13 +81,21 @@ namespace CompanySupplier.UI.Tabs
             _trains = BuildToggle(L.Umw_Trains, () => Svc?.Pollution?.TrainsDisabled ?? false,
                 v => Svc?.Pollution?.SetTrainsDisabled(v), L.Umw_TrainsTip);
 
+            _noWaste = BuildToggle(L.Umw_NoWaste, () => Svc?.Population?.NoMunicipalWaste ?? false,
+                v => Svc?.Population?.SetNoMunicipalWaste(v), L.Umw_NoWasteTip);
+            _noBiowaste = BuildToggle(L.Umw_NoBiowaste, () => Svc?.Population?.NoBiowaste ?? false,
+                v => Svc?.Population?.SetNoBiowaste(v), L.Umw_NoBiowasteTip);
+
             var children = new List<UiComponent>
             {
                 CheatWidgets.SectionTitle(L.Umw_TitlePollution),
                 BuildMasterToggle(),
 
                 CheatWidgets.SectionTitle(L.Umw_TitleSources),
-                CheatWidgets.ToggleGrid(_air, _water, _landfill, _vehicles, _ships, _trains)
+                CheatWidgets.ToggleGrid(_air, _water, _landfill, _vehicles, _ships, _trains),
+
+                CheatWidgets.SectionTitle(L.Umw_TitleHousing),
+                CheatWidgets.ToggleGrid(_noWaste, _noBiowaste)
             };
 
             column.SetChildren(children.ToArray());

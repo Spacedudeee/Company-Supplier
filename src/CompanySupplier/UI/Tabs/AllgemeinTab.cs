@@ -29,6 +29,9 @@ namespace CompanySupplier.UI.Tabs
         // Weitere Zustands-Toggles dieses Tabs — Referenzen fuer den zentralen UI-Sync (CheatUiSync).
         private Toggle _master, _uncapped, _sourceSink, _godWand, _diseases, _happiness, _keepUnity;
 
+        // Forschungs-Toggles (Voraussetzungen ignorieren) — ebenfalls per CheatUiSync nachgezogen.
+        private Toggle _researchIgnoreItems, _researchIgnoreParents;
+
         // Unterdrückt die onChanged-Backend-Aufrufe, während der Sync/Master die Toggles optisch setzt.
         private bool _suppress;
 
@@ -70,6 +73,9 @@ namespace CompanySupplier.UI.Tabs
                 _diseases?.Value(Svc?.Population?.DiseasesDisabled ?? false);
                 _happiness?.Value(Svc?.Population?.MaxConsumptionHappiness ?? false);
                 _keepUnity?.Value(Svc?.Population?.KeepUnityFull ?? false);
+
+                _researchIgnoreItems?.Value(Svc?.Research?.IgnoreItemRequirements ?? false);
+                _researchIgnoreParents?.Value(Svc?.Research?.IgnoreParentRequirements ?? false);
             }
             finally { _suppress = false; }
         }
@@ -138,12 +144,18 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(BuildDiseasesToggle(), BuildHappinessToggle(), BuildKeepUnityToggle()),
                 CheatWidgets.SectionTitle(L.Gen_TitleAddPopulation),
                 BuildPopulationStepper(),
+                BuildPopulationSetRow(),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleResearch),
                 BuildResearchButtons(),
+                BuildResearchUnlockButtons(),
+                CheatWidgets.ToggleGrid(BuildResearchIgnoreItemsToggle(), BuildResearchIgnoreParentsToggle()),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleAddUnity),
-                BuildUnityStepper()
+                BuildUnityStepper(),
+
+                CheatWidgets.SectionTitle(L.Gen_TitleWorldgen),
+                BuildWorldgenButton()
             };
 
             column.SetChildren(children.ToArray());
@@ -307,6 +319,19 @@ namespace CompanySupplier.UI.Tabs
             return CheatWidgets.NewIncrementButtonGroup(steps);
         }
 
+        // Bevölkerung absolut auf einen eingegebenen Wert setzen.
+        private UiComponent BuildPopulationSetRow()
+        {
+            return CheatWidgets.NewIntInputRow(
+                L.Gen_SetPopulation,
+                v =>
+                {
+                    CheatService.Instance?.Population?.SetPopulation(v);
+                    CheatMenuStatus.Show(L.Gen_StatusPopulationSet(v));
+                },
+                min: 0);
+        }
+
         // A6 + A7: zwei Forschungs-Buttons nebeneinander.
         private UiComponent BuildResearchButtons()
         {
@@ -331,6 +356,69 @@ namespace CompanySupplier.UI.Tabs
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(finishCurrent, unlockAll);
             return row;
+        }
+
+        // Verfügbare + wiederholbare Forschung freischalten.
+        private UiComponent BuildResearchUnlockButtons()
+        {
+            var available = CheatWidgets.PrimaryButton(
+                L.Gen_ResearchUnlockAvailable,
+                () =>
+                {
+                    CheatService.Instance?.Research?.UnlockAvailableResearch();
+                    CheatMenuStatus.Show(L.Gen_StatusResearchUnlocked);
+                },
+                L.Gen_ResearchUnlockAvailableTip);
+
+            var repeatable = CheatWidgets.PrimaryButton(
+                L.Gen_ResearchUnlockRepeatable,
+                () =>
+                {
+                    CheatService.Instance?.Research?.UnlockRepeatableResearch();
+                    CheatMenuStatus.Show(L.Gen_StatusResearchUnlocked);
+                },
+                L.Gen_ResearchUnlockRepeatableTip);
+
+            var row = new Row((Px)CheatWidgets.Gap);
+            row.SetChildren(available, repeatable);
+            return row;
+        }
+
+        // Forschung ignoriert benötigte Produkte/Bedingungen. Status aus Research.IgnoreItemRequirements.
+        private UiComponent BuildResearchIgnoreItemsToggle()
+        {
+            bool initial = CheatService.Instance?.Research?.IgnoreItemRequirements ?? false;
+            _researchIgnoreItems = CheatWidgets.NewToggleRow(
+                L.Gen_ResearchIgnoreItems,
+                initial,
+                v => { if (!_suppress) CheatService.Instance?.Research?.SetIgnoreItemRequirements(v); },
+                L.Gen_ResearchIgnoreItemsTip);
+            return _researchIgnoreItems;
+        }
+
+        // Jeder Knoten ist ohne Vorgänger forschbar. Status aus Research.IgnoreParentRequirements.
+        private UiComponent BuildResearchIgnoreParentsToggle()
+        {
+            bool initial = CheatService.Instance?.Research?.IgnoreParentRequirements ?? false;
+            _researchIgnoreParents = CheatWidgets.NewToggleRow(
+                L.Gen_ResearchIgnoreParents,
+                initial,
+                v => { if (!_suppress) CheatService.Instance?.Research?.SetIgnoreParentRequirements(v); },
+                L.Gen_ResearchIgnoreParentsTip);
+            return _researchIgnoreParents;
+        }
+
+        // WorldGen-Fixes: gesperrtes Saatgut/Radar freischalten.
+        private UiComponent BuildWorldgenButton()
+        {
+            return CheatWidgets.PrimaryButton(
+                L.Gen_WorldgenUnlock,
+                () =>
+                {
+                    CheatService.Instance?.Research?.UnlockWorldgenFixes();
+                    CheatMenuStatus.Show(L.Gen_StatusWorldgen);
+                },
+                L.Gen_WorldgenUnlockTip);
         }
 
         // A8: Unity-Stepper ±5/±25/±100 -> Population.AddUnity(int).

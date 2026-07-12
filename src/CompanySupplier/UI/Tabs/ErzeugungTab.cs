@@ -85,6 +85,13 @@ namespace CompanySupplier.UI.Tabs
                     v => { _unityPerMonth = v; CheatService.Instance?.Generation?.SetUnityPerMonth(v); },
                     v => _unityPerMonth = v,
                     () => CheatService.Instance?.Generation?.UnityPerMonthValue ?? 0),
+
+                // Kosmetischer Fake-Verbrauch: reine Anzeigewerte, kein UI-Sync noetig.
+                CheatWidgets.SectionTitle(L.Erz_TitleFake),
+                CheatWidgets.NewIntInputRow(L.Erz_FakePower,
+                    v => CheatService.Instance?.Generation?.SetFakePowerConsumption(v), min: 0),
+                CheatWidgets.NewIntInputRow(L.Erz_FakeComputing,
+                    v => CheatService.Instance?.Generation?.SetFakeComputingConsumption(v), min: 0),
             };
 
             column.SetChildren(children.ToArray());

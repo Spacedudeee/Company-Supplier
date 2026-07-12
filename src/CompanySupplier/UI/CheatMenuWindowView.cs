@@ -70,6 +70,7 @@ namespace CompanySupplier.UI
                 .WindowWidth((Px)WindowWidthPx)
                 .WindowMaxHeight(Percent.FromPercentVal(85))
                 .MakeMovable();
+            window.EnablePinning();     // native Pin-Schaltflaeche: angepinnt bleibt das Fenster bei Welt-Klick offen
             window.CloseOnClickOutside();
 
             // Linke, vertikale Reiter-Leiste: feste Breite, schrumpft nicht; Buttons fuellen die Breite.

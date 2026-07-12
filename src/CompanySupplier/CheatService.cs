@@ -68,6 +68,8 @@ namespace CompanySupplier
         public Cheats.WorldMapCheats     WorldMap     { get; private set; }
         public Cheats.ShipCheats         Ships        { get; private set; }
         public Cheats.BoostCheats        Boost        { get; private set; }
+        public Cheats.StorageThroughputCheats StorageThroughput { get; private set; }
+        public Cheats.StorageLabelCheats      StorageLabels     { get; private set; }
 
         private CheatService(DependencyResolver resolver) => _resolver = resolver;
 
@@ -107,6 +109,8 @@ namespace CompanySupplier
             WorldMap     = TryCreate(() => new Cheats.WorldMapCheats(_resolver),     nameof(Cheats.WorldMapCheats));
             Ships        = TryCreate(() => new Cheats.ShipCheats(_resolver),         nameof(Cheats.ShipCheats));
             Boost        = TryCreate(() => new Cheats.BoostCheats(_resolver),        nameof(Cheats.BoostCheats));
+            StorageThroughput = TryCreate(() => new Cheats.StorageThroughputCheats(_resolver), nameof(Cheats.StorageThroughputCheats));
+            StorageLabels     = TryCreate(() => new Cheats.StorageLabelCheats(_resolver),      nameof(Cheats.StorageLabelCheats));
             // StorageToolCheats ist jetzt [GlobalDependency] (der StorageWandController bekommt es per DI
             // injiziert) -> hier DIESELBE DI-Instanz holen statt einer zweiten via new.
             StorageTool  = Resolve<Cheats.StorageToolCheats>(nameof(Cheats.StorageToolCheats));
@@ -343,6 +347,10 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.DiseasesDisabled,   Apply = v => Population?.SetDiseasesDisabled(v),Read = () => Population?.DiseasesDisabled ?? false },
                 new ToggleEntry { Key = ConfigKeys.MaxHappiness,       Apply = v => Population?.SetMaxConsumptionHappiness(v), Read = () => Population?.MaxConsumptionHappiness ?? false },
                 new ToggleEntry { Key = ConfigKeys.KeepUnityFull,      Apply = v => Population?.SetKeepUnityFull(v),    Read = () => Population?.KeepUnityFull ?? false },
+                new ToggleEntry { Key = ConfigKeys.HousingNoWaste,     Apply = v => Population?.SetNoMunicipalWaste(v), Read = () => Population?.NoMunicipalWaste ?? false },
+                new ToggleEntry { Key = ConfigKeys.HousingNoBiowaste,  Apply = v => Population?.SetNoBiowaste(v),       Read = () => Population?.NoBiowaste ?? false },
+                new ToggleEntry { Key = ConfigKeys.ResIgnoreItemReq,   Apply = v => Research?.SetIgnoreItemRequirements(v),   Read = () => Research?.IgnoreItemRequirements ?? false },
+                new ToggleEntry { Key = ConfigKeys.ResIgnoreParentReq, Apply = v => Research?.SetIgnoreParentRequirements(v), Read = () => Research?.IgnoreParentRequirements ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.PollutionAir,       Apply = v => Pollution?.SetAirDisabled(v),      Read = () => Pollution?.AirDisabled ?? false },
                 new ToggleEntry { Key = ConfigKeys.PollutionWater,     Apply = v => Pollution?.SetWaterDisabled(v),    Read = () => Pollution?.WaterDisabled ?? false },
@@ -363,6 +371,7 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.ProdSolar,          Apply = v => Boost?.SetSolarBoost(v),           Read = () => Boost?.SolarBoost ?? false },
                 new ToggleEntry { Key = ConfigKeys.ProdForceRun,       Apply = v => Boost?.SetForceRunMachines(v),     Read = () => Boost?.ForceRunMachines ?? false },
                 new ToggleEntry { Key = ConfigKeys.ProdUnlimitedWater, Apply = v => Boost?.SetUnlimitedWater(v),       Read = () => Boost?.UnlimitedWater ?? false },
+                new ToggleEntry { Key = ConfigKeys.ProdNoOilDrain,     Apply = v => Boost?.SetNoOilDrain(v),           Read = () => Boost?.NoOilDrain ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
 
@@ -424,6 +433,8 @@ namespace CompanySupplier
                 Generation?.SetFreeElectricityPerTick(0);
                 Generation?.SetFreeComputingPerTick(0);
                 Generation?.SetUnityPerMonth(0);
+                Generation?.SetFakePowerConsumption(0);
+                Generation?.SetFakeComputingConsumption(0);
             }
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] Panik-Aus(Erzeugung): {ex.Message}"); }
             GameSpeed?.SetSpeed(1);

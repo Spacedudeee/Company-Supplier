@@ -31,6 +31,7 @@ namespace CompanySupplier.UI.Tabs
         private bool _suppress;
         private CargoShipProto _shipSelected;
         private Label _shipInfo;
+        private Label _shipyardInfo;
         private IReadOnlyList<CargoShipProto> _cargoShips = Array.Empty<CargoShipProto>();
 
         public WerftFlotteTab()
@@ -47,6 +48,7 @@ namespace CompanySupplier.UI.Tabs
             {
                 _fuelToggle?.Value(CheatService.Instance?.Ships?.ShipsFuelDisabled ?? false);
                 RefreshShipInfo();
+                RefreshShipyardInfo();
             }
             finally { _suppress = false; }
         }
@@ -73,7 +75,10 @@ namespace CompanySupplier.UI.Tabs
                 BuildShipFuelToggle(),
 
                 CheatWidgets.SectionTitle(L.Wrf_TitleCargo),
-                BuildCargoShipSection()
+                BuildCargoShipSection(),
+
+                CheatWidgets.SectionTitle(L.Wrf_TitleShipyard),
+                BuildShipyardSection()
             };
 
             column.SetChildren(children.ToArray());
@@ -205,6 +210,73 @@ namespace CompanySupplier.UI.Tabs
         {
             if (_shipInfo is IComponentWithText t)
                 t.SetValue(new LocStrFormatted(ShipInfoText()));
+        }
+
+        // Werft-Lager: Kapazitaet aller Werft-Stufen (×2/×3/×5, gruen + Reset rot) plus Fracht-Aktionen
+        // (Werft-Fracht zerstoeren / ins Basis-Lager umlegen).
+        private UiComponent BuildShipyardSection()
+        {
+            var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
+
+            _shipyardInfo = new Label(new LocStrFormatted(ShipyardCapText()));
+
+            var x2 = new ButtonText(Button.Primary, new LocStrFormatted("×2"), () => ApplyShipyardCapacity(2));
+            var x3 = new ButtonText(Button.Primary, new LocStrFormatted("×3"), () => ApplyShipyardCapacity(3));
+            var x5 = new ButtonText(Button.Primary, new LocStrFormatted("×5"), () => ApplyShipyardCapacity(5));
+            var reset = CheatWidgets.DangerButton(
+                L.Common_Reset,
+                () =>
+                {
+                    CheatService.Instance?.Ships?.ResetShipyardCapacity();
+                    RefreshShipyardInfo();
+                    CheatMenuStatus.Show(L.Wrf_StatusShipyardReset);
+                },
+                L.Wrf_ShipyardCapTip);
+            var capRow = new Row((Px)CheatWidgets.Gap);
+            capRow.SetChildren(x2, x3, x5, reset);
+
+            // Werft-Fracht sofort verwerfen (rot) oder ins globale Basis-Lager umlegen (gruen).
+            var destroy = CheatWidgets.DangerButton(
+                L.Wrf_DestroyCargo,
+                () =>
+                {
+                    CheatService.Instance?.FleetVehicle?.DestroyShipyardCargo();
+                    CheatMenuStatus.Show(L.Wrf_StatusCargoDestroyed);
+                },
+                L.Wrf_DestroyCargoTip);
+            var dump = CheatWidgets.PrimaryButton(
+                L.Wrf_DumpCargo,
+                () =>
+                {
+                    CheatService.Instance?.FleetVehicle?.DumpShipyardCargoToBase();
+                    CheatMenuStatus.Show(L.Wrf_StatusCargoDumped);
+                },
+                L.Wrf_DumpCargoTip);
+            var cargoRow = new Row((Px)CheatWidgets.Gap);
+            cargoRow.SetChildren(destroy, dump);
+
+            col.SetChildren(_shipyardInfo, capRow, cargoRow);
+            return col;
+        }
+
+        private void ApplyShipyardCapacity(int factor)
+        {
+            CheatService.Instance?.Ships?.SetShipyardCapacityFactor(factor);
+            RefreshShipyardInfo();
+            CheatMenuStatus.Show(L.Wrf_StatusShipyardCap(factor));
+        }
+
+        // "Lager-Kapazität: 900" — aktuelle Kapazitaet der ersten Werft; "—" wenn keine vorhanden (<0).
+        private string ShipyardCapText()
+        {
+            int cap = CheatService.Instance?.Ships?.GetFirstShipyardCapacity() ?? -1;
+            return L.Wrf_ShipyardCapInfo(cap < 0 ? "—" : cap.ToString());
+        }
+
+        private void RefreshShipyardInfo()
+        {
+            if (_shipyardInfo is IComponentWithText t)
+                t.SetValue(new LocStrFormatted(ShipyardCapText()));
         }
     }
 }

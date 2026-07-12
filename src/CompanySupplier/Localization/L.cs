@@ -62,6 +62,14 @@ namespace CompanySupplier.Localization
         public static string Res_StatusEmptyWandOff => Loc.T("Empty storage OFF", "Lager leeren AUS", "Vidage de stockage DÉSACTIVÉ", "Vaciar almacén DESACTIVADO");
         public static string Res_StatusFillWandUnavail => Loc.T("Storage tool (fill) not available", "Lager-Werkzeug (füllen) nicht verfügbar", "Outil de stockage (remplir) indisponible", "Herramienta de almacén (llenar) no disponible");
         public static string Res_StatusEmptyWandUnavail => Loc.T("Storage tool (empty) not available", "Lager-Werkzeug (leeren) nicht verfügbar", "Outil de stockage (vider) indisponible", "Herramienta de almacén (vaciar) no disponible");
+        public static string Res_TitleFavorites => Loc.T("Favourites", "Favoriten", "Favoris", "Favoritos");
+        public static string Res_PinFavorite => Loc.T("★ Favourite", "★ Favorit", "★ Favori", "★ Favorito");
+        public static string Res_ThroughputTitle => Loc.T("Storage throughput", "Lager-Durchsatz", "Débit de stockage", "Rendimiento de almacén");
+        public static string Res_ThroughputTip => Loc.T("Scales the transfer throughput of all storage types.", "Skaliert den Transfer-Durchsatz aller Lager-Typen.", "Met à l'échelle le débit de transfert de tous les types de stockage.", "Escala el rendimiento de transferencia de todos los tipos de almacén.");
+        public static string Res_StatusThroughput(object a0) => string.Format(Loc.T("Storage throughput x{0}", "Lager-Durchsatz x{0}", "Débit de stockage x{0}", "Rendimiento de almacén x{0}"), a0);
+        public static string Res_StatusThroughputReset => Loc.T("Storage throughput reset", "Lager-Durchsatz zurückgesetzt", "Débit de stockage réinitialisé", "Rendimiento de almacén restablecido");
+        public static string Res_StatusFavAdded(object a0) => string.Format(Loc.T("{0} added to favourites", "{0} zu Favoriten hinzugefügt", "{0} ajouté aux favoris", "{0} añadido a favoritos"), a0);
+        public static string Res_StatusFavRemoved(object a0) => string.Format(Loc.T("{0} removed from favourites", "{0} aus Favoriten entfernt", "{0} retiré des favoris", "{0} eliminado de favoritos"), a0);
 
         // ---- Gen ----
         public static string Gen_TitleCreative => Loc.T("Creative Mode", "Kreativmodus", "Mode créatif", "Modo creativo");
@@ -122,12 +130,30 @@ namespace CompanySupplier.Localization
         public static string Gen_StatusGodWandOff => Loc.T("God tool OFF", "God-Werkzeug AUS", "Outil dieu DÉSACTIVÉ", "Herramienta dios DESACTIVADA");
         public static string Gen_StatusResearchFinished => Loc.T("Current research completed", "Aktuelle Forschung abgeschlossen", "Recherche en cours terminée", "Investigación actual completada");
         public static string Gen_StatusResearchUnlocked => Loc.T("Entire research tree unlocked", "Kompletter Forschungsbaum freigeschaltet", "Arbre de recherche entièrement débloqué", "Árbol de investigación completo desbloqueado");
+        public static string Gen_SetPopulation => Loc.T("Set population", "Bevölkerung setzen", "Définir la population", "Establecer población");
+        public static string Gen_SetPopulationTip => Loc.T("Sets total population to the entered value.", "Setzt die Gesamtbevölkerung auf den eingegebenen Wert.", "Définit la population totale sur la valeur saisie.", "Establece la población total en el valor introducido.");
+        public static string Gen_ResearchUnlockAvailable => Loc.T("Unlock available research", "Verfügbare Forschung freischalten", "Débloquer la recherche disponible", "Desbloquear investigación disponible");
+        public static string Gen_ResearchUnlockAvailableTip => Loc.T("Unlocks all currently reachable research nodes.", "Schaltet alle aktuell erreichbaren Forschungsknoten frei.", "Débloque tous les nœuds de recherche actuellement accessibles.", "Desbloquea todos los nodos de investigación accesibles actualmente.");
+        public static string Gen_ResearchUnlockRepeatable => Loc.T("Unlock repeatable research", "Wiederholbare Forschung freischalten", "Débloquer la recherche répétable", "Desbloquear investigación repetible");
+        public static string Gen_ResearchUnlockRepeatableTip => Loc.T("Unlocks all repeatable research once.", "Schaltet alle wiederholbaren Forschungen einmal frei.", "Débloque une fois toutes les recherches répétables.", "Desbloquea una vez todas las investigaciones repetibles.");
+        public static string Gen_ResearchIgnoreItems => Loc.T("Ignore item requirements", "Produkt-Voraussetzungen ignorieren", "Ignorer les prérequis en produits", "Ignorar requisitos de productos");
+        public static string Gen_ResearchIgnoreItemsTip => Loc.T("Research ignores required products/conditions.", "Forschung ignoriert benötigte Produkte/Bedingungen.", "La recherche ignore les produits/conditions requis.", "La investigación ignora los productos/condiciones requeridos.");
+        public static string Gen_ResearchIgnoreParents => Loc.T("Ignore parent requirements", "Eltern-Voraussetzungen ignorieren", "Ignorer les prérequis parents", "Ignorar requisitos previos");
+        public static string Gen_ResearchIgnoreParentsTip => Loc.T("Every node is researchable without its predecessors.", "Jeder Knoten ist ohne seine Vorgänger forschbar.", "Chaque nœud est disponible sans ses prédécesseurs.", "Cada nodo se puede investigar sin sus predecesores.");
+        public static string Gen_TitleWorldgen => Loc.T("WorldGen fixes", "WorldGen-Fixes", "Correctifs WorldGen", "Correcciones de WorldGen");
+        public static string Gen_WorldgenUnlock => Loc.T("Unlock locked seeds/radar", "Gesperrtes Saatgut/Radar freischalten", "Débloquer graines/radar verrouillés", "Desbloquear semillas/radar bloqueados");
+        public static string Gen_WorldgenUnlockTip => Loc.T("Fixes the worldgen bug: unlocks sugar cane/poppy/corn seeds and radar 2.", "Behebt den WorldGen-Bug: schaltet Zuckerrohr-/Mohn-/Mais-Saatgut und Radar 2 frei.", "Corrige le bug worldgen : débloque les graines de canne à sucre/pavot/maïs et le radar 2.", "Corrige el error de worldgen: desbloquea semillas de caña de azúcar/amapola/maíz y radar 2.");
+        public static string Gen_StatusPopulationSet(object a0) => string.Format(Loc.T("Population set to {0}", "Bevölkerung auf {0} gesetzt", "Population définie sur {0}", "Población establecida en {0}"), a0);
+        public static string Gen_StatusWorldgen => Loc.T("WorldGen fixes applied", "WorldGen-Fixes angewendet", "Correctifs WorldGen appliqués", "Correcciones de WorldGen aplicadas");
 
         // ---- Erz ----
         public static string Erz_TitlePower => Loc.T("Free power (KW) per tick", "Gratis-Strom (KW) pro Tick", "Électricité gratuite (KW) par tick", "Electricidad gratis (KW) por tick");
         public static string Erz_TitleComputing => Loc.T("Free Computing (TFlops) per tick", "Gratis-Rechenleistung (TFlops) pro Tick", "Puissance de calcul gratuite (TFlops) par tick", "Computing gratis (TFlops) por tick");
         public static string Erz_TitleUnity => Loc.T("Free Unity per month", "Gratis-Unity pro Monat", "Unity gratuite par mois", "Unity gratis al mes");
         public static string Erz_Value => Loc.T("Value", "Wert", "Valeur", "Valor");
+        public static string Erz_TitleFake => Loc.T("Fake consumption (display only)", "Fake-Verbrauch (nur Anzeige)", "Consommation factice (affichage)", "Consumo falso (solo visual)");
+        public static string Erz_FakePower => Loc.T("Fake power consumption (MW)", "Fake-Strom-Verbrauch (MW)", "Consommation d'énergie factice (MW)", "Consumo de energía falso (MW)");
+        public static string Erz_FakeComputing => Loc.T("Fake computing consumption (TFLOPS)", "Fake-Computing-Verbrauch (TFlops)", "Consommation de calcul factice (TFLOPS)", "Consumo de cómputo falso (TFLOPS)");
 
         // ---- Fzg ----
         public static string Fzg_TitleFuel => Loc.T("Fuel", "Treibstoff", "Carburant", "Combustible");
@@ -211,6 +237,11 @@ namespace CompanySupplier.Localization
         public static string Umw_MasterTip => Loc.T("Turns off all six pollution sources at once. Existing pollution then decays on its own.", "Schaltet alle sechs Verschmutzungsquellen auf einmal ab. Bestehende Verschmutzung baut sich danach selbst ab.", "Coupe d'un seul coup les six sources de pollution. La pollution existante se dissipe ensuite d'elle-même.", "Desactiva de golpe las seis fuentes de contaminación. La contaminación existente se disipa por sí sola después.");
         public static string Umw_StatusOff => Loc.T("Pollution OFF", "Verschmutzung AUS", "Pollution COUPÉE", "Contaminación DESACTIVADA");
         public static string Umw_StatusNormal => Loc.T("Pollution normal", "Verschmutzung normal", "Pollution normale", "Contaminación normal");
+        public static string Umw_TitleHousing => Loc.T("Settlement waste", "Siedlungs-Abfall", "Déchets des colonies", "Residuos de asentamientos");
+        public static string Umw_NoWaste => Loc.T("No municipal waste", "Kein Hausmüll", "Aucun déchet municipal", "Sin residuos municipales");
+        public static string Umw_NoWasteTip => Loc.T("Settlements no longer produce municipal waste (landfill).", "Siedlungen erzeugen keinen Hausmüll (Deponie) mehr.", "Les colonies ne produisent plus de déchets municipaux (décharge).", "Los asentamientos ya no producen residuos municipales (vertedero).");
+        public static string Umw_NoBiowaste => Loc.T("No biowaste", "Kein Biomüll", "Aucun biodéchet", "Sin biorresiduos");
+        public static string Umw_NoBiowasteTip => Loc.T("Settlements no longer produce biowaste.", "Siedlungen erzeugen keinen Biomüll mehr.", "Les colonies ne produisent plus de biodéchets.", "Los asentamientos ya no producen biorresiduos.");
 
         // ---- Wlt ----
         public static string Wlt_TitleMap => Loc.T("Map", "Karte", "Carte", "Mapa");
@@ -247,6 +278,17 @@ namespace CompanySupplier.Localization
         public static string Wrf_NoShips => Loc.T("(no cargo ships available)", "(keine Frachtschiffe vorhanden)", "(aucun navire cargo disponible)", "(no hay barcos de carga)");
         public static string Wrf_StatusShipCap(object a0, object a1) => string.Format(Loc.T("Cargo ship capacity {0} = x{1}", "Frachtschiff-Kapazität {0} = x{1}", "Capacité du navire {0} = x{1}", "Capacidad del barco {0} = x{1}"), a0, a1);
         public static string Wrf_StatusShipReset => Loc.T("Cargo ship reset", "Frachtschiff zurückgesetzt", "Navire cargo réinitialisé", "Barco de carga restablecido");
+        public static string Wrf_TitleShipyard => Loc.T("Shipyard storage", "Werft-Lager", "Stockage du chantier naval", "Almacén del astillero");
+        public static string Wrf_ShipyardCapInfo(object a0) => string.Format(Loc.T("Storage capacity: {0}", "Lager-Kapazität: {0}", "Capacité de stockage : {0}", "Capacidad de almacenamiento: {0}"), a0);
+        public static string Wrf_ShipyardCapTip => Loc.T("Scales the storage capacity of all shipyard tiers.", "Skaliert die Lager-Kapazität aller Werft-Stufen.", "Met à l'échelle la capacité de stockage de tous les niveaux de chantier naval.", "Escala la capacidad de almacenamiento de todos los niveles del astillero.");
+        public static string Wrf_DestroyCargo => Loc.T("Destroy shipyard cargo", "Werft-Fracht zerstören", "Détruire la cargaison du chantier", "Destruir carga del astillero");
+        public static string Wrf_DestroyCargoTip => Loc.T("Discards all cargo held in the shipyard storage.", "Verwirft die gesamte im Werft-Lager liegende Fracht.", "Rejette toute la cargaison stockée dans le chantier naval.", "Descarta toda la carga almacenada en el astillero.");
+        public static string Wrf_DumpCargo => Loc.T("Dump cargo to base storage", "Fracht ins Basis-Lager", "Verser la cargaison au stockage de base", "Volcar carga al almacén base");
+        public static string Wrf_DumpCargoTip => Loc.T("Moves shipyard cargo into the global base storage.", "Legt die Werft-Fracht ins globale Basis-Lager.", "Déplace la cargaison du chantier vers le stockage de base global.", "Traslada la carga del astillero al almacén base global.");
+        public static string Wrf_StatusShipyardCap(object a0) => string.Format(Loc.T("Shipyard capacity x{0}", "Werft-Kapazität x{0}", "Capacité du chantier x{0}", "Capacidad del astillero x{0}"), a0);
+        public static string Wrf_StatusShipyardReset => Loc.T("Shipyard capacity reset", "Werft-Kapazität zurückgesetzt", "Capacité du chantier réinitialisée", "Capacidad del astillero restablecida");
+        public static string Wrf_StatusCargoDestroyed => Loc.T("Shipyard cargo destroyed", "Werft-Fracht zerstört", "Cargaison du chantier détruite", "Carga del astillero destruida");
+        public static string Wrf_StatusCargoDumped => Loc.T("Cargo moved to base storage", "Fracht ins Basis-Lager gelegt", "Cargaison déplacée au stockage de base", "Carga trasladada al almacén base");
 
         // ---- Tab ----
         public static string Tab_Produktion => Loc.T("Production", "Produktion", "Production", "Producción");
@@ -265,6 +307,8 @@ namespace CompanySupplier.Localization
         public static string Prod_TitleReserves => Loc.T("Reserves", "Reserven", "Réserves", "Reservas");
         public static string Prod_UnlimitedWater => Loc.T("Unlimited groundwater", "Unerschöpfliches Grundwasser", "Nappe phréatique infinie", "Aguas subterráneas infinitas");
         public static string Prod_UnlimitedWaterTip => Loc.T("Groundwater deposits no longer deplete — pumps keep extracting indefinitely.", "Grundwasser-Vorkommen erschöpfen nicht mehr — Pumpen fördern dauerhaft weiter.", "Les nappes phréatiques ne s'épuisent plus — les pompes continuent indéfiniment.", "Las aguas subterráneas ya no se agotan — las bombas siguen extrayendo indefinidamente.");
+        public static string Prod_NoOilDrain => Loc.T("No oil drain", "Kein Erdöl-Verbrauch", "Pas de consommation de pétrole", "Sin consumo de petróleo");
+        public static string Prod_NoOilDrainTip => Loc.T("Oil deposits are refilled to capacity every day.", "Erdöl-Vorkommen werden täglich wieder auf Kapazität aufgefüllt.", "Les gisements de pétrole sont remplis à pleine capacité chaque jour.", "Los yacimientos de petróleo se rellenan a su capacidad cada día.");
 
         // ---- Wet ----
         public static string Wet_TitleFix => Loc.T("Lock Weather Permanently", "Wetter dauerhaft fixieren", "Fixer la météo en permanence", "Fijar el clima de forma permanente");

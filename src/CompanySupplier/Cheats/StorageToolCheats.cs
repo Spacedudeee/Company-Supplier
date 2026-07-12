@@ -52,6 +52,8 @@ namespace CompanySupplier.Cheats
             try
             {
                 _setCheatMode.Invoke(storage, new object[] { mode });
+                // Schwebendes Weltlabel (gelb=KF / rot=KE) nachziehen — rein visuell, best effort.
+                CheatService.Instance?.StorageLabels?.UpdateLabel(storage, mode);
                 Log.Info($"[{CompanySupplier.ModName}] Lager {storage.Id} Cheat-Modus = {mode}.");
                 return true;
             }

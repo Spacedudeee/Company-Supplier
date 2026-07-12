@@ -33,6 +33,12 @@ namespace CompanySupplier.Config
         [DataMember(Name = "presets", Order = 3)]
         public List<CheatPreset> Presets { get; set; } = new List<CheatPreset>();
 
+        /// <summary>Als Favorit markierte Produkte (stabile <c>ProductProto.Id.Value</c>-Strings) fuer den
+        /// Ressourcen-Tab. Reine UI-/Komfort-Liste, unabhaengig vom Spielstand; unbekannte Ids werden beim
+        /// Anzeigen still uebersprungen.</summary>
+        [DataMember(Name = "favorites", Order = 4)]
+        public List<string> FavoriteProductIds { get; set; } = new List<string>();
+
         /// <summary>
         /// WICHTIG: <see cref="System.Runtime.Serialization.Json.DataContractJsonSerializer"/> erzeugt
         /// Instanzen OHNE Konstruktor/Initializer (GetUninitializedObject). Fehlt ein Member im JSON,
@@ -46,6 +52,25 @@ namespace CompanySupplier.Config
             Toggles = new List<ToggleState>();
             AutoRestore = true;
             Presets = new List<CheatPreset>();
+            FavoriteProductIds = new List<string>();
+        }
+
+        // ----------------------------------------------------------------------------------------
+        // Komfort-Helfer fuer die Produkt-Favoriten (Ressourcen-Tab)
+        // ----------------------------------------------------------------------------------------
+
+        /// <summary>True, wenn die Produkt-Id als Favorit markiert ist.</summary>
+        public bool IsFavorite(string productId)
+            => productId != null && FavoriteProductIds != null && FavoriteProductIds.Contains(productId);
+
+        /// <summary>Schaltet den Favoriten-Status einer Produkt-Id um. Liefert den neuen Zustand.</summary>
+        public bool ToggleFavorite(string productId)
+        {
+            if (productId == null) return false;
+            if (FavoriteProductIds == null) FavoriteProductIds = new List<string>();
+            if (FavoriteProductIds.Contains(productId)) { FavoriteProductIds.Remove(productId); return false; }
+            FavoriteProductIds.Add(productId);
+            return true;
         }
 
         // ----------------------------------------------------------------------------------------
@@ -118,6 +143,10 @@ namespace CompanySupplier.Config
         public const string DiseasesDisabled    = "pop.noDiseases";
         public const string MaxHappiness        = "pop.maxHappiness";
         public const string KeepUnityFull       = "pop.keepUnityFull";
+        public const string HousingNoWaste      = "pop.noWaste";
+        public const string HousingNoBiowaste   = "pop.noBiowaste";
+        public const string ResIgnoreItemReq    = "research.ignoreItemReq";
+        public const string ResIgnoreParentReq  = "research.ignoreParentReq";
 
         public const string PollutionAir        = "pollution.air";
         public const string PollutionWater      = "pollution.water";
@@ -131,6 +160,7 @@ namespace CompanySupplier.Config
         public const string ProdSolar           = "prod.solar";
         public const string ProdForceRun        = "prod.forceRun";
         public const string ProdUnlimitedWater  = "prod.unlimitedWater";
+        public const string ProdNoOilDrain      = "prod.noOilDrain";
 
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";
