@@ -169,6 +169,15 @@ namespace CompanySupplier.Config
         public const string MachineLowComputing = "gameplay.machineLowComputing";
         public const string NoConsumption       = "gameplay.noConsumption";
         public const string HousingCapacity     = "gameplay.housingCapacity";
+        public const string NoMaintConsume      = "gameplay.noMaintConsume";
+        public const string NoFarmWater         = "gameplay.noFarmWater";
+        public const string UnityProduction     = "gameplay.unityProduction";
+        public const string TrainPower          = "gameplay.trainPower";
+        public const string TrainSlopes         = "gameplay.trainSlopes";
+        public const string LogisticsPower      = "gameplay.logisticsPower";
+        public const string RecyclingFull       = "gameplay.recyclingFull";
+        public const string TreeGrowth          = "gameplay.treeGrowth";
+        public const string RocketCapacity      = "gameplay.rocketCapacity";
 
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";

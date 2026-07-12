@@ -319,6 +319,22 @@ namespace CompanySupplier
             }
         }
 
+        /// <summary>Fuellt sofort ALLE Wartungspuffer im Spiel auf (One-Shot; behebt Wartungs-Engpaesse ohne
+        /// die Mechanik dauerhaft abzuschalten). Nutzt die public <c>MaintenanceManager.Cheat_FillAllMaintenanceBuffers</c>.</summary>
+        public void FillAllMaintenance()
+        {
+            if (_maintenance == null) return;
+            try
+            {
+                _maintenance.Cheat_FillAllMaintenanceBuffers();
+                Log.Info($"[{CompanySupplier.ModName}] Alle Wartungspuffer aufgefuellt.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] FillAllMaintenance: {ex.Message}");
+            }
+        }
+
         // ----------------------------------------------------------------------------------------
         // Zentrale Dauer-Cheat-Verwaltung (Basis fuer Panik-Aus, Auto-Restore, Presets)
         // ----------------------------------------------------------------------------------------
@@ -385,6 +401,17 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.MachineLowComputing,Apply = v => Gameplay?.SetMachineFullOnLowComputing(v), Read = () => Gameplay?.MachineFullOnLowComputing ?? false },
                 new ToggleEntry { Key = ConfigKeys.NoConsumption,      Apply = v => Gameplay?.SetNoSettlementConsumption(v),   Read = () => Gameplay?.NoSettlementConsumption ?? false },
                 new ToggleEntry { Key = ConfigKeys.HousingCapacity,    Apply = v => Gameplay?.SetHousingCapacityBoost(v),     Read = () => Gameplay?.HousingCapacityBoost ?? false },
+
+                // Gameplay-Hebel Welle 2.
+                new ToggleEntry { Key = ConfigKeys.NoMaintConsume,     Apply = v => Gameplay?.SetNoMaintenanceConsumption(v), Read = () => Gameplay?.NoMaintenanceConsumption ?? false },
+                new ToggleEntry { Key = ConfigKeys.NoFarmWater,        Apply = v => Gameplay?.SetNoFarmWater(v),        Read = () => Gameplay?.NoFarmWater ?? false },
+                new ToggleEntry { Key = ConfigKeys.UnityProduction,    Apply = v => Gameplay?.SetUnityProductionBoost(v), Read = () => Gameplay?.UnityProductionBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.TrainPower,         Apply = v => Gameplay?.SetTrainPowerBoost(v),    Read = () => Gameplay?.TrainPowerBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.TrainSlopes,        Apply = v => Gameplay?.SetTrainsIgnoreSlopes(v), Read = () => Gameplay?.TrainsIgnoreSlopes ?? false },
+                new ToggleEntry { Key = ConfigKeys.LogisticsPower,     Apply = v => Gameplay?.SetLogisticsIgnorePower(v), Read = () => Gameplay?.LogisticsIgnorePower ?? false },
+                new ToggleEntry { Key = ConfigKeys.RecyclingFull,      Apply = v => Gameplay?.SetRecyclingFull(v),      Read = () => Gameplay?.RecyclingFull ?? false },
+                new ToggleEntry { Key = ConfigKeys.TreeGrowth,         Apply = v => Gameplay?.SetTreeGrowthBoost(v),    Read = () => Gameplay?.TreeGrowthBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.RocketCapacity,     Apply = v => Gameplay?.SetRocketCapacityBoost(v), Read = () => Gameplay?.RocketCapacityBoost ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
 

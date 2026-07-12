@@ -28,6 +28,15 @@ namespace CompanySupplier.Cheats
         private const string OwnerMachineComp = "CompanySupplier.Gameplay.MachineComputing";
         private const string OwnerNoConsume   = "CompanySupplier.Gameplay.NoConsumption";
         private const string OwnerHousing     = "CompanySupplier.Gameplay.Housing";
+        private const string OwnerMaintCons   = "CompanySupplier.Gameplay.MaintConsume";
+        private const string OwnerFarmWater   = "CompanySupplier.Gameplay.FarmWater";
+        private const string OwnerUnityProd   = "CompanySupplier.Gameplay.UnityProd";
+        private const string OwnerTrainPower  = "CompanySupplier.Gameplay.TrainPower";
+        private const string OwnerTrainSlope  = "CompanySupplier.Gameplay.TrainSlope";
+        private const string OwnerLogiPower   = "CompanySupplier.Gameplay.LogisticsPower";
+        private const string OwnerRecycling   = "CompanySupplier.Gameplay.Recycling";
+        private const string OwnerTreeGrowth  = "CompanySupplier.Gameplay.TreeGrowth";
+        private const string OwnerRocketCap   = "CompanySupplier.Gameplay.RocketCap";
 
         private readonly DependencyResolver _resolver;
         private IPropertiesDb _db;
@@ -58,7 +67,36 @@ namespace CompanySupplier.Cheats
         public bool HousingCapacityBoost     => HasPercent(IdsCore.PropertyIds.HousingCapacityMultiplier, OwnerHousing);
         public void SetHousingCapacityBoost(bool v) => SetPercent(IdsCore.PropertyIds.HousingCapacityMultiplier, OwnerHousing, 900, v, "Wohnkapazitaet x10");
 
-        // ---- generische Helfer (ein IProperty<Percent>-Cache pro Aufruf; robust) ------------------
+        // ---- Welle 2 ------------------------------------------------------------------------------
+
+        public bool NoMaintenanceConsumption => HasPercent(IdsCore.PropertyIds.MaintenanceConsumptionMultiplier, OwnerMaintCons);
+        public void SetNoMaintenanceConsumption(bool v) => SetPercent(IdsCore.PropertyIds.MaintenanceConsumptionMultiplier, OwnerMaintCons, -100, v, "Kein Wartungsverbrauch");
+
+        public bool NoFarmWater              => HasPercent(IdsCore.PropertyIds.FarmWaterConsumptionMultiplier, OwnerFarmWater);
+        public void SetNoFarmWater(bool v)     => SetPercent(IdsCore.PropertyIds.FarmWaterConsumptionMultiplier, OwnerFarmWater, -100, v, "Farmen ohne Wasser");
+
+        public bool UnityProductionBoost     => HasPercent(IdsCore.PropertyIds.UnityProductionMultiplier, OwnerUnityProd);
+        public void SetUnityProductionBoost(bool v) => SetPercent(IdsCore.PropertyIds.UnityProductionMultiplier, OwnerUnityProd, 900, v, "Unity-Produktion x10");
+
+        public bool TrainPowerBoost          => HasPercent(IdsCore.PropertyIds.TrainPowerMultiplier, OwnerTrainPower);
+        public void SetTrainPowerBoost(bool v) => SetPercent(IdsCore.PropertyIds.TrainPowerMultiplier, OwnerTrainPower, 900, v, "Zug-Leistung x10");
+
+        public bool TrainsIgnoreSlopes       => HasPercent(IdsCore.PropertyIds.TrainSlopeDifficultyMultiplier, OwnerTrainSlope);
+        public void SetTrainsIgnoreSlopes(bool v) => SetPercent(IdsCore.PropertyIds.TrainSlopeDifficultyMultiplier, OwnerTrainSlope, -100, v, "Zuege: Steigungen ignorieren");
+
+        public bool LogisticsIgnorePower     => HasBool(IdsCore.PropertyIds.LogisticsIgnorePower, OwnerLogiPower);
+        public void SetLogisticsIgnorePower(bool v) => SetBool(IdsCore.PropertyIds.LogisticsIgnorePower, OwnerLogiPower, true, v, "Logistik ignoriert Strom");
+
+        public bool RecyclingFull            => HasPercent(IdsCore.PropertyIds.RecyclingRatioDiff, OwnerRecycling);
+        public void SetRecyclingFull(bool v)   => SetPercent(IdsCore.PropertyIds.RecyclingRatioDiff, OwnerRecycling, 100, v, "Recycling voll");
+
+        public bool TreeGrowthBoost          => HasPercent(IdsCore.PropertyIds.TreesGrowthSpeed, OwnerTreeGrowth);
+        public void SetTreeGrowthBoost(bool v) => SetPercent(IdsCore.PropertyIds.TreesGrowthSpeed, OwnerTreeGrowth, 900, v, "Baum-Wachstum x10");
+
+        public bool RocketCapacityBoost      => HasPercent(IdsCore.PropertyIds.RocketsCapacityMultiplier, OwnerRocketCap);
+        public void SetRocketCapacityBoost(bool v) => SetPercent(IdsCore.PropertyIds.RocketsCapacityMultiplier, OwnerRocketCap, 900, v, "Raketen-Kapazitaet x10");
+
+        // ---- generische Helfer (ein IProperty<T>-Cache pro Aufruf; robust) ------------------------
 
         private bool HasPercent(PropertyId<Percent> id, string owner)
         {
@@ -80,6 +118,30 @@ namespace CompanySupplier.Cheats
                 if (on) prop.AddOrSetModifier(owner, Percent.FromPercentVal(deltaPercent), PropertyModifiers.NO_GROUP);
                 else    prop.TryRemoveModifier(owner);
                 Log.Info($"[{CompanySupplier.ModName}] {label} = {on} ({deltaPercent:+0;-0}%).");
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] {label} umschalten: {ex.Message}"); }
+        }
+
+        private bool HasBool(PropertyId<bool> id, string owner)
+        {
+            try
+            {
+                IProperty<bool> prop = _db?.GetProperty(id);
+                return prop != null && prop.TryGetModifier(owner, out PropertyModifier<bool> _);
+            }
+            catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] HasBool({id}): {ex.Message}"); return false; }
+        }
+
+        private void SetBool(PropertyId<bool> id, string owner, bool targetValue, bool on, string label)
+        {
+            if (_db == null) return;
+            try
+            {
+                IProperty<bool> prop = _db.GetProperty(id);
+                if (prop == null) { Log.Warning($"[{CompanySupplier.ModName}] {label}: Property nicht gefunden."); return; }
+                if (on) prop.AddOrSetModifier(owner, targetValue, PropertyModifiers.NO_GROUP);
+                else    prop.TryRemoveModifier(owner);
+                Log.Info($"[{CompanySupplier.ModName}] {label} = {on}.");
             }
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] {label} umschalten: {ex.Message}"); }
         }

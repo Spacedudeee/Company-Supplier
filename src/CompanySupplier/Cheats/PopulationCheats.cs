@@ -4,6 +4,7 @@ using Mafi;
 using Mafi.Core;
 using Mafi.Core.Buildings.Settlements;
 using Mafi.Core.Population;
+using Mafi.Core.Population.Refugees;        // RefugeesManager (Einwanderungs-Event abschliessen)
 using Mafi.Core.Simulation;
 
 namespace CompanySupplier.Cheats
@@ -29,6 +30,7 @@ namespace CompanySupplier.Cheats
         private UpointsManager _upoints;           // Mafi.Core.Population — GenerateUnity
         private PopsHealthManager _popsHealth;     // Mafi.Core.Population — DisableDiseases / CurrentDisease
         private WorkersManager _workers;           // Mafi.Core.Population — Cheat_addWorkers (freie Arbeiter)
+        private RefugeesManager _refugees;         // Mafi.Core.Population.Refugees — Einwanderungs-Discovery sofort abschliessen
         private ICalendar _calendar;               // Mafi.Core.Simulation — NewDay-Event
 
         /// <summary>true = neu auftretende Seuchen werden taeglich automatisch beendet.</summary>
@@ -53,6 +55,7 @@ namespace CompanySupplier.Cheats
             _resolver.TryResolve<UpointsManager>(out _upoints);
             _resolver.TryResolve<PopsHealthManager>(out _popsHealth);
             _resolver.TryResolve<WorkersManager>(out _workers);
+            _resolver.TryResolve<RefugeesManager>(out _refugees);
             _resolver.TryResolve<ICalendar>(out _calendar);
 
             // Taeglicher Hook: beendet aktive Seuchen bzw. haelt die Zufriedenheit oben, solange aktiv.
@@ -137,6 +140,23 @@ namespace CompanySupplier.Cheats
         {
             try { return _workers?.AmountOfFreeWorkers ?? -1; }
             catch { return -1; }
+        }
+
+        /// <summary>Schliesst die laufende Einwanderungs-/Fluechtlings-Entdeckung sofort ab und schuettet ihre
+        /// Belohnung (Gratis-Pops + Ware) aus. No-op, wenn gerade keine laeuft. Nutzt die public
+        /// <c>RefugeesManager.Cheat_FinishCurrentDiscovery</c> (0.8.5.0).</summary>
+        public void FinishImmigration()
+        {
+            if (_refugees == null) return;
+            try
+            {
+                _refugees.Cheat_FinishCurrentDiscovery();
+                Log.Info($"[{CompanySupplier.ModName}] Einwanderungs-Entdeckung abgeschlossen.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] FinishImmigration: {ex.Message}");
+            }
         }
 
         // ----------------------------------------------------------------------------------------

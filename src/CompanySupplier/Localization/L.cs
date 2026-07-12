@@ -153,6 +153,16 @@ namespace CompanySupplier.Localization
         public static string Gen_HousingCapacityTip => Loc.T("Multiplies every housing building's capacity by ten.", "Verzehnfacht die Wohnkapazität aller Wohngebäude.", "Multiplie par dix la capacité de tous les logements.", "Multiplica por diez la capacidad de todas las viviendas.");
         public static string Gen_FreeWorkers => Loc.T("Free workers", "Freie Arbeiter", "Ouvriers libres", "Trabajadores libres");
         public static string Gen_StatusWorkers(object a0) => string.Format(Loc.T("{0} free workers", "{0} freie Arbeiter", "{0} ouvriers libres", "{0} trabajadores libres"), a0);
+        public static string Gen_NoMaintConsume => Loc.T("No maintenance consumption", "Kein Wartungsverbrauch", "Aucune consommation d'entretien", "Sin consumo de mantenimiento");
+        public static string Gen_NoMaintConsumeTip => Loc.T("Machines no longer consume maintenance parts (cleaner than the ignore lever).", "Maschinen verbrauchen keine Wartungsteile mehr (sauberer als der Ignore-Hebel).", "Les machines ne consomment plus de pièces d'entretien (plus propre que l'option d'ignorance).", "Las máquinas ya no consumen piezas de mantenimiento (más limpio que la opción de ignorar).");
+        public static string Gen_UnityProduction => Loc.T("Unity production ×10", "Unity-Produktion ×10", "Production d'Unity ×10", "Producción de Unity ×10");
+        public static string Gen_UnityProductionTip => Loc.T("Multiplies all unity production (edicts/HQ) by ten.", "Verzehnfacht die gesamte Unity-Produktion (Edikte/HQ).", "Multiplie par dix toute la production d'Unity (édits/QG).", "Multiplica por diez toda la producción de Unity (edictos/central).");
+        public static string Gen_FillMaintenance => Loc.T("Fill all maintenance now", "Wartung sofort auffüllen", "Remplir l'entretien maintenant", "Rellenar mantenimiento ahora");
+        public static string Gen_FillMaintenanceTip => Loc.T("Instantly tops up every maintenance buffer (one-shot).", "Füllt alle Wartungspuffer im Spiel sofort auf (One-Shot).", "Remplit instantanément tous les tampons d'entretien (une fois).", "Rellena al instante todos los búferes de mantenimiento (una vez).");
+        public static string Gen_StatusMaintFilled => Loc.T("Maintenance filled", "Wartung aufgefüllt", "Entretien rempli", "Mantenimiento rellenado");
+        public static string Gen_FinishImmigration => Loc.T("Finish immigration event", "Einwanderungs-Event abschließen", "Terminer l'événement d'immigration", "Finalizar evento de inmigración");
+        public static string Gen_FinishImmigrationTip => Loc.T("Instantly completes the running immigration discovery (free pops + goods).", "Schließt die laufende Einwanderungs-Entdeckung sofort ab (Gratis-Pops + Ware).", "Termine instantanément la découverte d'immigration en cours (pops + biens gratuits).", "Completa al instante el descubrimiento de inmigración en curso (pops + bienes gratis).");
+        public static string Gen_StatusImmigration => Loc.T("Immigration completed", "Einwanderung abgeschlossen", "Immigration terminée", "Inmigración completada");
 
         // ---- Erz ----
         public static string Erz_TitlePower => Loc.T("Free power (KW) per tick", "Gratis-Strom (KW) pro Tick", "Électricité gratuite (KW) par tick", "Electricidad gratis (KW) por tick");
@@ -203,6 +213,10 @@ namespace CompanySupplier.Localization
         public static string Fzg_StatusWagonReset => Loc.T("Wagon capacity reset", "Waggon-Kapazität zurückgesetzt", "Capacité du wagon réinitialisée", "Capacidad de vagón restablecida");
         public static string Fzg_TrainsNoFuel => Loc.T("Trains: no fuel", "Züge: kein Treibstoff", "Trains : pas de carburant", "Trenes: sin combustible");
         public static string Fzg_TrainsNoFuelTip => Loc.T("Trains consume no fuel (diesel).", "Züge verbrauchen keinen Treibstoff (Diesel).", "Les trains ne consomment pas de carburant (diesel).", "Los trenes no consumen combustible (diésel).");
+        public static string Fzg_TrainPower => Loc.T("Train power ×10", "Zug-Leistung ×10", "Puissance des trains ×10", "Potencia de trenes ×10");
+        public static string Fzg_TrainPowerTip => Loc.T("Multiplies train engine power by ten (acceleration/load pulled).", "Verzehnfacht die Motorleistung der Züge (Beschleunigung/Zuglast).", "Multiplie par dix la puissance des trains (accélération/charge tractée).", "Multiplica por diez la potencia de los trenes (aceleración/carga).");
+        public static string Fzg_TrainSlopes => Loc.T("Trains: ignore slopes", "Züge: Steigungen ignorieren", "Trains : ignorer les pentes", "Trenes: ignorar pendientes");
+        public static string Fzg_TrainSlopesTip => Loc.T("Trains climb any grade effortlessly (no slope limit).", "Züge fahren jede Steigung mühelos (keine Gefälle-Grenze).", "Les trains gravissent toute pente sans effort (pas de limite de pente).", "Los trenes suben cualquier pendiente sin esfuerzo (sin límite de pendiente).");
 
         // ---- Gel ----
         public static string Gel_Material => Loc.T("Material", "Material", "Matériau", "Material");
@@ -227,6 +241,8 @@ namespace CompanySupplier.Localization
         public static string Gel_PlantTreesTip => Loc.T("Plants trees in the dumping markings.", "Pflanzt Bäume in den Verfüll-Markierungen.", "Plante des arbres dans les marquages de remblai.", "Planta árboles en las marcas de relleno.");
         public static string Gel_RemoveTrees => Loc.T("Remove trees", "Bäume entfernen", "Retirer les arbres", "Quitar árboles");
         public static string Gel_RemoveTreesTip => Loc.T("Removes all trees marked for removal.", "Entfernt alle zur Entfernung markierten Bäume.", "Retire tous les arbres marqués pour suppression.", "Elimina todos los árboles marcados para su tala.");
+        public static string Gel_TreeGrowth => Loc.T("Tree growth ×10", "Baum-Wachstum ×10", "Croissance des arbres ×10", "Crecimiento de árboles ×10");
+        public static string Gel_TreeGrowthTip => Loc.T("Trees regrow ten times as fast.", "Bäume wachsen zehnmal so schnell nach.", "Les arbres repoussent dix fois plus vite.", "Los árboles vuelven a crecer diez veces más rápido.");
 
         // ---- Umw ----
         public static string Umw_TitlePollution => Loc.T("Pollution", "Verschmutzung", "Pollution", "Contaminación");
@@ -252,6 +268,8 @@ namespace CompanySupplier.Localization
         public static string Umw_NoWasteTip => Loc.T("Settlements no longer produce municipal waste (landfill).", "Siedlungen erzeugen keinen Hausmüll (Deponie) mehr.", "Les colonies ne produisent plus de déchets municipaux (décharge).", "Los asentamientos ya no producen residuos municipales (vertedero).");
         public static string Umw_NoBiowaste => Loc.T("No biowaste", "Kein Biomüll", "Aucun biodéchet", "Sin biorresiduos");
         public static string Umw_NoBiowasteTip => Loc.T("Settlements no longer produce biowaste.", "Siedlungen erzeugen keinen Biomüll mehr.", "Les colonies ne produisent plus de biodéchets.", "Los asentamientos ya no producen biorresiduos.");
+        public static string Umw_RecyclingFull => Loc.T("Full recycling", "Recycling voll", "Recyclage complet", "Reciclaje total");
+        public static string Umw_RecyclingFullTip => Loc.T("Recyclers recover products from waste near-losslessly.", "Recycler gewinnen nahezu verlustfrei Produkte aus Abfall zurück.", "Les recycleurs récupèrent les produits des déchets presque sans perte.", "Los recicladores recuperan productos de los residuos casi sin pérdidas.");
 
         // ---- Wlt ----
         public static string Wlt_TitleMap => Loc.T("Map", "Karte", "Carte", "Mapa");
@@ -268,6 +286,8 @@ namespace CompanySupplier.Localization
         public static string Wlt_RevealMap => Loc.T("Reveal entire map", "Ganze Karte aufdecken", "Révéler toute la carte", "Revelar todo el mapa");
         public static string Wlt_RevealMapTip => Loc.T("Reveals the entire world map and resolves all world entities.", "Deckt die gesamte Weltkarte auf und löst alle Welt-Entitäten auf.", "Révèle l'intégralité de la carte du monde et découvre toutes les entités du monde.", "Revela todo el mapa mundial y descubre todas las entidades del mundo.");
         public static string Wlt_StatusRevealed => Loc.T("World map fully revealed", "Weltkarte komplett aufgedeckt", "Carte du monde entièrement révélée", "Mapa mundial revelado por completo");
+        public static string Wlt_RocketCapacity => Loc.T("Rocket capacity ×10", "Raketen-Kapazität ×10", "Capacité des fusées ×10", "Capacidad de cohetes ×10");
+        public static string Wlt_RocketCapacityTip => Loc.T("Multiplies rocket cargo capacity by ten (space program).", "Verzehnfacht die Frachtkapazität der Raketen (Weltraumprogramm).", "Multiplie par dix la capacité de fret des fusées (programme spatial).", "Multiplica por diez la capacidad de carga de los cohetes (programa espacial).");
 
         // ---- Wrf ----
         public static string Wrf_TitleShip => Loc.T("World Ship (Fleet)", "Welt-Schiff (Flotte)", "Navire du monde (flotte)", "Barco mundial (flota)");
@@ -329,6 +349,10 @@ namespace CompanySupplier.Localization
         public static string Prod_MachineLowPowerTip => Loc.T("Machines keep running at full speed during a power shortage.", "Maschinen laufen bei Stromknappheit weiter mit voller Geschwindigkeit.", "Les machines continuent à pleine vitesse en cas de pénurie d'énergie.", "Las máquinas siguen a máxima velocidad durante la escasez de energía.");
         public static string Prod_MachineLowComputing => Loc.T("Full speed on low computing", "Volle Leistung bei Computing-Mangel", "Pleine vitesse en cas de manque de calcul", "Máxima velocidad con poco cómputo");
         public static string Prod_MachineLowComputingTip => Loc.T("Machines keep running at full speed when computing is insufficient.", "Maschinen laufen bei Rechenleistungs-Mangel weiter mit voller Geschwindigkeit.", "Les machines continuent à pleine vitesse en cas de manque de calcul.", "Las máquinas siguen a máxima velocidad cuando falta cómputo.");
+        public static string Prod_NoFarmWater => Loc.T("Farms need no water", "Farmen ohne Wasser", "Fermes sans eau", "Granjas sin agua");
+        public static string Prod_NoFarmWaterTip => Loc.T("Farms no longer consume water.", "Farmen verbrauchen kein Wasser mehr.", "Les fermes ne consomment plus d'eau.", "Las granjas ya no consumen agua.");
+        public static string Prod_LogisticsPower => Loc.T("Logistics ignore power", "Logistik ignoriert Strom", "La logistique ignore l'énergie", "La logística ignora la energía");
+        public static string Prod_LogisticsPowerTip => Loc.T("Transports/conveyors keep running even without power.", "Transporte/Förderbänder laufen auch ohne Strom weiter.", "Les transports/convoyeurs continuent même sans énergie.", "Los transportes/cintas siguen funcionando incluso sin energía.");
 
         // ---- Wet ----
         public static string Wet_TitleFix => Loc.T("Lock Weather Permanently", "Wetter dauerhaft fixieren", "Fixer la météo en permanence", "Fijar el clima de forma permanente");

@@ -32,6 +32,9 @@ namespace CompanySupplier.UI.Tabs
         // Gameplay-Hebel-Toggles (Gratis-Bau, Siedlungsverbrauch, Wohnkapazitaet) — ebenfalls per CheatUiSync nachgezogen.
         private Toggle _freeBuild, _noConsumption, _housingCapacity;
 
+        // Weitere Gameplay-Hebel: Wartungsverbrauch aus, Unity-Produktion x10 — ebenfalls per CheatUiSync nachgezogen.
+        private Toggle _noMaintConsume, _unityProduction;
+
         // Forschungs-Toggles (Voraussetzungen ignorieren) — ebenfalls per CheatUiSync nachgezogen.
         private Toggle _researchIgnoreItems, _researchIgnoreParents;
 
@@ -83,6 +86,8 @@ namespace CompanySupplier.UI.Tabs
                 _freeBuild?.Value(Svc?.Gameplay?.FreeBuild ?? false);
                 _noConsumption?.Value(Svc?.Gameplay?.NoSettlementConsumption ?? false);
                 _housingCapacity?.Value(Svc?.Gameplay?.HousingCapacityBoost ?? false);
+                _noMaintConsume?.Value(Svc?.Gameplay?.NoMaintenanceConsumption ?? false);
+                _unityProduction?.Value(Svc?.Gameplay?.UnityProductionBoost ?? false);
             }
             finally { _suppress = false; }
         }
@@ -136,6 +141,12 @@ namespace CompanySupplier.UI.Tabs
             _housingCapacity = BuildIgnoreToggle(L.Gen_HousingCapacity, () => Svc?.Gameplay?.HousingCapacityBoost ?? false,
                 v => Svc?.Gameplay?.SetHousingCapacityBoost(v),
                 L.Gen_HousingCapacityTip);
+            _noMaintConsume = BuildIgnoreToggle(L.Gen_NoMaintConsume, () => Svc?.Gameplay?.NoMaintenanceConsumption ?? false,
+                v => Svc?.Gameplay?.SetNoMaintenanceConsumption(v),
+                L.Gen_NoMaintConsumeTip);
+            _unityProduction = BuildIgnoreToggle(L.Gen_UnityProduction, () => Svc?.Gameplay?.UnityProductionBoost ?? false,
+                v => Svc?.Gameplay?.SetUnityProductionBoost(v),
+                L.Gen_UnityProductionTip);
 
             var children = new List<UiComponent>
             {
@@ -146,7 +157,11 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(_noPower, _noWorkers, _noComputing, _noUnity, _noFood),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleBuildOps),
-                CheatWidgets.ToggleGrid(_instaBuild, _freeBuild, _noFuel, _noMaintenance),
+                CheatWidgets.ToggleGrid(_instaBuild, _freeBuild, _noFuel, _noMaintenance, _noMaintConsume),
+                CheatWidgets.PrimaryButton(
+                    L.Gen_FillMaintenance,
+                    () => { CheatService.Instance?.FillAllMaintenance(); CheatMenuStatus.Show(L.Gen_StatusMaintFilled); },
+                    L.Gen_FillMaintenanceTip),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleSpeed),
                 BuildSpeedButtons(),
@@ -165,6 +180,10 @@ namespace CompanySupplier.UI.Tabs
                 BuildPopulationStepper(),
                 BuildFreeWorkersControl(),
                 BuildPopulationSetRow(),
+                CheatWidgets.PrimaryButton(
+                    L.Gen_FinishImmigration,
+                    () => { CheatService.Instance?.Population?.FinishImmigration(); CheatMenuStatus.Show(L.Gen_StatusImmigration); },
+                    L.Gen_FinishImmigrationTip),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleResearch),
                 BuildResearchButtons(),
@@ -172,6 +191,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(BuildResearchIgnoreItemsToggle(), BuildResearchIgnoreParentsToggle()),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleAddUnity),
+                _unityProduction,
                 BuildUnityStepper(),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleWorldgen),

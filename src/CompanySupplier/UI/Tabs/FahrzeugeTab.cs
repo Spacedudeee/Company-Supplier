@@ -65,6 +65,8 @@ namespace CompanySupplier.UI.Tabs
         // V1-Toggle als Feld + Suppress-Flag fuer den zentralen UI-Sync (CheatUiSync).
         private Toggle _fuelToggle;
         private Toggle _trainsNoFuelToggle;
+        private Toggle _trainPowerToggle;
+        private Toggle _trainSlopesToggle;
         private bool _suppress;
 
         public FahrzeugeTab()
@@ -90,6 +92,8 @@ namespace CompanySupplier.UI.Tabs
             {
                 _fuelToggle?.Value(CheatService.Instance?.FleetVehicle?.FuelConsumptionDisabled ?? false);
                 _trainsNoFuelToggle?.Value(CheatService.Instance?.Gameplay?.TrainsNoFuel ?? false);
+                _trainPowerToggle?.Value(CheatService.Instance?.Gameplay?.TrainPowerBoost ?? false);
+                _trainSlopesToggle?.Value(CheatService.Instance?.Gameplay?.TrainsIgnoreSlopes ?? false);
                 RefreshLimit();
                 RefreshCapacityLabels();
                 RefreshStatsInfo();
@@ -116,6 +120,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.SectionTitle(L.Fzg_TitleFuel),
                 BuildFuelToggle(),              // V1
                 BuildTrainsNoFuelToggle(),      // V1: Zuege kein Treibstoff
+                BuildTrainPerformanceToggles(), // V1: Zug-Leistung x10 + Steigungen ignorieren
 
                 CheatWidgets.SectionTitle(L.Fzg_TitleLimit),
                 BuildVehicleLimitSection(),     // V2: aktuelles Limit + Zahlenfeld + Stepper
@@ -158,6 +163,24 @@ namespace CompanySupplier.UI.Tabs
                 v => { if (!_suppress) CheatService.Instance?.Gameplay?.SetTrainsNoFuel(v); },
                 L.Fzg_TrainsNoFuelTip);
             return _trainsNoFuelToggle;
+        }
+
+        // V1: Zug-Leistung x10 + Steigungen ignorieren. Beide gespiegelt vom zentralen Sync (SyncFromState).
+        private UiComponent BuildTrainPerformanceToggles()
+        {
+            _trainPowerToggle = CheatWidgets.NewToggleRow(
+                L.Fzg_TrainPower,
+                CheatService.Instance?.Gameplay?.TrainPowerBoost ?? false,
+                v => { if (!_suppress) CheatService.Instance?.Gameplay?.SetTrainPowerBoost(v); },
+                L.Fzg_TrainPowerTip);
+
+            _trainSlopesToggle = CheatWidgets.NewToggleRow(
+                L.Fzg_TrainSlopes,
+                CheatService.Instance?.Gameplay?.TrainsIgnoreSlopes ?? false,
+                v => { if (!_suppress) CheatService.Instance?.Gameplay?.SetTrainsIgnoreSlopes(v); },
+                L.Fzg_TrainSlopesTip);
+
+            return CheatWidgets.ToggleGrid(_trainPowerToggle, _trainSlopesToggle);
         }
 
         // V2: aktuelles Limit (Label) + absolutes Zahlenfeld + ±Stepper. Alle drei aktualisieren das Label.

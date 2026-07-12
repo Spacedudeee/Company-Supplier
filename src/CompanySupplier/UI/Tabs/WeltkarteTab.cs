@@ -19,7 +19,7 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
-        private Toggle _unlimitedMines, _minesNoUnity, _minesEffMax, _tradeBoost;
+        private Toggle _unlimitedMines, _minesNoUnity, _minesEffMax, _tradeBoost, _rocketCapacity;
         private bool _suppress;
 
         public WeltkarteTab()
@@ -38,6 +38,7 @@ namespace CompanySupplier.UI.Tabs
                 _minesNoUnity?.Value(Svc?.WorldMap?.MinesNoUnity ?? false);
                 _minesEffMax?.Value(Svc?.WorldMap?.MinesEfficiencyMax ?? false);
                 _tradeBoost?.Value(Svc?.WorldMap?.TradeBoosted ?? false);
+                _rocketCapacity?.Value(Svc?.Gameplay?.RocketCapacityBoost ?? false);
             }
             finally { _suppress = false; }
         }
@@ -76,6 +77,11 @@ namespace CompanySupplier.UI.Tabs
                 Svc?.WorldMap?.TradeBoosted ?? false,
                 v => { if (!_suppress) Svc?.WorldMap?.SetTradeBoost(v); },
                 L.Wlt_TradeBoostTip);
+            _rocketCapacity = CheatWidgets.NewToggleRow(
+                L.Wlt_RocketCapacity,
+                Svc?.Gameplay?.RocketCapacityBoost ?? false,
+                v => { if (!_suppress) Svc?.Gameplay?.SetRocketCapacityBoost(v); },
+                L.Wlt_RocketCapacityTip);
 
             var children = new List<UiComponent>
             {
@@ -95,7 +101,8 @@ namespace CompanySupplier.UI.Tabs
                 _minesEffMax,
 
                 CheatWidgets.SectionTitle(L.Wlt_TitleTrade),
-                _tradeBoost
+                _tradeBoost,
+                _rocketCapacity
             };
 
             column.SetChildren(children.ToArray());

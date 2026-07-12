@@ -42,7 +42,7 @@ namespace CompanySupplier.UI.Tabs
         private bool _physicsDisabled;
 
         // Toggle-Referenzen + Suppress-Flag fuer den zentralen UI-Sync (CheatUiSync).
-        private Toggle _physicsToggle, _towerToggle;
+        private Toggle _physicsToggle, _towerToggle, _treeGrowthToggle;
         private bool _suppress;
 
         public GelaendeTab()
@@ -61,6 +61,7 @@ namespace CompanySupplier.UI.Tabs
             {
                 _physicsToggle?.Value(_physicsDisabled);
                 _towerToggle?.Value(CheatService.Instance?.Terrain?.IgnoreTowerDesignations ?? true);
+                _treeGrowthToggle?.Value(CheatService.Instance?.Gameplay?.TreeGrowthBoost ?? false);
                 RetryLoadMaterialsIfEmpty();
             }
             finally { _suppress = false; }
@@ -124,7 +125,8 @@ namespace CompanySupplier.UI.Tabs
 
                 CheatWidgets.SectionTitle(L.Gel_TitleReserves),
                 BuildReserveButtons(),          // T7 + T8
-                BuildTreeButtons()              // T9 + T10
+                BuildTreeButtons(),             // T9 + T10
+                BuildTreeGrowthToggle()         // T11
             };
 
             column.SetChildren(children.ToArray());
@@ -251,6 +253,18 @@ namespace CompanySupplier.UI.Tabs
             var row = new Row((Px)CheatWidgets.Gap);
             row.SetChildren(plant, remove);
             return row;
+        }
+
+        // T11: Baum-Wachstum x10 (Dauer-Toggle ueber GameplayCheats, per CheatUiSync nachgezogen).
+        private UiComponent BuildTreeGrowthToggle()
+        {
+            bool initial = CheatService.Instance?.Gameplay?.TreeGrowthBoost ?? false;
+            _treeGrowthToggle = CheatWidgets.NewToggleRow(
+                L.Gel_TreeGrowth,
+                initial,
+                v => { if (!_suppress) CheatService.Instance?.Gameplay?.SetTreeGrowthBoost(v); },
+                L.Gel_TreeGrowthTip);
+            return _treeGrowthToggle;
         }
 
     }
