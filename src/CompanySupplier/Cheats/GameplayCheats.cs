@@ -37,6 +37,7 @@ namespace CompanySupplier.Cheats
         private const string OwnerRecycling   = "CompanySupplier.Gameplay.Recycling";
         private const string OwnerTreeGrowth  = "CompanySupplier.Gameplay.TreeGrowth";
         private const string OwnerRocketCap   = "CompanySupplier.Gameplay.RocketCap";
+        private const string OwnerRainYield   = "CompanySupplier.Gameplay.RainYield";
 
         private readonly DependencyResolver _resolver;
         private IPropertiesDb _db;
@@ -95,6 +96,9 @@ namespace CompanySupplier.Cheats
 
         public bool RocketCapacityBoost      => HasPercent(IdsCore.PropertyIds.RocketsCapacityMultiplier, OwnerRocketCap);
         public void SetRocketCapacityBoost(bool v) => SetPercent(IdsCore.PropertyIds.RocketsCapacityMultiplier, OwnerRocketCap, 900, v, "Raketen-Kapazitaet x10");
+
+        public bool RainYieldBoost           => HasPercent(IdsCore.PropertyIds.RainYieldMultiplier, OwnerRainYield);
+        public void SetRainYieldBoost(bool v)  => SetPercent(IdsCore.PropertyIds.RainYieldMultiplier, OwnerRainYield, 900, v, "Regen-Ertrag x10");
 
         // ---- generische Helfer (ein IProperty<T>-Cache pro Aufruf; robust) ------------------------
 

@@ -415,6 +415,11 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.TreeGrowth,         Apply = v => Gameplay?.SetTreeGrowthBoost(v),    Read = () => Gameplay?.TreeGrowthBoost ?? false },
                 new ToggleEntry { Key = ConfigKeys.RocketCapacity,     Apply = v => Gameplay?.SetRocketCapacityBoost(v), Read = () => Gameplay?.RocketCapacityBoost ?? false },
 
+                // Umwelt/Gelaende-Welle.
+                new ToggleEntry { Key = ConfigKeys.RainYield,          Apply = v => Gameplay?.SetRainYieldBoost(v),    Read = () => Gameplay?.RainYieldBoost ?? false },
+                new ToggleEntry { Key = ConfigKeys.OffLimits,          Apply = v => Terrain?.SetOffLimitsDisabled(v),  Read = () => Terrain?.OffLimitsDisabled ?? false },
+                new ToggleEntry { Key = ConfigKeys.UnlimitedFertility, Apply = v => Terrain?.SetUnlimitedFertility(v), Read = () => Terrain?.UnlimitedFertility ?? false },
+
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
 
                 // Nur bei tatsaechlicher Aenderung anwenden: SetUncapped(false) setzt intern die

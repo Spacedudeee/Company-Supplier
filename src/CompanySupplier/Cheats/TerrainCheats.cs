@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Mafi;
 using Mafi.Core;
+using Mafi.Core.Buildings.Farms;                   // FarmProto (Boden-Fruchtbarkeit)
 using Mafi.Core.Products;
 using Mafi.Core.Prototypes;
 using Mafi.Core.Terrain;
@@ -36,6 +37,19 @@ namespace CompanySupplier.Cheats
         /// <summary>T3 "Turm-Markierungen ignorieren" — Provider-internes Flag (es gibt keinen globalen
         /// Game-Toggle dafuer); die Instant-Operationen lesen es als Parameter. Default an (ui-spec T3).</summary>
         public bool IgnoreTowerDesignations { get; private set; } = true;
+
+        /// <summary>true = Kartenrand-Sperre (Off-Limits) deaktiviert -> bis zum aeussersten Rand bauen/abbauen.
+        /// Live aus <c>TerrainManager.OffLimitsDisabled</c> gelesen.</summary>
+        public bool OffLimitsDisabled
+        {
+            get { try { return _terrainManager != null && _terrainManager.OffLimitsDisabled; } catch { return false; } }
+        }
+
+        /// <summary>true = unbegrenzte Boden-Fruchtbarkeit (FarmProto.FertilityReplenishPerDay hochgesetzt).</summary>
+        public bool UnlimitedFertility { get; private set; }
+
+        // Original-Fruchtbarkeits-Replenish je FarmProto-Id (gesnapshottet VOR dem Override) -> Reset.
+        private readonly Dictionary<string, Percent> _origFertility = new Dictionary<string, Percent>();
 
         public TerrainCheats(DependencyResolver resolver)
         {
@@ -139,6 +153,65 @@ namespace CompanySupplier.Cheats
         {
             IgnoreTowerDesignations = ignore;
             Log.Info($"[CompanySupplier] Turm-Markierungen ignorieren = {ignore}.");
+        }
+
+        /// <summary>Schaltet die Kartenrand-Sperre (Off-Limits) an/aus. Bei "aus" laesst sich bis zum aeussersten
+        /// Kartenrand bauen und abbauen. <c>TerrainManager.OffLimitsDisabled</c> ist ein public Feld (0.8.5.0).</summary>
+        public void SetOffLimitsDisabled(bool disabled)
+        {
+            if (_terrainManager == null) return;
+            try
+            {
+                // OffLimitsDisabled ist ein readonly Feld (0.8.5.0) -> per Reflection setzen; die Off-Limits-
+                // Pruefungen des Spiels (IsOffLimitsOrInvalid) lesen den Feldwert live.
+                FieldInfo fi = typeof(TerrainManager).GetField("OffLimitsDisabled",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (fi == null)
+                {
+                    Log.Warning($"[CompanySupplier] SetOffLimitsDisabled: Feld 'OffLimitsDisabled' nicht gefunden (API-Drift?).");
+                    return;
+                }
+                fi.SetValue(_terrainManager, disabled);
+                Log.Info($"[CompanySupplier] Off-Limits (Kartenrand-Sperre) deaktiviert = {disabled}.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[CompanySupplier] SetOffLimitsDisabled: {ex.Message}");
+            }
+        }
+
+        /// <summary>Schaltet "unbegrenzte Boden-Fruchtbarkeit" an/aus: hebt je <c>FarmProto</c> das (readonly)
+        /// Feld <c>FertilityReplenishPerDay</c> per Reflection stark an, sodass sich die Fruchtbarkeit taeglich
+        /// voll erneuert (kein Duenger noetig). Snapshot beim ersten Edit -> Reset stellt das Original wieder her.</summary>
+        public void SetUnlimitedFertility(bool enabled)
+        {
+            if (_protos == null) return;
+            try
+            {
+                foreach (var farm in _protos.Filter<FarmProto>(_ => true))
+                {
+                    FieldInfo fi = farm.GetType().GetField("FertilityReplenishPerDay",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (fi == null) continue;
+                    string id = farm.Id.ToString();
+                    if (enabled)
+                    {
+                        if (!_origFertility.ContainsKey(id)) _origFertility[id] = (Percent)fi.GetValue(farm);
+                        fi.SetValue(farm, Percent.FromPercentVal(500));   // 500%/Tag -> Fruchtbarkeit bleibt sicher voll
+                    }
+                    else if (_origFertility.TryGetValue(id, out Percent orig))
+                    {
+                        fi.SetValue(farm, orig);
+                    }
+                }
+                if (!enabled) _origFertility.Clear();
+                UnlimitedFertility = enabled;
+                Log.Info($"[CompanySupplier] Unbegrenzte Boden-Fruchtbarkeit = {enabled}.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[CompanySupplier] SetUnlimitedFertility: {ex.Message}");
+            }
         }
 
         // ------------------------------------------------------------------------------------------

@@ -20,7 +20,7 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
-        private Toggle _mining, _farm, _solar, _forceRun, _machineLowPower, _machineLowComputing, _logisticsPower, _water, _noOilDrain, _noFarmWater, _pipeSlopes;
+        private Toggle _mining, _farm, _solar, _rainYield, _unlimitedFertility, _forceRun, _machineLowPower, _machineLowComputing, _logisticsPower, _water, _noOilDrain, _noFarmWater, _pipeSlopes;
         private bool _suppress;
 
         public ProduktionTab()
@@ -38,6 +38,8 @@ namespace CompanySupplier.UI.Tabs
                 _mining?.Value(Svc?.Boost?.MiningBoost ?? false);
                 _farm?.Value(Svc?.Boost?.FarmBoost ?? false);
                 _solar?.Value(Svc?.Boost?.SolarBoost ?? false);
+                _rainYield?.Value(Svc?.Gameplay?.RainYieldBoost ?? false);
+                _unlimitedFertility?.Value(Svc?.Terrain?.UnlimitedFertility ?? false);
                 _forceRun?.Value(Svc?.Boost?.ForceRunMachines ?? false);
                 _machineLowPower?.Value(Svc?.Gameplay?.MachineFullOnLowPower ?? false);
                 _machineLowComputing?.Value(Svc?.Gameplay?.MachineFullOnLowComputing ?? false);
@@ -66,6 +68,8 @@ namespace CompanySupplier.UI.Tabs
             _mining   = BuildToggle(L.Prod_Mining,          () => Svc?.Boost?.MiningBoost ?? false,       v => Svc?.Boost?.SetMiningBoost(v),      L.Prod_MiningTip);
             _farm     = BuildToggle(L.Prod_Farm,            () => Svc?.Boost?.FarmBoost ?? false,         v => Svc?.Boost?.SetFarmBoost(v),        L.Prod_FarmTip);
             _solar    = BuildToggle(L.Prod_Solar,           () => Svc?.Boost?.SolarBoost ?? false,        v => Svc?.Boost?.SetSolarBoost(v),       L.Prod_SolarTip);
+            _rainYield          = BuildToggle(L.Prod_RainYield,           () => Svc?.Gameplay?.RainYieldBoost ?? false,  v => Svc?.Gameplay?.SetRainYieldBoost(v),   L.Prod_RainYieldTip);
+            _unlimitedFertility = BuildToggle(L.Prod_UnlimitedFertility,  () => Svc?.Terrain?.UnlimitedFertility ?? false, v => Svc?.Terrain?.SetUnlimitedFertility(v), L.Prod_UnlimitedFertilityTip);
             _forceRun = BuildToggle(L.Prod_ForceRun,        () => Svc?.Boost?.ForceRunMachines ?? false,  v => Svc?.Boost?.SetForceRunMachines(v), L.Prod_ForceRunTip);
             _machineLowPower     = BuildToggle(L.Prod_MachineLowPower,     () => Svc?.Gameplay?.MachineFullOnLowPower ?? false,     v => Svc?.Gameplay?.SetMachineFullOnLowPower(v),     L.Prod_MachineLowPowerTip);
             _machineLowComputing = BuildToggle(L.Prod_MachineLowComputing, () => Svc?.Gameplay?.MachineFullOnLowComputing ?? false, v => Svc?.Gameplay?.SetMachineFullOnLowComputing(v), L.Prod_MachineLowComputingTip);
@@ -79,7 +83,7 @@ namespace CompanySupplier.UI.Tabs
             var children = new List<UiComponent>
             {
                 CheatWidgets.SectionTitle(L.Prod_TitleYield),
-                CheatWidgets.ToggleGrid(_mining, _farm, _solar),
+                CheatWidgets.ToggleGrid(_mining, _farm, _solar, _rainYield, _unlimitedFertility),
 
                 CheatWidgets.SectionTitle(L.Prod_TitleMachines),
                 CheatWidgets.ToggleGrid(_forceRun, _machineLowPower, _machineLowComputing, _logisticsPower),

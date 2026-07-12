@@ -178,6 +178,9 @@ namespace CompanySupplier.Config
         public const string RecyclingFull       = "gameplay.recyclingFull";
         public const string TreeGrowth          = "gameplay.treeGrowth";
         public const string RocketCapacity      = "gameplay.rocketCapacity";
+        public const string RainYield           = "gameplay.rainYield";
+        public const string OffLimits           = "terrain.offLimits";
+        public const string UnlimitedFertility  = "terrain.unlimitedFertility";
 
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";

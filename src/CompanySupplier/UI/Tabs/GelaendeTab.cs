@@ -42,7 +42,7 @@ namespace CompanySupplier.UI.Tabs
         private bool _physicsDisabled;
 
         // Toggle-Referenzen + Suppress-Flag fuer den zentralen UI-Sync (CheatUiSync).
-        private Toggle _physicsToggle, _towerToggle, _treeGrowthToggle;
+        private Toggle _physicsToggle, _towerToggle, _offLimitsToggle, _treeGrowthToggle;
         private bool _suppress;
 
         public GelaendeTab()
@@ -61,6 +61,7 @@ namespace CompanySupplier.UI.Tabs
             {
                 _physicsToggle?.Value(_physicsDisabled);
                 _towerToggle?.Value(CheatService.Instance?.Terrain?.IgnoreTowerDesignations ?? true);
+                _offLimitsToggle?.Value(CheatService.Instance?.Terrain?.OffLimitsDisabled ?? false);
                 _treeGrowthToggle?.Value(CheatService.Instance?.Gameplay?.TreeGrowthBoost ?? false);
                 RetryLoadMaterialsIfEmpty();
             }
@@ -119,6 +120,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.SectionTitle(L.Gel_TitleOptions),
                 BuildPhysicsToggle(),           // T2
                 BuildIgnoreTowerToggle(),       // T3
+                BuildOffLimitsToggle(),         // T3b
 
                 CheatWidgets.SectionTitle(L.Gel_TitleMarkers),
                 BuildInstantMarkerButtons(),    // T4 + T5 + T6
@@ -186,6 +188,19 @@ namespace CompanySupplier.UI.Tabs
                 v => { if (!_suppress) CheatService.Instance?.Terrain?.SetIgnoreTowerDesignations(v); },
                 L.Gel_IgnoreTowerTip);
             return _towerToggle;
+        }
+
+        // T3b: Sperrzonen-Beschraenkungen aufheben. Backend hat ein Status-Flag (OffLimitsDisabled,
+        // Default aus) -> Startzustand daraus seeden.
+        private UiComponent BuildOffLimitsToggle()
+        {
+            bool initial = CheatService.Instance?.Terrain?.OffLimitsDisabled ?? false;
+            _offLimitsToggle = CheatWidgets.NewToggleRow(
+                L.Gel_OffLimits,
+                initial,
+                v => { if (!_suppress) CheatService.Instance?.Terrain?.SetOffLimitsDisabled(v); },
+                L.Gel_OffLimitsTip);
+            return _offLimitsToggle;
         }
 
         // T4 + T5 + T6: drei Sofort-Aktions-Buttons auf die Markierungen, nutzen das T1-Material.

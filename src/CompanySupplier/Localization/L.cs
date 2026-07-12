@@ -243,6 +243,8 @@ namespace CompanySupplier.Localization
         public static string Gel_RemoveTreesTip => Loc.T("Removes all trees marked for removal.", "Entfernt alle zur Entfernung markierten Bäume.", "Retire tous les arbres marqués pour suppression.", "Elimina todos los árboles marcados para su tala.");
         public static string Gel_TreeGrowth => Loc.T("Tree growth ×10", "Baum-Wachstum ×10", "Croissance des arbres ×10", "Crecimiento de árboles ×10");
         public static string Gel_TreeGrowthTip => Loc.T("Trees regrow ten times as fast.", "Bäume wachsen zehnmal so schnell nach.", "Les arbres repoussent dix fois plus vite.", "Los árboles vuelven a crecer diez veces más rápido.");
+        public static string Gel_OffLimits => Loc.T("Disable off-limits (map edge)", "Off-Limits deaktivieren (Kartenrand)", "Désactiver la zone interdite (bord de carte)", "Desactivar zona restringida (borde del mapa)");
+        public static string Gel_OffLimitsTip => Loc.T("Build and mine all the way to the outer map edge.", "Bauen und Abbau bis zum äußersten Kartenrand möglich.", "Construction et extraction jusqu'au bord extérieur de la carte.", "Construir y minar hasta el borde exterior del mapa.");
 
         // ---- Umw ----
         public static string Umw_TitlePollution => Loc.T("Pollution", "Verschmutzung", "Pollution", "Contaminación");
@@ -363,6 +365,10 @@ namespace CompanySupplier.Localization
         public static string Prod_NoFarmWaterTip => Loc.T("Farms no longer consume water.", "Farmen verbrauchen kein Wasser mehr.", "Les fermes ne consomment plus d'eau.", "Las granjas ya no consumen agua.");
         public static string Prod_LogisticsPower => Loc.T("Logistics ignore power", "Logistik ignoriert Strom", "La logistique ignore l'énergie", "La logística ignora la energía");
         public static string Prod_LogisticsPowerTip => Loc.T("Transports/conveyors keep running even without power.", "Transporte/Förderbänder laufen auch ohne Strom weiter.", "Les transports/convoyeurs continuent même sans énergie.", "Los transportes/cintas siguen funcionando incluso sin energía.");
+        public static string Prod_RainYield => Loc.T("Rain yield ×10", "Regen-Ertrag ×10", "Rendement de pluie ×10", "Rendimiento de lluvia ×10");
+        public static string Prod_RainYieldTip => Loc.T("Multiplies the yield of rain-watered fields by ten.", "Verzehnfacht den Ertrag regenbewässerter Felder.", "Multiplie par dix le rendement des champs arrosés par la pluie.", "Multiplica por diez el rendimiento de los campos regados por lluvia.");
+        public static string Prod_UnlimitedFertility => Loc.T("Unlimited soil fertility", "Unbegrenzte Boden-Fruchtbarkeit", "Fertilité du sol illimitée", "Fertilidad del suelo ilimitada");
+        public static string Prod_UnlimitedFertilityTip => Loc.T("Fields fully renew their fertility every day (no fertilizer needed).", "Felder erneuern ihre Fruchtbarkeit täglich voll (kein Dünger nötig).", "Les champs renouvellent pleinement leur fertilité chaque jour (aucun engrais requis).", "Los campos renuevan por completo su fertilidad cada día (sin fertilizante).");
 
         // ---- Wet ----
         public static string Wet_TitleFix => Loc.T("Lock Weather Permanently", "Wetter dauerhaft fixieren", "Fixer la météo en permanence", "Fijar el clima de forma permanente");
