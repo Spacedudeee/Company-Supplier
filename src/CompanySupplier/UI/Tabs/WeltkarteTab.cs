@@ -102,7 +102,21 @@ namespace CompanySupplier.UI.Tabs
 
                 CheatWidgets.SectionTitle(L.Wlt_TitleTrade),
                 _tradeBoost,
-                _rocketCapacity
+
+                CheatWidgets.SectionTitle(L.Wlt_TitleSpace),
+                _rocketCapacity,
+                CheatWidgets.PrimaryButton(
+                    L.Wlt_BuildStation,
+                    () => { Svc?.Space?.BuildOrUpgradeStation(); CheatMenuStatus.Show(L.Wlt_StatusStation); },
+                    L.Wlt_BuildStationTip),
+                CheatWidgets.PrimaryButton(
+                    L.Wlt_ScanAsteroid,
+                    () => { Svc?.Space?.ScanForAsteroid(); CheatMenuStatus.Show(L.Wlt_StatusAsteroid); },
+                    L.Wlt_ScanAsteroidTip),
+                CheatWidgets.PrimaryButton(
+                    L.Wlt_LaunchRockets,
+                    () => { Svc?.Space?.LaunchAllRockets(); CheatMenuStatus.Show(L.Wlt_StatusRockets); },
+                    L.Wlt_LaunchRocketsTip)
             };
 
             column.SetChildren(children.ToArray());

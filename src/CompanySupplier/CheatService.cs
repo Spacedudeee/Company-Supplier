@@ -71,6 +71,7 @@ namespace CompanySupplier
         public Cheats.StorageThroughputCheats StorageThroughput { get; private set; }
         public Cheats.StorageLabelCheats      StorageLabels     { get; private set; }
         public Cheats.GameplayCheats          Gameplay          { get; private set; }
+        public Cheats.SpaceCheats             Space             { get; private set; }
 
         private CheatService(DependencyResolver resolver) => _resolver = resolver;
 
@@ -113,6 +114,7 @@ namespace CompanySupplier
             StorageThroughput = TryCreate(() => new Cheats.StorageThroughputCheats(_resolver), nameof(Cheats.StorageThroughputCheats));
             StorageLabels     = TryCreate(() => new Cheats.StorageLabelCheats(_resolver),      nameof(Cheats.StorageLabelCheats));
             Gameplay          = TryCreate(() => new Cheats.GameplayCheats(_resolver),          nameof(Cheats.GameplayCheats));
+            Space             = TryCreate(() => new Cheats.SpaceCheats(_resolver),             nameof(Cheats.SpaceCheats));
             // StorageToolCheats ist jetzt [GlobalDependency] (der StorageWandController bekommt es per DI
             // injiziert) -> hier DIESELBE DI-Instanz holen statt einer zweiten via new.
             StorageTool  = Resolve<Cheats.StorageToolCheats>(nameof(Cheats.StorageToolCheats));

@@ -288,6 +288,16 @@ namespace CompanySupplier.Localization
         public static string Wlt_StatusRevealed => Loc.T("World map fully revealed", "Weltkarte komplett aufgedeckt", "Carte du monde entièrement révélée", "Mapa mundial revelado por completo");
         public static string Wlt_RocketCapacity => Loc.T("Rocket capacity ×10", "Raketen-Kapazität ×10", "Capacité des fusées ×10", "Capacidad de cohetes ×10");
         public static string Wlt_RocketCapacityTip => Loc.T("Multiplies rocket cargo capacity by ten (space program).", "Verzehnfacht die Frachtkapazität der Raketen (Weltraumprogramm).", "Multiplie par dix la capacité de fret des fusées (programme spatial).", "Multiplica por diez la capacidad de carga de los cohetes (programa espacial).");
+        public static string Wlt_TitleSpace => Loc.T("Space", "Weltraum", "Espace", "Espacio");
+        public static string Wlt_BuildStation => Loc.T("Build/upgrade space station", "Raumstation bauen/ausbauen", "Construire/améliorer la station spatiale", "Construir/mejorar estación espacial");
+        public static string Wlt_BuildStationTip => Loc.T("Builds the space station or upgrades it to the next tier (one tier per click).", "Baut die Raumstation oder hebt sie auf die nächste Stufe (eine Stufe pro Klick).", "Construit la station spatiale ou la fait passer au niveau suivant (un niveau par clic).", "Construye la estación espacial o la mejora al siguiente nivel (un nivel por clic).");
+        public static string Wlt_StatusStation => Loc.T("Space station upgrade queued", "Raumstation-Ausbau eingeplant", "Amélioration de la station planifiée", "Mejora de estación programada");
+        public static string Wlt_ScanAsteroid => Loc.T("Discover new asteroid", "Neuen Asteroiden entdecken", "Découvrir un nouvel astéroïde", "Descubrir nuevo asteroide");
+        public static string Wlt_ScanAsteroidTip => Loc.T("Instantly discovers a new asteroid (skips the scan wait).", "Entdeckt sofort einen neuen Asteroiden (überspringt die Scan-Wartezeit).", "Découvre instantanément un nouvel astéroïde (ignore le temps de scan).", "Descubre al instante un nuevo asteroide (omite la espera del escaneo).");
+        public static string Wlt_StatusAsteroid => Loc.T("Asteroid scan queued", "Asteroiden-Scan eingeplant", "Scan d'astéroïde planifié", "Escaneo de asteroide programado");
+        public static string Wlt_LaunchRockets => Loc.T("Launch all rockets", "Alle Raketen starten", "Lancer toutes les fusées", "Lanzar todos los cohetes");
+        public static string Wlt_LaunchRocketsTip => Loc.T("Launches a ready rocket on every launch pad.", "Startet auf jeder Startrampe eine startbereite Rakete.", "Lance une fusée prête sur chaque rampe de lancement.", "Lanza un cohete listo en cada plataforma de lanzamiento.");
+        public static string Wlt_StatusRockets => Loc.T("Rocket launch queued", "Raketenstart eingeplant", "Lancement de fusée planifié", "Lanzamiento de cohete programado");
 
         // ---- Wrf ----
         public static string Wrf_TitleShip => Loc.T("World Ship (Fleet)", "Welt-Schiff (Flotte)", "Navire du monde (flotte)", "Barco mundial (flota)");
