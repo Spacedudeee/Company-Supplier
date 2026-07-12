@@ -111,7 +111,7 @@ namespace CompanySupplier.Cheats
         }
 
         // ----------------------------------------------------------------------------------------
-        // Cheat++-Paritaet: verfuegbare/wiederholbare Forschung + Voraussetzungen ignorieren
+        // Forschungs-Cheats: verfuegbare/wiederholbare Forschung + Voraussetzungen ignorieren
         // ----------------------------------------------------------------------------------------
 
         /// <summary>Schaltet alle AKTUELL verfuegbaren (nicht gesperrten, noch nicht erforschten) Knoten frei —

@@ -170,7 +170,7 @@ namespace CompanySupplier.Cheats
             }
         }
 
-        /// <summary>Zerstoert die gesamte im Werft-Lager liegende Fracht (Cheat++ „Destroy Shipyard Cargo").</summary>
+        /// <summary>Zerstoert die gesamte im Werft-Lager liegende Fracht (Werft-Lager-Fracht verwerfen).</summary>
         /// <remarks>
         /// 0.8.5.0: <c>Shipyard.PeekAllCargo(Lyst&lt;ProductQuantity&gt;)</c> listet die gelagerte Fracht;
         /// <c>Shipyard.TryToDiscardCargo(ProductProto)</c> verwirft sie je Produkt (public, direkter Pfad —
@@ -204,8 +204,8 @@ namespace CompanySupplier.Cheats
             }
         }
 
-        /// <summary>Legt die gesamte Werft-Lager-Fracht ins globale Basis-Lager (Wirtschaft) um (Cheat++
-        /// „Dump Cargo to Base Storage").</summary>
+        /// <summary>Legt die gesamte Werft-Lager-Fracht ins globale Basis-Lager (Wirtschaft) um
+        /// (Fracht in die Basis umlagern).</summary>
         /// <remarks>
         /// 0.8.5.0: Es gibt kein einzelnes „Basis-Lager"-Gebaeude — <c>IAssetTransactionManager.StoreProduct</c>
         /// speist in die globale Produkt-Wirtschaft/verbundene Lager ein (derselbe Pfad wie unser Ressourcen-

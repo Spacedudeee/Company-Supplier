@@ -6,7 +6,7 @@ namespace CompanySupplier.HarmonyIntegration
     /// No-Ops und rufen das Original unveraendert).
     ///
     /// Aktuell umgesetzt: „Rohre entlang Haengen bauen" (Flat-Endpunkt-Zwang entfernen). Die drei weiteren
-    /// Cheat++-Pipe-Cheats sind in 0.8.5.0 nicht sicher patchbar (siehe README/Doku): „unterirdisch" sitzt in
+    /// Rohr-Cheats sind in 0.8.5.0 nicht sicher patchbar (siehe README/Doku): „unterirdisch" sitzt in
     /// der privaten Kollisionslogik des Pathfinders, „Bulldozer inkl. unterirdisch" hat keinen auffindbaren
     /// Controller, „Tiefenlabels" braeuchten ein eigenes Welt-Render-Overlay.
     /// </summary>

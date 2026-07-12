@@ -7,7 +7,7 @@ namespace CompanySupplier.Cheats
 {
     /// <summary>
     /// Cheat-Provider "Lager-Weltlabels": setzt ein schwebendes, eingefaerbtes Icon ueber ein Lager, das im
-    /// Cheat-Modus ist (gelb = KeepFull, rot = KeepEmpty) — die Cheat++-„KF/KE"-Marker, hier als spielnative
+    /// Cheat-Modus ist (gelb = KeepFull, rot = KeepEmpty) — die „KF/KE"-Marker, hier als spielnative
     /// farbige Icons (echter Zwei-Buchstaben-Text braeuchte ein eigenes AssetBundle, siehe custom-ui-icons).
     ///
     /// Mechanik: der spieleigene <see cref="EntitiesIconRenderer"/> (Mafi.Unity) zeichnet Entity-Icons; er ist

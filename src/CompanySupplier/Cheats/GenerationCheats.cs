@@ -187,7 +187,7 @@ namespace CompanySupplier.Cheats
         }
 
         // ----------------------------------------------------------------------------------------
-        // Kosmetische Fake-Verbrauchszahlen (Cheat++-Paritaet: "Fake Power/Computing Consumption")
+        // Kosmetische Fake-Verbrauchszahlen (Strom/Computing nur optisch, ohne Spielnutzen)
         // ----------------------------------------------------------------------------------------
         // Reiner Anzeige-Cheat OHNE Spielnutzen (echten unbegrenzten Strom/Computing gibt es ueber die
         // Gratis-Erzeugung oben). Die ThisTick-Verbrauchswerte werden pro Tick-Ende ueberschrieben, weil
