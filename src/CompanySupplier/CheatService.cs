@@ -373,6 +373,9 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.ProdUnlimitedWater, Apply = v => Boost?.SetUnlimitedWater(v),       Read = () => Boost?.UnlimitedWater ?? false },
                 new ToggleEntry { Key = ConfigKeys.ProdNoOilDrain,     Apply = v => Boost?.SetNoOilDrain(v),           Read = () => Boost?.NoOilDrain ?? false },
 
+                // Pipe-Cheat (Harmony): statischer Schalter, den der InitPathFinding-Patch pro Aufruf liest.
+                new ToggleEntry { Key = ConfigKeys.PipeSlopes,         Apply = v => HarmonyIntegration.PipeCheats.BuildAlongSlopes = v, Read = () => HarmonyIntegration.PipeCheats.BuildAlongSlopes },
+
                 new ToggleEntry { Key = ConfigKeys.SourceSinkEnabled,  Apply = v => SourceSink?.SetEnabled(v),         Read = () => SourceSink?.Enabled ?? false },
 
                 // Nur bei tatsaechlicher Aenderung anwenden: SetUncapped(false) setzt intern die

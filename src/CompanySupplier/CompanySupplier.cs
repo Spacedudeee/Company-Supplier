@@ -42,6 +42,9 @@ namespace CompanySupplier
             {
                 Log.Warning($"[{ModName}] CheatService-Aufbau fehlgeschlagen — Mod inaktiv: {ex.Message}");
             }
+            // Harmony (Pipe-Cheats) separat + bruchsicher initialisieren: schlaegt es fehl, bleiben nur die
+            // Pipe-Cheats aus, alle anderen Cheats laufen weiter. TryInit kapselt seine Fehler selbst.
+            HarmonyIntegration.HarmonyBootstrap.TryInit();
             Log.Info($"[{ModName}] EarlyInit abgeschlossen.");
         }
     }

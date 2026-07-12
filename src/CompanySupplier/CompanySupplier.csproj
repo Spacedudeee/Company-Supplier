@@ -68,6 +68,16 @@
     <Reference Include="Mafi.TrainsDlc" Condition="'$(RequiresTrainsDlc)' == 'true'"><HintPath>$(ManagedDir)\Mafi.TrainsDlc.dll</HintPath></Reference>
   </ItemGroup>
 
+  <!-- Harmony (0Harmony.dll, net48) — fuer die Pipe-Build-Cheats (patcht private Build-Tool-Interna).
+       Liegt in libs/ und wird ins Output kopiert (Private=true) + im Deploy-Target neben die Mod-DLL gelegt.
+       Zur Laufzeit laedt der AssemblyResolve-Handler in HarmonyBootstrap 0Harmony.dll aus dem Mod-Ordner. -->
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(ProjectDir)..\..\libs\0Harmony.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
   <!-- Unity (fuer UI/Input in spaeteren Phasen). -->
   <ItemGroup>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath></Reference>
@@ -100,6 +110,8 @@
     <Copy SourceFiles="$(ProjectDir)$(ManifestFile)" DestinationFiles="$(COI_MODS)\$(AssemblyName)\manifest.json" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" />
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+    <!-- Harmony-Laufzeit-DLL mit ausliefern (fuer die Pipe-Cheats; via AssemblyResolve geladen). -->
+    <Copy SourceFiles="$(TargetDir)0Harmony.dll" DestinationFolder="$(COI_MODS)\$(AssemblyName)\" Condition="Exists('$(TargetDir)0Harmony.dll')" />
     <Message Importance="high" Text="Deployed CompanySupplier -> $(COI_MODS)\$(AssemblyName)" />
   </Target>
 

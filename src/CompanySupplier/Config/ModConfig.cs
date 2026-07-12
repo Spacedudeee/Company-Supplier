@@ -161,6 +161,7 @@ namespace CompanySupplier.Config
         public const string ProdForceRun        = "prod.forceRun";
         public const string ProdUnlimitedWater  = "prod.unlimitedWater";
         public const string ProdNoOilDrain      = "prod.noOilDrain";
+        public const string PipeSlopes          = "pipe.slopes";
 
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";

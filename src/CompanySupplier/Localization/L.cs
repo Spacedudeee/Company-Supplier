@@ -309,6 +309,9 @@ namespace CompanySupplier.Localization
         public static string Prod_UnlimitedWaterTip => Loc.T("Groundwater deposits no longer deplete — pumps keep extracting indefinitely.", "Grundwasser-Vorkommen erschöpfen nicht mehr — Pumpen fördern dauerhaft weiter.", "Les nappes phréatiques ne s'épuisent plus — les pompes continuent indéfiniment.", "Las aguas subterráneas ya no se agotan — las bombas siguen extrayendo indefinidamente.");
         public static string Prod_NoOilDrain => Loc.T("No oil drain", "Kein Erdöl-Verbrauch", "Pas de consommation de pétrole", "Sin consumo de petróleo");
         public static string Prod_NoOilDrainTip => Loc.T("Oil deposits are refilled to capacity every day.", "Erdöl-Vorkommen werden täglich wieder auf Kapazität aufgefüllt.", "Les gisements de pétrole sont remplis à pleine capacité chaque jour.", "Los yacimientos de petróleo se rellenan a su capacidad cada día.");
+        public static string Prod_TitlePipes => Loc.T("Pipes (Harmony)", "Rohre (Harmony)", "Tuyaux (Harmony)", "Tuberías (Harmony)");
+        public static string Prod_PipeSlopes => Loc.T("Build pipes along slopes", "Rohre entlang Hängen bauen", "Construire des tuyaux le long des pentes", "Construir tuberías en pendientes");
+        public static string Prod_PipeSlopesTip => Loc.T("Pipe/transport start & end tiles may sit on a slope (need not be flat).", "Start-/Zielkachel von Rohren/Transporten darf auf einem Hang liegen (muss nicht eben sein).", "Les cases de début/fin des tuyaux/transports peuvent être sur une pente (pas besoin d'être plates).", "Las casillas de inicio/fin de tuberías/transportes pueden estar en una pendiente (no necesitan ser planas).");
 
         // ---- Wet ----
         public static string Wet_TitleFix => Loc.T("Lock Weather Permanently", "Wetter dauerhaft fixieren", "Fixer la météo en permanence", "Fijar el clima de forma permanente");
