@@ -27,7 +27,7 @@ namespace CompanySupplier.UI.Tabs
         private Toggle _noPower, _noWorkers, _noComputing, _noUnity, _noFood, _instaBuild, _noFuel, _noMaintenance;
 
         // Weitere Zustands-Toggles dieses Tabs — Referenzen fuer den zentralen UI-Sync (CheatUiSync).
-        private Toggle _master, _uncapped, _sourceSink, _godWand, _diseases, _happiness;
+        private Toggle _master, _uncapped, _sourceSink, _godWand, _diseases, _happiness, _keepUnity;
 
         // Unterdrückt die onChanged-Backend-Aufrufe, während der Sync/Master die Toggles optisch setzt.
         private bool _suppress;
@@ -69,6 +69,7 @@ namespace CompanySupplier.UI.Tabs
                 _godWand?.Value(Svc?.IsGodWandActive ?? false);
                 _diseases?.Value(Svc?.Population?.DiseasesDisabled ?? false);
                 _happiness?.Value(Svc?.Population?.MaxConsumptionHappiness ?? false);
+                _keepUnity?.Value(Svc?.Population?.KeepUnityFull ?? false);
             }
             finally { _suppress = false; }
         }
@@ -134,7 +135,7 @@ namespace CompanySupplier.UI.Tabs
                 BuildGodWandToggle(),
 
                 CheatWidgets.SectionTitle(L.Gen_TitlePopulation),
-                CheatWidgets.ToggleGrid(BuildDiseasesToggle(), BuildHappinessToggle()),
+                CheatWidgets.ToggleGrid(BuildDiseasesToggle(), BuildHappinessToggle(), BuildKeepUnityToggle()),
                 CheatWidgets.SectionTitle(L.Gen_TitleAddPopulation),
                 BuildPopulationStepper(),
 
@@ -280,6 +281,18 @@ namespace CompanySupplier.UI.Tabs
                 v => { if (!_suppress) CheatService.Instance?.Population?.SetMaxConsumptionHappiness(v); },
                 L.Gen_HappinessTip);
             return _happiness;
+        }
+
+        // Unity taeglich bis zur Kapazitaet auffuellen. Status aus Population.KeepUnityFull.
+        private UiComponent BuildKeepUnityToggle()
+        {
+            bool initial = CheatService.Instance?.Population?.KeepUnityFull ?? false;
+            _keepUnity = CheatWidgets.NewToggleRow(
+                L.Gen_KeepUnity,
+                initial,
+                v => { if (!_suppress) CheatService.Instance?.Population?.SetKeepUnityFull(v); },
+                L.Gen_KeepUnityTip);
+            return _keepUnity;
         }
 
         // A5: Bevölkerung-Stepper ±5/±25/±50 -> Population.AddPopulation(int).

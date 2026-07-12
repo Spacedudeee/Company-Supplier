@@ -342,6 +342,7 @@ namespace CompanySupplier
                 new ToggleEntry { Key = ConfigKeys.NoMaintenance,      Apply = SetMaintenanceDisabled,                Read = () => MaintenanceDisabled },
                 new ToggleEntry { Key = ConfigKeys.DiseasesDisabled,   Apply = v => Population?.SetDiseasesDisabled(v),Read = () => Population?.DiseasesDisabled ?? false },
                 new ToggleEntry { Key = ConfigKeys.MaxHappiness,       Apply = v => Population?.SetMaxConsumptionHappiness(v), Read = () => Population?.MaxConsumptionHappiness ?? false },
+                new ToggleEntry { Key = ConfigKeys.KeepUnityFull,      Apply = v => Population?.SetKeepUnityFull(v),    Read = () => Population?.KeepUnityFull ?? false },
 
                 new ToggleEntry { Key = ConfigKeys.PollutionAir,       Apply = v => Pollution?.SetAirDisabled(v),      Read = () => Pollution?.AirDisabled ?? false },
                 new ToggleEntry { Key = ConfigKeys.PollutionWater,     Apply = v => Pollution?.SetWaterDisabled(v),    Read = () => Pollution?.WaterDisabled ?? false },

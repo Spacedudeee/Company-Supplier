@@ -117,6 +117,7 @@ namespace CompanySupplier.Config
         public const string NoMaintenance       = "build.noMaintenance";
         public const string DiseasesDisabled    = "pop.noDiseases";
         public const string MaxHappiness        = "pop.maxHappiness";
+        public const string KeepUnityFull       = "pop.keepUnityFull";
 
         public const string PollutionAir        = "pollution.air";
         public const string PollutionWater      = "pollution.water";

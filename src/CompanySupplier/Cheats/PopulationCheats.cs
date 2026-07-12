@@ -36,6 +36,9 @@ namespace CompanySupplier.Cheats
         /// <summary>true = Versorgungs-/Lebensmittel-Zufriedenheit wird taeglich auf Maximum gehalten.</summary>
         public bool MaxConsumptionHappiness { get; private set; }
 
+        /// <summary>true = die Unity-Punkte werden taeglich bis zur Kapazitaet aufgefuellt.</summary>
+        public bool KeepUnityFull { get; private set; }
+
         public PopulationCheats(DependencyResolver resolver)
         {
             _resolver = resolver;
@@ -99,6 +102,32 @@ namespace CompanySupplier.Cheats
             catch (Exception ex)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] AddUnity: {ex.Message}");
+            }
+        }
+
+        /// <summary>Schaltet "Unity voll halten" ein/aus. Bei "an" wird sofort einmal aufgefuellt; der
+        /// taegliche Hook (OnNewDay) haelt es danach voll.</summary>
+        public void SetKeepUnityFull(bool enabled)
+        {
+            KeepUnityFull = enabled;
+            if (enabled) TopUpUnity();
+            Log.Info($"[{CompanySupplier.ModName}] Unity voll halten = {enabled}.");
+        }
+
+        /// <summary>Fuellt die Unity-Punkte bis zur Kapazitaet auf. Da im Spiel gespeicherte Unity nicht ueber
+        /// <c>TotalUnityCap</c> hinaus geht (Ueberschuss verfaellt), genuegt es, die volle Cap-Menge ueber die
+        /// FreeUnity-Kategorie zu generieren — der Stand steht danach am Cap.</summary>
+        private void TopUpUnity()
+        {
+            if (_upoints == null) return;
+            try
+            {
+                Upoints cap = _upoints.TotalUnityCap;
+                _upoints.GenerateUnity(IdsCore.UpointsCategories.FreeUnity, cap, cap, cap, null);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"[{CompanySupplier.ModName}] TopUpUnity: {ex.Message}");
             }
         }
 
@@ -229,6 +258,7 @@ namespace CompanySupplier.Cheats
         {
             if (DiseasesDisabled) EndActiveDisease();
             if (MaxConsumptionHappiness) ApplyMaxHappiness();
+            if (KeepUnityFull) TopUpUnity();
         }
 
         // ----------------------------------------------------------------------------------------
