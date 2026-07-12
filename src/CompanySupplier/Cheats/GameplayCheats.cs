@@ -38,6 +38,11 @@ namespace CompanySupplier.Cheats
         private const string OwnerTreeGrowth  = "CompanySupplier.Gameplay.TreeGrowth";
         private const string OwnerRocketCap   = "CompanySupplier.Gameplay.RocketCap";
         private const string OwnerRainYield   = "CompanySupplier.Gameplay.RainYield";
+        private const string OwnerBaseHealth  = "CompanySupplier.Gameplay.BaseHealth";
+        private const string OwnerDeconRefund = "CompanySupplier.Gameplay.DeconRefund";
+        private const string OwnerResearchSpd = "CompanySupplier.Gameplay.ResearchSpeed";
+        private const string OwnerUnityCap    = "CompanySupplier.Gameplay.UnityCapacity";
+        private const string OwnerNoBreakSlow = "CompanySupplier.Gameplay.NoBreakSlow";
 
         private readonly DependencyResolver _resolver;
         private IPropertiesDb _db;
@@ -99,6 +104,24 @@ namespace CompanySupplier.Cheats
 
         public bool RainYieldBoost           => HasPercent(IdsCore.PropertyIds.RainYieldMultiplier, OwnerRainYield);
         public void SetRainYieldBoost(bool v)  => SetPercent(IdsCore.PropertyIds.RainYieldMultiplier, OwnerRainYield, 900, v, "Regen-Ertrag x10");
+
+        // ---- Abschluss-Welle ----------------------------------------------------------------------
+
+        public bool BaseHealthBoost          => HasPercent(IdsCore.PropertyIds.BaseHealthMultiplier, OwnerBaseHealth);
+        public void SetBaseHealthBoost(bool v) => SetPercent(IdsCore.PropertyIds.BaseHealthMultiplier, OwnerBaseHealth, 100, v, "Basis-Gesundheit x2");
+
+        public bool DeconstructionRefundBoost => HasPercent(IdsCore.PropertyIds.DeconstructionRefundMultiplier, OwnerDeconRefund);
+        public void SetDeconstructionRefundBoost(bool v) => SetPercent(IdsCore.PropertyIds.DeconstructionRefundMultiplier, OwnerDeconRefund, 400, v, "Abriss-Rueckerstattung x5");
+
+        public bool ResearchSpeedBoost       => HasPercent(IdsCore.PropertyIds.ResearchStepsMultiplier, OwnerResearchSpd);
+        public void SetResearchSpeedBoost(bool v) => SetPercent(IdsCore.PropertyIds.ResearchStepsMultiplier, OwnerResearchSpd, 900, v, "Forschungs-Tempo x10");
+
+        public bool UnityCapacityBoost       => HasPercent(IdsCore.PropertyIds.UnityCapacityMultiplier, OwnerUnityCap);
+        public void SetUnityCapacityBoost(bool v) => SetPercent(IdsCore.PropertyIds.UnityCapacityMultiplier, OwnerUnityCap, 900, v, "Unity-Kapazitaet x10");
+
+        // Maschinen verlieren bei Defekt kein Tempo: das bool-Property SlowDownIfBroken auf false zwingen.
+        public bool NoSlowdownWhenBroken     => HasBool(IdsCore.PropertyIds.SlowDownIfBroken, OwnerNoBreakSlow);
+        public void SetNoSlowdownWhenBroken(bool v) => SetBool(IdsCore.PropertyIds.SlowDownIfBroken, OwnerNoBreakSlow, false, v, "Kein Tempoverlust bei Defekt");
 
         // ---- generische Helfer (ein IProperty<T>-Cache pro Aufruf; robust) ------------------------
 

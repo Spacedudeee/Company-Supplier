@@ -20,7 +20,7 @@ namespace CompanySupplier.UI.Tabs
     {
         private readonly UiComponent _content;
 
-        private Toggle _mining, _farm, _solar, _rainYield, _unlimitedFertility, _forceRun, _machineLowPower, _machineLowComputing, _logisticsPower, _water, _noOilDrain, _noFarmWater, _pipeSlopes;
+        private Toggle _mining, _farm, _solar, _rainYield, _unlimitedFertility, _forceRun, _machineLowPower, _machineLowComputing, _logisticsPower, _noBreakSlow, _water, _noOilDrain, _noFarmWater, _pipeSlopes;
         private bool _suppress;
 
         public ProduktionTab()
@@ -44,6 +44,7 @@ namespace CompanySupplier.UI.Tabs
                 _machineLowPower?.Value(Svc?.Gameplay?.MachineFullOnLowPower ?? false);
                 _machineLowComputing?.Value(Svc?.Gameplay?.MachineFullOnLowComputing ?? false);
                 _logisticsPower?.Value(Svc?.Gameplay?.LogisticsIgnorePower ?? false);
+                _noBreakSlow?.Value(Svc?.Gameplay?.NoSlowdownWhenBroken ?? false);
                 _water?.Value(Svc?.Boost?.UnlimitedWater ?? false);
                 _noOilDrain?.Value(Svc?.Boost?.NoOilDrain ?? false);
                 _noFarmWater?.Value(Svc?.Gameplay?.NoFarmWater ?? false);
@@ -74,6 +75,7 @@ namespace CompanySupplier.UI.Tabs
             _machineLowPower     = BuildToggle(L.Prod_MachineLowPower,     () => Svc?.Gameplay?.MachineFullOnLowPower ?? false,     v => Svc?.Gameplay?.SetMachineFullOnLowPower(v),     L.Prod_MachineLowPowerTip);
             _machineLowComputing = BuildToggle(L.Prod_MachineLowComputing, () => Svc?.Gameplay?.MachineFullOnLowComputing ?? false, v => Svc?.Gameplay?.SetMachineFullOnLowComputing(v), L.Prod_MachineLowComputingTip);
             _logisticsPower      = BuildToggle(L.Prod_LogisticsPower,      () => Svc?.Gameplay?.LogisticsIgnorePower ?? false,      v => Svc?.Gameplay?.SetLogisticsIgnorePower(v),      L.Prod_LogisticsPowerTip);
+            _noBreakSlow         = BuildToggle(L.Prod_NoBreakSlow,         () => Svc?.Gameplay?.NoSlowdownWhenBroken ?? false,      v => Svc?.Gameplay?.SetNoSlowdownWhenBroken(v),      L.Prod_NoBreakSlowTip);
             _water    = BuildToggle(L.Prod_UnlimitedWater,  () => Svc?.Boost?.UnlimitedWater ?? false,    v => Svc?.Boost?.SetUnlimitedWater(v),   L.Prod_UnlimitedWaterTip);
             _noOilDrain = BuildToggle(L.Prod_NoOilDrain,    () => Svc?.Boost?.NoOilDrain ?? false,        v => Svc?.Boost?.SetNoOilDrain(v),       L.Prod_NoOilDrainTip);
             _noFarmWater = BuildToggle(L.Prod_NoFarmWater,  () => Svc?.Gameplay?.NoFarmWater ?? false,    v => Svc?.Gameplay?.SetNoFarmWater(v),   L.Prod_NoFarmWaterTip);
@@ -86,7 +88,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(_mining, _farm, _solar, _rainYield, _unlimitedFertility),
 
                 CheatWidgets.SectionTitle(L.Prod_TitleMachines),
-                CheatWidgets.ToggleGrid(_forceRun, _machineLowPower, _machineLowComputing, _logisticsPower),
+                CheatWidgets.ToggleGrid(_forceRun, _machineLowPower, _machineLowComputing, _logisticsPower, _noBreakSlow),
 
                 CheatWidgets.SectionTitle(L.Prod_TitleReserves),
                 CheatWidgets.ToggleGrid(_water, _noOilDrain, _noFarmWater),

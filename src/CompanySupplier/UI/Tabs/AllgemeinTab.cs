@@ -35,6 +35,9 @@ namespace CompanySupplier.UI.Tabs
         // Weitere Gameplay-Hebel: Wartungsverbrauch aus, Unity-Produktion x10 — ebenfalls per CheatUiSync nachgezogen.
         private Toggle _noMaintConsume, _unityProduction;
 
+        // Weitere Gameplay-Hebel: Abriss-Rueckerstattung x5, Forschungs-Tempo x10, Unity-Kapazitaet x10 — per CheatUiSync nachgezogen.
+        private Toggle _deconRefund, _researchSpeed, _unityCapacity;
+
         // Forschungs-Toggles (Voraussetzungen ignorieren) — ebenfalls per CheatUiSync nachgezogen.
         private Toggle _researchIgnoreItems, _researchIgnoreParents;
 
@@ -88,6 +91,9 @@ namespace CompanySupplier.UI.Tabs
                 _housingCapacity?.Value(Svc?.Gameplay?.HousingCapacityBoost ?? false);
                 _noMaintConsume?.Value(Svc?.Gameplay?.NoMaintenanceConsumption ?? false);
                 _unityProduction?.Value(Svc?.Gameplay?.UnityProductionBoost ?? false);
+                _deconRefund?.Value(Svc?.Gameplay?.DeconstructionRefundBoost ?? false);
+                _researchSpeed?.Value(Svc?.Gameplay?.ResearchSpeedBoost ?? false);
+                _unityCapacity?.Value(Svc?.Gameplay?.UnityCapacityBoost ?? false);
             }
             finally { _suppress = false; }
         }
@@ -147,6 +153,15 @@ namespace CompanySupplier.UI.Tabs
             _unityProduction = BuildIgnoreToggle(L.Gen_UnityProduction, () => Svc?.Gameplay?.UnityProductionBoost ?? false,
                 v => Svc?.Gameplay?.SetUnityProductionBoost(v),
                 L.Gen_UnityProductionTip);
+            _deconRefund = BuildIgnoreToggle(L.Gen_DeconRefund, () => Svc?.Gameplay?.DeconstructionRefundBoost ?? false,
+                v => Svc?.Gameplay?.SetDeconstructionRefundBoost(v),
+                L.Gen_DeconRefundTip);
+            _researchSpeed = BuildIgnoreToggle(L.Gen_ResearchSpeed, () => Svc?.Gameplay?.ResearchSpeedBoost ?? false,
+                v => Svc?.Gameplay?.SetResearchSpeedBoost(v),
+                L.Gen_ResearchSpeedTip);
+            _unityCapacity = BuildIgnoreToggle(L.Gen_UnityCapacity, () => Svc?.Gameplay?.UnityCapacityBoost ?? false,
+                v => Svc?.Gameplay?.SetUnityCapacityBoost(v),
+                L.Gen_UnityCapacityTip);
 
             var children = new List<UiComponent>
             {
@@ -157,7 +172,7 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.ToggleGrid(_noPower, _noWorkers, _noComputing, _noUnity, _noFood),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleBuildOps),
-                CheatWidgets.ToggleGrid(_instaBuild, _freeBuild, _noFuel, _noMaintenance, _noMaintConsume),
+                CheatWidgets.ToggleGrid(_instaBuild, _freeBuild, _noFuel, _noMaintenance, _noMaintConsume, _deconRefund),
                 CheatWidgets.PrimaryButton(
                     L.Gen_FillMaintenance,
                     () => { CheatService.Instance?.FillAllMaintenance(); CheatMenuStatus.Show(L.Gen_StatusMaintFilled); },
@@ -188,10 +203,10 @@ namespace CompanySupplier.UI.Tabs
                 CheatWidgets.SectionTitle(L.Gen_TitleResearch),
                 BuildResearchButtons(),
                 BuildResearchUnlockButtons(),
-                CheatWidgets.ToggleGrid(BuildResearchIgnoreItemsToggle(), BuildResearchIgnoreParentsToggle()),
+                CheatWidgets.ToggleGrid(BuildResearchIgnoreItemsToggle(), BuildResearchIgnoreParentsToggle(), _researchSpeed),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleAddUnity),
-                _unityProduction,
+                CheatWidgets.ToggleGrid(_unityProduction, _unityCapacity),
                 BuildUnityStepper(),
 
                 CheatWidgets.SectionTitle(L.Gen_TitleWorldgen),

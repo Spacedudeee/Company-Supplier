@@ -181,6 +181,11 @@ namespace CompanySupplier.Config
         public const string RainYield           = "gameplay.rainYield";
         public const string OffLimits           = "terrain.offLimits";
         public const string UnlimitedFertility  = "terrain.unlimitedFertility";
+        public const string BaseHealth          = "gameplay.baseHealth";
+        public const string DeconRefund         = "gameplay.deconRefund";
+        public const string ResearchSpeed       = "gameplay.researchSpeed";
+        public const string UnityCapacity       = "gameplay.unityCapacity";
+        public const string NoBreakSlow         = "gameplay.noBreakSlow";
 
         public const string WorldUnlimitedMines = "world.unlimitedMines";
         public const string WorldMinesNoUnity   = "world.minesNoUnity";

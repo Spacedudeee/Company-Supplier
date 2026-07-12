@@ -163,6 +163,12 @@ namespace CompanySupplier.Localization
         public static string Gen_FinishImmigration => Loc.T("Finish immigration event", "Einwanderungs-Event abschließen", "Terminer l'événement d'immigration", "Finalizar evento de inmigración");
         public static string Gen_FinishImmigrationTip => Loc.T("Instantly completes the running immigration discovery (free pops + goods).", "Schließt die laufende Einwanderungs-Entdeckung sofort ab (Gratis-Pops + Ware).", "Termine instantanément la découverte d'immigration en cours (pops + biens gratuits).", "Completa al instante el descubrimiento de inmigración en curso (pops + bienes gratis).");
         public static string Gen_StatusImmigration => Loc.T("Immigration completed", "Einwanderung abgeschlossen", "Immigration terminée", "Inmigración completada");
+        public static string Gen_DeconRefund => Loc.T("Deconstruction refund ×5", "Abriss-Rückerstattung ×5", "Remboursement de démolition ×5", "Reembolso de demolición ×5");
+        public static string Gen_DeconRefundTip => Loc.T("Demolishing returns several times the building materials.", "Beim Abreißen kommen die Baumaterialien mehrfach zurück.", "La démolition rend plusieurs fois les matériaux de construction.", "Demoler devuelve varias veces los materiales de construcción.");
+        public static string Gen_ResearchSpeed => Loc.T("Research speed ×10", "Forschungs-Tempo ×10", "Vitesse de recherche ×10", "Velocidad de investigación ×10");
+        public static string Gen_ResearchSpeedTip => Loc.T("Multiplies research speed by ten (for normal but fast research).", "Verzehnfacht die Forschungsgeschwindigkeit (für normales, aber schnelles Forschen).", "Multiplie par dix la vitesse de recherche (pour une recherche normale mais rapide).", "Multiplica por diez la velocidad de investigación (para investigar normal pero rápido).");
+        public static string Gen_UnityCapacity => Loc.T("Unity capacity ×10", "Unity-Kapazität ×10", "Capacité d'Unity ×10", "Capacidad de Unity ×10");
+        public static string Gen_UnityCapacityTip => Loc.T("Multiplies the maximum Unity storage capacity by ten (bigger reserve for edicts).", "Verzehnfacht die maximale Unity-Speicherkapazität (mehr Reserve für Edikte).", "Multiplie par dix la capacité de stockage d'Unity (plus de réserve pour les édits).", "Multiplica por diez la capacidad máxima de Unity (mayor reserva para edictos).");
 
         // ---- Erz ----
         public static string Erz_TitlePower => Loc.T("Free power (KW) per tick", "Gratis-Strom (KW) pro Tick", "Électricité gratuite (KW) par tick", "Electricidad gratis (KW) por tick");
@@ -272,6 +278,8 @@ namespace CompanySupplier.Localization
         public static string Umw_NoBiowasteTip => Loc.T("Settlements no longer produce biowaste.", "Siedlungen erzeugen keinen Biomüll mehr.", "Les colonies ne produisent plus de biodéchets.", "Los asentamientos ya no producen biorresiduos.");
         public static string Umw_RecyclingFull => Loc.T("Full recycling", "Recycling voll", "Recyclage complet", "Reciclaje total");
         public static string Umw_RecyclingFullTip => Loc.T("Recyclers recover products from waste near-losslessly.", "Recycler gewinnen nahezu verlustfrei Produkte aus Abfall zurück.", "Les recycleurs récupèrent les produits des déchets presque sans perte.", "Los recicladores recuperan productos de los residuos casi sin pérdidas.");
+        public static string Umw_BaseHealth => Loc.T("Base health ×2", "Basis-Gesundheit ×2", "Santé de base ×2", "Salud base ×2");
+        public static string Umw_BaseHealthTip => Loc.T("Doubles the population's base health (more resilient to disease/pollution).", "Verdoppelt die Basis-Gesundheit der Bevölkerung (robuster gegen Seuchen/Verschmutzung).", "Double la santé de base de la population (plus résistante aux maladies/à la pollution).", "Duplica la salud base de la población (más resistente a enfermedades/contaminación).");
 
         // ---- Wlt ----
         public static string Wlt_TitleMap => Loc.T("Map", "Karte", "Carte", "Mapa");
@@ -369,6 +377,8 @@ namespace CompanySupplier.Localization
         public static string Prod_RainYieldTip => Loc.T("Multiplies the yield of rain-watered fields by ten.", "Verzehnfacht den Ertrag regenbewässerter Felder.", "Multiplie par dix le rendement des champs arrosés par la pluie.", "Multiplica por diez el rendimiento de los campos regados por lluvia.");
         public static string Prod_UnlimitedFertility => Loc.T("Unlimited soil fertility", "Unbegrenzte Boden-Fruchtbarkeit", "Fertilité du sol illimitée", "Fertilidad del suelo ilimitada");
         public static string Prod_UnlimitedFertilityTip => Loc.T("Fields fully renew their fertility every day (no fertilizer needed).", "Felder erneuern ihre Fruchtbarkeit täglich voll (kein Dünger nötig).", "Les champs renouvellent pleinement leur fertilité chaque jour (aucun engrais requis).", "Los campos renuevan por completo su fertilidad cada día (sin fertilizante).");
+        public static string Prod_NoBreakSlow => Loc.T("No slowdown when broken", "Kein Tempoverlust bei Defekt", "Aucun ralentissement en cas de panne", "Sin ralentización al averiarse");
+        public static string Prod_NoBreakSlowTip => Loc.T("Broken/maintenance-due machines keep running at full speed.", "Defekte/wartungsbedürftige Maschinen laufen ohne Geschwindigkeitsverlust weiter.", "Les machines en panne/nécessitant un entretien continuent à pleine vitesse.", "Las máquinas averiadas/con mantenimiento pendiente siguen a máxima velocidad.");
 
         // ---- Wet ----
         public static string Wet_TitleFix => Loc.T("Lock Weather Permanently", "Wetter dauerhaft fixieren", "Fixer la météo en permanence", "Fijar el clima de forma permanente");
