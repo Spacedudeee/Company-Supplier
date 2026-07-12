@@ -118,15 +118,15 @@ namespace CompanySupplier.UI.Tabs
             return _fuelToggle;
         }
 
-        // Frachtschiff-Kapazitaet (×2/×3/×5) + Geschwindigkeit pro Typ. Ohne Frachtschiffe -> Hinweis.
+        // Frachtschiff-Kapazitaet (×2/×3/×5) + Geschwindigkeit — GLOBAL fuer ALLE Frachtschiff-Typen.
+        // Die vier Typen sind in-game optisch nicht unterscheidbar, daher KEIN Dropdown: jede Aenderung wirkt
+        // auf alle zugleich. Ohne Frachtschiffe -> Hinweis.
         private UiComponent BuildCargoShipSection()
         {
             var col = new Column((Px)CheatWidgets.Gap).AlignItemsStretch();
 
             var ships = CheatService.Instance?.Ships;
-            _cargoShips = ships?.GetCargoShips()
-                              .OrderBy(p => CheatWidgets.ProtoDisplayName(p))
-                              .ToList()
+            _cargoShips = ships?.GetCargoShips().ToList()
                           ?? (IReadOnlyList<CargoShipProto>)Array.Empty<CargoShipProto>();
 
             if (ships == null || _cargoShips.Count == 0)
@@ -135,23 +135,11 @@ namespace CompanySupplier.UI.Tabs
                 return col;
             }
 
+            // Repraesentant fuer die Anzeige (alle werden einheitlich gesetzt).
             _shipSelected = _cargoShips[0];
-
-            Dropdown<CargoShipProto>.OptionFactory factory =
-                (CargoShipProto proto, int index, bool isInDropdown) =>
-                    new ButtonIconText(Button.None, (IProtoWithIcon)proto, CheatWidgets.ProtoDisplayLabel(proto));
-
-            var dropdown = new Dropdown<CargoShipProto>(factory, null, null, false);
-            dropdown.Label(new LocStrFormatted(L.Wrf_CargoShip));
-            dropdown.SetOptions(_cargoShips);
-            dropdown.OnValueChanged((CargoShipProto proto, int idx) => { _shipSelected = proto; RefreshShipInfo(); });
-            dropdown.FlexGrow(1f);
-            dropdown.SetValueIndex(0, notifyChangeListeners: false);
-
             _shipInfo = new Label(new LocStrFormatted(ShipInfoText()));
 
-            // Kapazitaet: ×2/×3/×5 (gruen) + Zuruecksetzen (rot). Setzt CargoShipProto.CapacityMultiplier
-            // auf das N-fache des Originals; Reset stellt Kapazitaet + Geschwindigkeit wieder her.
+            // Kapazitaet: ×2/×3/×5 (gruen) + Zuruecksetzen (rot) — auf ALLE Frachtschiffe.
             var x2 = new ButtonText(Button.Primary, new LocStrFormatted("×2"), () => ApplyCapacity(2));
             var x3 = new ButtonText(Button.Primary, new LocStrFormatted("×3"), () => ApplyCapacity(3));
             var x5 = new ButtonText(Button.Primary, new LocStrFormatted("×5"), () => ApplyCapacity(5));
@@ -159,9 +147,8 @@ namespace CompanySupplier.UI.Tabs
                 L.Common_Reset,
                 () =>
                 {
-                    if (_shipSelected == null) return;
-                    CheatService.Instance?.Ships?.ResetCapacity(_shipSelected);
-                    CheatService.Instance?.VehicleStats?.ResetSpeed(_shipSelected);
+                    CheatService.Instance?.Ships?.ResetAllCapacity();
+                    foreach (var s in _cargoShips) CheatService.Instance?.VehicleStats?.ResetSpeed(s);
                     RefreshShipInfo();
                     CheatMenuStatus.Show(L.Wrf_StatusShipReset);
                 },
@@ -169,41 +156,38 @@ namespace CompanySupplier.UI.Tabs
             var capRow = new Row((Px)CheatWidgets.Gap);
             capRow.SetChildren(x2, x3, x5, reset);
 
-            // Geschwindigkeit exakt setzen (Frachtschiffe sind DrivingEntityProto -> gemeinsamer
-            // VehicleStats-Pfad, jetzt mit konsistenter roher Skala; siehe VehicleStatsCheats.WriteSpeedField).
+            // Geschwindigkeit exakt setzen — auf ALLE Frachtschiffe (Frachtschiffe sind DrivingEntityProto ->
+            // gemeinsamer VehicleStats-Pfad mit konsistenter roher Skala; siehe VehicleStatsCheats.WriteSpeedField).
             var speedRow = CheatWidgets.NewFloatInputRow(
                 L.Fzg_Speed,
                 v =>
                 {
-                    if (_shipSelected == null) return;
-                    CheatService.Instance?.VehicleStats?.SetSpeed(_shipSelected, v);
+                    foreach (var s in _cargoShips) CheatService.Instance?.VehicleStats?.SetSpeed(s, v);
                     RefreshShipInfo();
-                    CheatMenuStatus.Show(L.Fzg_StatusSpeedSet(CheatWidgets.ProtoDisplayName(_shipSelected), v.ToString("0.##")));
+                    CheatMenuStatus.Show(L.Wrf_StatusShipSpeed(v.ToString("0.##")));
                 },
                 min: 0.1f);
 
-            col.SetChildren(dropdown, _shipInfo, capRow, speedRow);
+            col.SetChildren(_shipInfo, capRow, speedRow);
             return col;
         }
 
         private void ApplyCapacity(int factor)
         {
-            if (_shipSelected == null) return;
-            CheatService.Instance?.Ships?.SetCapacityFactor(_shipSelected, factor);
+            CheatService.Instance?.Ships?.SetAllCapacityFactor(factor);
             RefreshShipInfo();
-            CheatMenuStatus.Show(L.Wrf_StatusShipCap(CheatWidgets.ProtoDisplayName(_shipSelected), factor));
+            CheatMenuStatus.Show(L.Wrf_StatusCargoCap(factor));
         }
 
-        // "Frachtschiff X — Kapazität: 300 % · Speed: 2,5" — Kapazitaet als Multiplikator-%, Speed in Tiles/Sek.
+        // "Frachtschiffe — Kapazität: 300 % · Speed: 2,5" — repraesentativ (alle einheitlich gesetzt).
         private string ShipInfoText()
         {
             var ships = CheatService.Instance?.Ships;
             if (ships == null || _shipSelected == null) return string.Empty;
-            string name = CheatWidgets.ProtoDisplayName(_shipSelected);
             int cap = ships.GetCapacityPercent(_shipSelected);
             double sp = CheatService.Instance?.VehicleStats?.GetSpeed(_shipSelected) ?? -1;
             string spStr = sp < 0 ? "—" : sp.ToString("0.##");
-            return L.Wrf_ShipInfo(name, cap, spStr);
+            return L.Wrf_CargoInfo(cap, spStr);
         }
 
         private void RefreshShipInfo()

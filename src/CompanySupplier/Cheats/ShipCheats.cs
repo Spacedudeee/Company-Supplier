@@ -141,6 +141,20 @@ namespace CompanySupplier.Cheats
             catch (Exception ex) { Log.Warning($"[{CompanySupplier.ModName}] SetCapacityFactor({proto.Id}): {ex.Message}"); }
         }
 
+        /// <summary>Skaliert die Kapazitaet ALLER Frachtschiff-Typen auf das <paramref name="factor"/>-fache
+        /// ihres jeweiligen Originals. Die vier Frachtschiff-Typen sind in-game optisch nicht unterscheidbar,
+        /// daher wirkt die Einstellung bewusst auf alle zugleich (statt per Dropdown-Auswahl).</summary>
+        public void SetAllCapacityFactor(int factor)
+        {
+            foreach (var ship in GetCargoShips()) SetCapacityFactor(ship, factor);
+        }
+
+        /// <summary>Setzt die Kapazitaet ALLER Frachtschiff-Typen auf ihren jeweiligen Originalwert zurueck.</summary>
+        public void ResetAllCapacity()
+        {
+            foreach (var ship in GetCargoShips()) ResetCapacity(ship);
+        }
+
         /// <summary>Setzt die Kapazitaet des Typs auf den gesnapshotteten Originalwert zurueck (no-op, wenn nie veraendert).</summary>
         public void ResetCapacity(CargoShipProto proto)
         {

@@ -289,6 +289,9 @@ namespace CompanySupplier.Localization
         public static string Wrf_StatusShipyardReset => Loc.T("Shipyard capacity reset", "Werft-Kapazität zurückgesetzt", "Capacité du chantier réinitialisée", "Capacidad del astillero restablecida");
         public static string Wrf_StatusCargoDestroyed => Loc.T("Shipyard cargo destroyed", "Werft-Fracht zerstört", "Cargaison du chantier détruite", "Carga del astillero destruida");
         public static string Wrf_StatusCargoDumped => Loc.T("Cargo moved to base storage", "Fracht ins Basis-Lager gelegt", "Cargaison déplacée au stockage de base", "Carga trasladada al almacén base");
+        public static string Wrf_CargoInfo(object a0, object a1) => string.Format(Loc.T("Cargo ships — capacity: {0} % · speed: {1}", "Frachtschiffe — Kapazität: {0} % · Speed: {1}", "Cargos — capacité : {0} % · vitesse : {1}", "Cargueros — capacidad: {0} % · velocidad: {1}"), a0, a1);
+        public static string Wrf_StatusCargoCap(object a0) => string.Format(Loc.T("Cargo ship capacity x{0}", "Frachtschiff-Kapazität x{0}", "Capacité des cargos x{0}", "Capacidad de cargueros x{0}"), a0);
+        public static string Wrf_StatusShipSpeed(object a0) => string.Format(Loc.T("Cargo ship speed set to {0}", "Frachtschiff-Geschwindigkeit auf {0} gesetzt", "Vitesse des cargos réglée sur {0}", "Velocidad de cargueros ajustada a {0}"), a0);
 
         // ---- Tab ----
         public static string Tab_Produktion => Loc.T("Production", "Produktion", "Production", "Producción");

@@ -27,16 +27,27 @@ namespace CompanySupplier.HarmonyIntegration
         /// die Pipe-Toggles bleiben ohne Harmony wirkungslos).</summary>
         public static bool Active { get; private set; }
 
-        public static void TryInit()
+        /// <param name="modDir">Mod-Wurzelverzeichnis aus dem Manifest (<c>ModManifest.RootDirectoryPath</c>).
+        /// <c>Assembly.Location</c> taugt NICHT: bei <c>non_locking_dll_load</c> wird die DLL aus Bytes geladen
+        /// und Location ist leer (fuehrte zu „Invalid path"). Fallback: Standard-Mods-Ordner + Assembly-Name.</param>
+        public static void TryInit(string modDir)
         {
             if (_initialized) return;
             _initialized = true;
             try
             {
-                string modDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                if (string.IsNullOrEmpty(modDir))
+                if (string.IsNullOrEmpty(modDir) || !Directory.Exists(modDir))
+                    modDir = FallbackModDir();
+                if (string.IsNullOrEmpty(modDir) || !Directory.Exists(modDir))
                 {
-                    Log.Warning($"[{CompanySupplier.ModName}] Harmony-Init: Mod-Verzeichnis nicht ermittelbar — Pipe-Cheats inaktiv.");
+                    Log.Warning($"[{CompanySupplier.ModName}] Harmony-Init: Mod-Ordner nicht gefunden — Pipe-Cheats inaktiv.");
+                    return;
+                }
+
+                string harmonyDll = Path.Combine(modDir, "0Harmony.dll");
+                if (!File.Exists(harmonyDll))
+                {
+                    Log.Warning($"[{CompanySupplier.ModName}] Harmony-Init: 0Harmony.dll nicht in '{modDir}' — Pipe-Cheats inaktiv.");
                     return;
                 }
 
@@ -45,11 +56,8 @@ namespace CompanySupplier.HarmonyIntegration
                     try
                     {
                         var requested = new AssemblyName(args.Name);
-                        if (requested.Name == "0Harmony")
-                        {
-                            string dll = Path.Combine(modDir, "0Harmony.dll");
-                            if (File.Exists(dll)) return Assembly.LoadFrom(dll);
-                        }
+                        if (requested.Name == "0Harmony" && File.Exists(harmonyDll))
+                            return Assembly.LoadFrom(harmonyDll);
                     }
                     catch { /* Resolver darf nie werfen */ }
                     return null;
@@ -57,12 +65,25 @@ namespace CompanySupplier.HarmonyIntegration
 
                 ApplyPatches();
                 Active = true;
-                Log.Info($"[{CompanySupplier.ModName}] Harmony aktiv — Pipe-Cheats geladen.");
+                Log.Info($"[{CompanySupplier.ModName}] Harmony aktiv — Pipe-Cheats geladen (0Harmony aus '{modDir}').");
             }
             catch (Exception ex)
             {
                 Log.Warning($"[{CompanySupplier.ModName}] Harmony-Init fehlgeschlagen — Pipe-Cheats inaktiv, restlicher Mod laeuft: {ex.Message}");
             }
+        }
+
+        /// <summary>Fallback-Mod-Ordner: <c>%APPDATA%\Captain of Industry\Mods\&lt;AssemblyName&gt;</c>.
+        /// <c>GetName().Name</c> funktioniert auch bei aus Bytes geladenen Assemblies (anders als Location).</summary>
+        private static string FallbackModDir()
+        {
+            try
+            {
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string asmName = Assembly.GetExecutingAssembly().GetName().Name;
+                return Path.Combine(appData, "Captain of Industry", "Mods", asmName);
+            }
+            catch { return null; }
         }
 
         // Separate Methode: referenziert HarmonyLib-Typen, die erst hier (nach Resolver-Registrierung) JITen.

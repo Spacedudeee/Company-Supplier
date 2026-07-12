@@ -16,8 +16,14 @@ namespace CompanySupplier
     {
         public const string ModName = "CompanySupplier";
 
+        /// <summary>Mod-Wurzelverzeichnis aus dem Manifest — die zuverlaessige Quelle fuer den Ordner, in dem
+        /// 0Harmony.dll liegt. WICHTIG: <c>Assembly.Location</c> ist hier LEER, weil das Manifest
+        /// <c>non_locking_dll_load</c> setzt (die DLL wird aus Bytes geladen) — daher NICHT darauf verlassen.</summary>
+        private readonly string _rootDir;
+
         public CompanySupplier(ModManifest manifest) : base(manifest)
         {
+            _rootDir = manifest?.RootDirectoryPath;
             Log.Info($"[{ModName}] constructed (v0.1.0)");
         }
 
@@ -44,7 +50,8 @@ namespace CompanySupplier
             }
             // Harmony (Pipe-Cheats) separat + bruchsicher initialisieren: schlaegt es fehl, bleiben nur die
             // Pipe-Cheats aus, alle anderen Cheats laufen weiter. TryInit kapselt seine Fehler selbst.
-            HarmonyIntegration.HarmonyBootstrap.TryInit();
+            // Mod-Wurzelverzeichnis aus dem Manifest durchreichen (Assembly.Location ist bei non_locking_dll_load leer).
+            HarmonyIntegration.HarmonyBootstrap.TryInit(_rootDir);
             Log.Info($"[{ModName}] EarlyInit abgeschlossen.");
         }
     }
