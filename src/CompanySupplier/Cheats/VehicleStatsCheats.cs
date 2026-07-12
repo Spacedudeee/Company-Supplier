@@ -230,7 +230,11 @@ namespace CompanySupplier.Cheats
         }
 
         // Schreibt das readonly DrivingData.MaxForwardsSpeed (RelTile1f) per Reflection.
-        private static void WriteSpeedField(DrivingEntityProto proto, double tilesPerSec)
+        // WICHTIG: Der ROHE RelTile1f-Wert (Fix32) wird geschrieben — exakt so, wie GetSpeed ihn
+        // liest (MaxForwardsSpeed.Value.ToDouble()). NICHT RelTile1f.FromTilesPerSecond verwenden:
+        // dessen Tiles/Sek->intern-Umrechnung (Faktor ~10) passt NICHT zur rohen Anzeige und liess
+        // gesetzte Geschwindigkeiten daneben skalieren (bei Schiffen sichtbar: Eingabe 5 -> 0,5).
+        private static void WriteSpeedField(DrivingEntityProto proto, double speedValue)
         {
             object dd = proto.DrivingData;
             if (dd == null) return;
@@ -240,15 +244,15 @@ namespace CompanySupplier.Cheats
                 Log.Warning($"[{CompanySupplier.ModName}] Feld 'MaxForwardsSpeed' auf {dd.GetType().Name} nicht gefunden (API-Drift?).");
                 return;
             }
-            fi.SetValue(dd, RelTile1f.FromTilesPerSecond(tilesPerSec));
+            fi.SetValue(dd, new RelTile1f(Fix32.FromDouble(speedValue)));
         }
 
         // Zieht lebende Fahrzeuge dieses Typs nach: ueberschreibt die privaten Basis-Geschwindigkeitsfelder im
         // per-Instanz SmoothDriver und ruft StartUpdate(). Best effort + isoliert je Fahrzeug (private Interna).
-        private void UpdateLiveSpeed(DrivingEntityProto proto, double tilesPerSec)
+        private void UpdateLiveSpeed(DrivingEntityProto proto, double speedValue)
         {
             if (_vehiclesManager == null) return;
-            Fix32 speed = RelTile1f.FromTilesPerSecond(tilesPerSec).Value;
+            Fix32 speed = Fix32.FromDouble(speedValue);   // roher Wert, konsistent mit WriteSpeedField/GetSpeed
             foreach (Vehicle v in _vehiclesManager.AllVehicles)
             {
                 try

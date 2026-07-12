@@ -164,11 +164,20 @@ namespace CompanySupplier.UI.Tabs
             var capRow = new Row((Px)CheatWidgets.Gap);
             capRow.SetChildren(x2, x3, x5, reset);
 
-            // Hinweis: Ein Geschwindigkeits-Eingabefeld gab es hier zunaechst, aber Schiffe nutzen in ihrer
-            // DrivingData eine ANDERE Speed-Einheit als LKW — der gemeinsame VehicleStats.SetSpeed-Pfad
-            // skaliert dabei um Faktor 10 daneben (Eingabe 5 -> 0,5, verlangsamt statt beschleunigt). Bis die
-            // Schiffs-Einheit sauber geklaert ist, zeigt die Info-Zeile die Geschwindigkeit nur an (kein Setzen).
-            col.SetChildren(dropdown, _shipInfo, capRow);
+            // Geschwindigkeit exakt setzen (Frachtschiffe sind DrivingEntityProto -> gemeinsamer
+            // VehicleStats-Pfad, jetzt mit konsistenter roher Skala; siehe VehicleStatsCheats.WriteSpeedField).
+            var speedRow = CheatWidgets.NewFloatInputRow(
+                L.Fzg_Speed,
+                v =>
+                {
+                    if (_shipSelected == null) return;
+                    CheatService.Instance?.VehicleStats?.SetSpeed(_shipSelected, v);
+                    RefreshShipInfo();
+                    CheatMenuStatus.Show(L.Fzg_StatusSpeedSet(CheatWidgets.ProtoDisplayName(_shipSelected), v.ToString("0.##")));
+                },
+                min: 0.1f);
+
+            col.SetChildren(dropdown, _shipInfo, capRow, speedRow);
             return col;
         }
 
