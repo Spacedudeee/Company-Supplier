@@ -1,6 +1,6 @@
 {
   "id": "CompanySupplierBeta",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "display_name": "Company Supplier (BETA)",
   "authors": [ "Spacedudee (github.com/Spacedudeee)" ],
   "primary_dlls": [ "CompanySupplierBeta.dll" ],
