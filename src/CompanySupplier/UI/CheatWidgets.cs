@@ -151,12 +151,17 @@ namespace CompanySupplier.UI
         /// <c>false</c>, meldet die zentrale Statuszeile eine ungueltige Eingabe.</summary>
         private static Row NewInputRow(string label, string hint, string setLabel, Func<string, bool> tryApply)
         {
+            // Label fuellt die Restbreite (FlexGrow) -> Eingabefeld + "Setzen" richten sich RECHTSBUENDIG aus.
+            // So stehen die Kaesten ueber alle Zeilen hinweg untereinander, egal wie lang die Beschriftung ist
+            // (vorher begannen sie je nach Label-Laenge an unterschiedlichen x-Positionen).
             var caption = new Label(new LocStrFormatted(label));
+            caption.FlexGrow(1f);
 
             var field = new UnityEngine.UIElements.TextField { multiline = false, maxLength = 12, isDelayed = true };
             StyleInputField(field); // sichtbarer Rahmen/Hintergrund — rohes TextField ist sonst kaum erkennbar
             if (!string.IsNullOrEmpty(hint)) field.value = hint;
             var fieldComp = new UiComponent(field);
+            fieldComp.FlexShrink(0f); // feste 130px behalten — nicht schrumpfen, damit die Ausrichtung stabil bleibt
 
             void Commit()
             {
